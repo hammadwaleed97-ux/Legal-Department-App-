@@ -1,231 +1,608 @@
-import streamlit as st
-import json
-import os
-from datetime import datetime, date, timedelta
-import base64
-import re
 
-st.set_page_config(page_title="الإدارة القانونية", page_icon="⚖️", layout="wide")
-
-st.markdown("""
+html_code = '''<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الهيئة القومية للتأمين الاجتماعي</title>
 <style>
-.stApp { direction: rtl; }
-div[data-testid="stSidebar"] { direction: rtl; }
-.stTextInput > div > div > input, .stTextArea > div > div > textarea, .stSelectbox > div > div > div { direction: rtl; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: #f0f2f5; direction: rtl; }
+
+/* الهيدر */
+.header {
+    background: linear-gradient(135deg, #1a5f7a 0%, #2c8da8 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+.header-left { display: flex; align-items: center; gap: 15px; }
+.header-icon { font-size: 30px; }
+.header-title { font-size: 18px; font-weight: bold; }
+.header-subtitle { font-size: 12px; opacity: 0.9; }
+.header-right { font-size: 14px; }
+
+/* المحتوى الرئيسي */
+.container { display: flex; height: calc(100vh - 60px); }
+
+/* القائمة الجانبية */
+.sidebar {
+    width: 280px;
+    background: #1e2a3a;
+    color: #b0c4de;
+    overflow-y: auto;
+    padding: 10px 0;
+}
+.sidebar-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-right: 3px solid transparent;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar-item:hover { background: #2a3a4a; color: white; }
+.sidebar-item.active { background: #2a3a4a; color: white; border-right-color: #4fc3f7; }
+.sidebar-section {
+    padding: 8px 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #5a7a9a;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+.sidebar-icon { font-size: 16px; width: 25px; text-align: center; }
+
+/* المحتوى */
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    background: #f5f7fa;
+}
+.content-title {
+    font-size: 24px;
+    color: #1a5f7a;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* البطاقات */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+}
+.card-number { font-size: 36px; font-weight: bold; color: #1a5f7a; }
+.card-label { font-size: 14px; color: #666; margin-top: 5px; }
+
+/* التنبيهات */
+.alerts {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+.alert-item {
+    padding: 10px 15px;
+    margin: 8px 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.alert-success { background: #e8f5e9; color: #2e7d32; border-right: 4px solid #4caf50; }
+.alert-warning { background: #fff3e0; color: #ef6c00; border-right: 4px solid #ff9800; }
+.alert-danger { background: #ffebee; color: #c62828; border-right: 4px solid #f44336; }
+
+/* النماذج */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; font-size: 14px; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+.form-group textarea { resize: vertical; min-height: 80px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+/* الأزرار */
+.btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-primary { background: #1a5f7a; color: white; }
+.btn-primary:hover { background: #134b61; }
+.btn-success { background: #4caf50; color: white; }
+.btn-success:hover { background: #45a049; }
+.btn-warning { background: #ff9800; color: white; }
+.btn-warning:hover { background: #e68900; }
+.btn-group { display: flex; gap: 10px; margin-top: 20px; }
+
+/* التبويبات */
+.tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; }
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+    font-weight: bold;
+    color: #666;
+}
+.tab:hover { color: #1a5f7a; }
+.tab.active { color: #1a5f7a; border-bottom-color: #1a5f7a; }
+
+/* الجدول */
+.table-container { background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #1a5f7a; color: white; padding: 12px; text-align: right; font-size: 13px; }
+td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+tr:hover { background: #f5f7fa; }
+
+/* المعاينة */
+.preview-box {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    line-height: 2;
+    font-size: 15px;
+}
+.preview-header { text-align: center; margin-bottom: 30px; }
+.preview-header h2 { font-size: 20px; color: #1a5f7a; }
+.preview-header h3 { font-size: 14px; color: #666; margin-top: 5px; }
+.signature-line { border-top: 1px solid #333; margin-top: 60px; padding-top: 5px; width: 200px; text-align: center; }
+
+/* الفوتر */
+.footer {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-size: 12px;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 30px;
+}
+
+/* إخفاء/إظهار */
+.page { display: none; }
+.page.active { display: block; }
+
+/* مخصص للموبايل */
+@media (max-width: 768px) {
+    .sidebar { width: 100%; position: fixed; bottom: 0; z-index: 100; display: flex; overflow-x: auto; height: auto; }
+    .sidebar-item { white-space: nowrap; }
+    .container { flex-direction: column; }
+    .content { padding: 15px; }
+    .form-row { grid-template-columns: 1fr; }
+}
 </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
 
-DATA_FILE = "data.json"
+<!-- الهيدر -->
+<div class="header">
+    <div class="header-left">
+        <div class="header-icon">⚖️</div>
+        <div>
+            <div class="header-title">الهيئة القومية للتأمين الاجتماعي</div>
+            <div class="header-subtitle">الإدارة العامة للشئون القانونية</div>
+        </div>
+    </div>
+    <div class="header-right">مع تحيات أ/ وليد حماد</div>
+</div>
 
-def load_data():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {"cases": [], "appeals": [], "fatwas": [], "investigations": [], "library": [], "archive": [], "activities": []}
+<!-- المحتوى -->
+<div class="container">
+    <!-- القائمة الجانبية -->
+    <div class="sidebar">
+        <div class="sidebar-item active" onclick="showPage('dashboard')">
+            <span class="sidebar-icon">📊</span> لوحة التحكم
+        </div>
+        
+        <div class="sidebar-section">الإدارة العامة للقضايا</div>
+        <div class="sidebar-item" onclick="showPage('cases')">
+            <span class="sidebar-icon">📁</span> تسجيل الدعاوى
+        </div>
+        <div class="sidebar-item" onclick="showPage('appeals')">
+            <span class="sidebar-icon">📋</span> تسجيل الطعون
+        </div>
+        <div class="sidebar-item" onclick="showPage('memo')">
+            <span class="sidebar-icon">📝</span> مذكرة دفاع
+        </div>
+        <div class="sidebar-item" onclick="showPage('memo2')">
+            <span class="sidebar-icon">📄</span> مذكرة مدعية
+        </div>
+        <div class="sidebar-item" onclick="showPage('appeal-sheet')">
+            <span class="sidebar-icon">📨</span> صحيفة استئناف
+        </div>
+        <div class="sidebar-item" onclick="showPage('cassation')">
+            <span class="sidebar-icon">⚖️</span> صحيفة طعن بالنقض
+        </div>
+        <div class="sidebar-item" onclick="showPage('admin-appeal')">
+            <span class="sidebar-icon">🏛️</span> صحيفة طعن إداري
+        </div>
+        
+        <div class="sidebar-section">الإدارة العامة للفتوى</div>
+        <div class="sidebar-item" onclick="showPage('fatwa')">
+            <span class="sidebar-icon">💡</span> الفتاوى القانونية
+        </div>
+        <div class="sidebar-item" onclick="showPage('injury')">
+            <span class="sidebar-icon">🩹</span> إصابات العمل
+        </div>
+        <div class="sidebar-item" onclick="showPage('marriage')">
+            <span class="sidebar-icon">💑</span> شكاوى الزواج العرفي
+        </div>
+        
+        <div class="sidebar-section">التحقيقات والنيابات</div>
+        <div class="sidebar-item" onclick="showPage('investigation')">
+            <span class="sidebar-icon">🔍</span> تحقيقات الهيئة
+        </div>
+        <div class="sidebar-item" onclick="showPage('admin-pros')">
+            <span class="sidebar-icon">⚖️</span> النيابة الإدارية
+        </div>
+        <div class="sidebar-item" onclick="showPage('public-pros')">
+            <span class="sidebar-icon">👮</span> النيابة العامة
+        </div>
+        
+        <div class="sidebar-section">المكتبة والأرشيف</div>
+        <div class="sidebar-item" onclick="showPage('library')">
+            <span class="sidebar-icon">📚</span> المكتبة القانونية
+        </div>
+        <div class="sidebar-item" onclick="showPage('archive')">
+            <span class="sidebar-icon">🗄️</span> أرشيف الحفظ
+        </div>
+        <div class="sidebar-item" onclick="showPage('search')">
+            <span class="sidebar-icon">🔎</span> البحث المتقدم
+        </div>
+    </div>
 
-def save_data(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    <!-- المحتوى -->
+    <div class="content">
+        
+        <!-- لوحة التحكم -->
+        <div id="dashboard" class="page active">
+            <div class="content-title">📊 لوحة التحكم</div>
+            <div class="cards">
+                <div class="card"><div class="card-number" id="caseCount">0</div><div class="card-label">دعاوى متداولة</div></div>
+                <div class="card"><div class="card-number" id="appealCount">0</div><div class="card-label">طعون</div></div>
+                <div class="card"><div class="card-number" id="fatwaCount">0</div><div class="card-label">فتاوى</div></div>
+                <div class="card"><div class="card-number" id="invCount">0</div><div class="card-label">تحقيقات</div></div>
+            </div>
+            <div class="alerts">
+                <h3 style="margin-bottom:15px;">🔔 التنبيهات</h3>
+                <div id="alertsContainer">
+                    <div class="alert-item alert-success">✅ لا توجد تنبيهات حالياً</div>
+                </div>
+            </div>
+        </div>
 
-st.title("⚖️ الهيئة القومية للتأمين الاجتماعي")
-st.subheader("الإدارة العامة للشئون القانونية")
-st.markdown("---")
+        <!-- تسجيل الدعاوى -->
+        <div id="cases" class="page">
+            <div class="content-title">📁 تسجيل الدعاوى</div>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab(this, 'newCase')">➕ جديدة</div>
+                <div class="tab" onclick="showTab(this, 'listCase')">📋 المسجلة</div>
+            </div>
+            <div id="newCase">
+                <div class="form-row">
+                    <div class="form-group"><label>المحكمة</label><select id="caseCourt"><option value="">اختر</option><option>محكمة ابتدائية</option><option>محكمة إدارية</option><option>محكمة القضاء الإداري</option><option>محكمة تأديبية</option></select></div>
+                    <div class="form-group"><label>الدائرة</label><input type="text" id="caseCircle" placeholder="الدائرة"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>رقم الدعوى</label><input type="text" id="caseNum" placeholder="رقم الدعوى"></div>
+                    <div class="form-group"><label>لسنة</label><input type="number" id="caseYear" value="2026"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>المدعي</label><input type="text" id="casePlaintiff" placeholder="اسم المدعي"></div>
+                    <div class="form-group"><label>الرقم القومي</label><input type="text" id="caseNid" placeholder="14 رقم" maxlength="14"></div>
+                </div>
+                <div class="form-group"><label>المدعى عليه</label><input type="text" value="الهيئة القومية للتأمين الاجتماعي" disabled></div>
+                <div class="form-group"><label>ملخص الوقائع</label><textarea id="caseFacts" placeholder="ملخص الوقائع..."></textarea></div>
+                <div class="form-group"><label>طلبات المدعي</label><textarea id="caseRequests" placeholder="طلبات المدعي..."></textarea></div>
+                <div class="form-row">
+                    <div class="form-group"><label>تاريخ الجلسة</label><input type="date" id="caseDate"></div>
+                    <div class="form-group"><label>الحالة</label><select id="caseStatus"><option>متداولة</option><option>محسومة</option><option>مؤجلة</option></select></div>
+                </div>
+                <div class="form-group"><label>رفع صورة الصحيفة</label><input type="file" id="caseFile" accept=".pdf,.jpg,.jpeg,.png"></div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="saveCase()">💾 حفظ</button>
+                    <button class="btn btn-success" onclick="archiveCase()">📁 أرشيف</button>
+                    <button class="btn btn-warning" onclick="clearCase()">🔄 تفريغ</button>
+                </div>
+            </div>
+            <div id="listCase" style="display:none;">
+                <div class="form-group"><input type="text" id="caseSearch" placeholder="🔍 بحث بالاسم أو رقم الدعوى" onkeyup="searchCases()"></div>
+                <div class="table-container"><table><thead><tr><th>رقم الدعوى</th><th>المدعي</th><th>المحكمة</th><th>الحالة</th><th>الجلسة</th></tr></thead><tbody id="casesTable"></tbody></table></div>
+            </div>
+        </div>
 
-page = st.sidebar.radio("📂 القائمة", [
-    "📊 لوحة التحكم", "📁 تسجيل الدعاوى", "📋 تسجيل الطعون", "📝 مذكرة دفاع (مدعى عليها)"
-])
+        <!-- مذكرة دفاع -->
+        <div id="memo" class="page">
+            <div class="content-title">📝 مذكرة دفاع - الهيئة مدعى عليها</div>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab(this, 'memoForm')">✏️ إدخال البيانات</div>
+                <div class="tab" onclick="showTab(this, 'memoPreview')">👁️ معاينة المذكرة</div>
+            </div>
+            <div id="memoForm">
+                <div class="form-row">
+                    <div class="form-group"><label>المحكمة</label><input type="text" id="memoCourt" placeholder="المحكمة"></div>
+                    <div class="form-group"><label>الدائرة</label><input type="text" id="memoCircle" placeholder="الدائرة"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>رقم الدعوى</label><input type="text" id="memoNum" placeholder="رقم الدعوى"></div>
+                    <div class="form-group"><label>لسنة</label><input type="number" id="memoYear" value="2026"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>المدعي</label><input type="text" id="memoPlaintiff" placeholder="اسم المدعي"></div>
+                    <div class="form-group"><label>صفة المدعي</label><input type="text" id="memoRole" placeholder="صاحب معاش"></div>
+                </div>
+                <div class="form-group"><label>ملخص الوقائع</label><textarea id="memoFacts" rows="4" placeholder="ملخص الوقائع..."></textarea></div>
+                <div class="form-group"><label>طلبات المدعي</label><textarea id="memoRequests" rows="3" placeholder="طلبات المدعي..."></textarea></div>
+                <div class="form-group"><label>الدفوع القانونية (كل دفع في سطر)</label><textarea id="memoDefenses" rows="4" placeholder="المادة 45 من القانون 79 لسنة 1975&#10;عدم قبول الدعوى لرفعها على غير ذي صفة&#10;سقوط الحق بالتقادم"></textarea></div>
+                <div class="form-group"><label>رفع صورة الصحيفة</label><input type="file" accept=".pdf,.jpg,.jpeg,.png"></div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="generateMemo()">✨ صياغة</button>
+                    <button class="btn btn-success" onclick="downloadMemo()">💾 Word</button>
+                    <button class="btn btn-warning" onclick="printMemo()">📄 PDF</button>
+                </div>
+            </div>
+            <div id="memoPreview" style="display:none;">
+                <div class="preview-box" id="memoContent">
+                    <div class="preview-header">
+                        <h2>الهيئة القومية للتأمين الاجتماعي</h2>
+                        <h3>الإدارة العامة للشئون القانونية</h3>
+                        <h2 style="margin-top:10px;">مذكرة بدفاع الهيئة</h2>
+                        <h3 style="color:#999;">مدعى عليها</h3>
+                    </div>
+                    <p style="text-align:center;">اضغط "صياغة" لإنشاء المذكرة</p>
+                </div>
+            </div>
+        </div>
 
-def check_alerts():
-    data = load_data()
-    alerts = []
-    today = date.today()
-    for c in data.get("cases", []):
-        sd = c.get("sessionDate", "")
-        if sd and sd != "None":
-            try:
-                d = datetime.strptime(sd, "%Y-%m-%d").date()
-                diff = (d - today).days
-                if 0 <= diff <= 7 and c.get("status") == "متداولة":
-                    alerts.append({"type": "جلسة", "msg": f"دعوى {c.get('number')} - جلسة بعد {diff} أيام", "priority": "high" if diff <= 3 else "medium"})
-            except: pass
-    for a in data.get("appeals", []):
-        if a.get("status") == "متداولة":
-            ad = a.get("date", "")
-            if ad:
-                try:
-                    d = datetime.strptime(ad[:10], "%Y-%m-%d").date()
-                    dl = d + timedelta(days=40)
-                    rem = (dl - today).days
-                    if 0 <= rem <= 15:
-                        alerts.append({"type": "طعن", "msg": f"طعن {a.get('number')} - متبقي {rem} يوم", "priority": "high" if rem <= 5 else "medium"})
-                except: pass
-    return alerts
+        <!-- باقي الصفحات -->
+        <div id="appeals" class="page"><div class="content-title">📋 تسجيل الطعون</div><p>قريباً...</p></div>
+        <div id="memo2" class="page"><div class="content-title">📄 مذكرة مدعية</div><p>قريباً...</p></div>
+        <div id="appeal-sheet" class="page"><div class="content-title">📨 صحيفة استئناف</div><p>قريباً...</p></div>
+        <div id="cassation" class="page"><div class="content-title">⚖️ صحيفة طعن بالنقض</div><p>قريباً...</p></div>
+        <div id="admin-appeal" class="page"><div class="content-title">🏛️ صحيفة طعن إداري</div><p>قريباً...</p></div>
+        <div id="fatwa" class="page"><div class="content-title">💡 الفتاوى القانونية</div><p>قريباً...</p></div>
+        <div id="injury" class="page"><div class="content-title">🩹 إصابات العمل</div><p>قريباً...</p></div>
+        <div id="marriage" class="page"><div class="content-title">💑 شكاوى الزواج العرفي</div><p>قريباً...</p></div>
+        <div id="investigation" class="page"><div class="content-title">🔍 تحقيقات الهيئة</div><p>قريباً...</p></div>
+        <div id="admin-pros" class="page"><div class="content-title">⚖️ النيابة الإدارية</div><p>قريباً...</p></div>
+        <div id="public-pros" class="page"><div class="content-title">👮 النيابة العامة</div><p>قريباً...</p></div>
+        <div id="library" class="page"><div class="content-title">📚 المكتبة القانونية</div><p>قريباً...</p></div>
+        <div id="archive" class="page"><div class="content-title">🗄️ أرشيف الحفظ</div><p>قريباً...</p></div>
+        <div id="search" class="page"><div class="content-title">🔎 البحث المتقدم</div><p>قريباً...</p></div>
 
-if page == "📊 لوحة التحكم":
-    st.header("📊 لوحة التحكم")
-    data = load_data()
-    c1, c2, c3 = st.columns(3)
-    c1.metric("دعاوى متداولة", len([c for c in data["cases"] if c.get("status") == "متداولة"]))
-    c2.metric("طعون", len(data["appeals"]))
-    c3.metric("نشاطات", len(data["activities"]))
+    </div>
+</div>
+
+<script>
+// البيانات
+let data = JSON.parse(localStorage.getItem('legalData')) || { cases: [], appeals: [], fatwas: [], investigations: [], archive: [], activities: [] };
+
+function saveData() {
+    localStorage.setItem('legalData', JSON.stringify(data));
+    updateDashboard();
+}
+
+function updateDashboard() {
+    document.getElementById('caseCount').textContent = data.cases.filter(c => c.status === 'متداولة').length;
+    document.getElementById('appealCount').textContent = data.appeals.length;
+    document.getElementById('fatwaCount').textContent = data.fatwas.length;
+    document.getElementById('invCount').textContent = data.investigations.length;
+    checkAlerts();
+}
+
+function checkAlerts() {
+    let alerts = [];
+    let today = new Date();
+    data.cases.forEach(c => {
+        if (c.sessionDate && c.status === 'متداولة') {
+            let d = new Date(c.sessionDate);
+            let diff = Math.ceil((d - today) / (1000 * 60 * 60 * 24));
+            if (diff >= 0 && diff <= 7) {
+                alerts.push({ type: 'جلسة', msg: `دعوى ${c.number} - جلسة بعد ${diff} أيام`, priority: diff <= 3 ? 'high' : 'medium' });
+            }
+        }
+    });
     
-    alerts = check_alerts()
-    if alerts:
-        st.warning("🔔 تنبيهات عاجلة")
-        for a in alerts:
-            if a["priority"] == "high": st.error(f"🚨 {a['type']}: {a['msg']}")
-            else: st.info(f"⚠️ {a['type']}: {a['msg']}")
-    else: st.success("✅ لا توجد تنبيهات حالياً")
+    let container = document.getElementById('alertsContainer');
+    if (alerts.length === 0) {
+        container.innerHTML = '<div class="alert-item alert-success">✅ لا توجد تنبيهات حالياً</div>';
+    } else {
+        container.innerHTML = alerts.map(a => 
+            `<div class="alert-item alert-${a.priority === 'high' ? 'danger' : 'warning'}">${a.priority === 'high' ? '🚨' : '⚠️'} ${a.type}: ${a.msg}</div>`
+        ).join('');
+    }
+}
 
-elif page == "📁 تسجيل الدعاوى":
-    st.header("📁 تسجيل الدعاوى")
-    t1, t2 = st.tabs(["➕ جديدة", "📋 المسجلة"])
-    
-    with t1:
-        with st.form("case_f"):
-            c1, c2 = st.columns(2)
-            with c1:
-                court = st.selectbox("المحكمة", ["", "محكمة ابتدائية", "محكمة إدارية", "محكمة القضاء الإداري", "محكمة تأديبية"])
-                num = st.text_input("رقم الدعوى")
-                plaintiff = st.text_input("المدعي")
-                p_role = st.text_input("صفة المدعي", placeholder="صاحب معاش")
-            with c2:
-                circle = st.text_input("الدائرة")
-                year = st.number_input("لسنة", value=2026)
-                nid = st.text_input("الرقم القومي", max_chars=14)
-                defendant = st.text_input("المدعى عليه", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
-            facts = st.text_area("ملخص الوقائع")
-            requests = st.text_area("طلبات المدعي")
-            c3, c4 = st.columns(2)
-            with c3: s_date = st.date_input("تاريخ الجلسة")
-            with c4: status = st.selectbox("الحالة", ["متداولة", "محسومة", "مؤجلة"])
-            st.file_uploader("رفع صورة الصحيفة", type=["pdf", "jpg", "jpeg", "png"])
-            
-            b1, b2, b3 = st.columns(3)
-            with b1: sub = st.form_submit_button("💾 حفظ", use_container_width=True)
-            with b2: arc = st.form_submit_button("📁 أرشيف", use_container_width=True)
-            with b3: clr = st.form_submit_button("🔄 تفريغ", use_container_width=True)
-            
-            if sub and num and plaintiff:
-                d = load_data()
-                d["cases"].append({"id": int(datetime.now().timestamp()), "court": court, "circle": circle, "number": num, "year": year, "plaintiff": plaintiff, "nationalId": nid, "plaintiffRole": p_role, "defendant": defendant, "facts": facts, "requests": requests, "sessionDate": str(s_date), "status": status, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                d["activities"].append({"action": f"تسجيل دعوى {num}", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                save_data(d)
-                st.success("✅ تم الحفظ!")
-            if arc and num and plaintiff:
-                d = load_data()
-                d["cases"].append({"id": int(datetime.now().timestamp()), "court": court, "circle": circle, "number": num, "year": year, "plaintiff": plaintiff, "nationalId": nid, "plaintiffRole": p_role, "defendant": defendant, "facts": facts, "requests": requests, "sessionDate": str(s_date), "status": status, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                d["archive"].append({"id": int(datetime.now().timestamp()), "type": "دعوى", "serial": len([a for a in d["archive"] if a["type"] == "دعوى"]) + 1, "parties": f"{plaintiff} ضد {defendant}", "court": court, "sessionDate": str(s_date), "judgment": "", "lastAction": "تسجيل", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                save_data(d)
-                st.success("✅ تم الحفظ في الأرشيف!")
-    
-    with t2:
-        d = load_data()
-        s = st.text_input("🔍 بحث بالاسم أو رقم الدعوى")
-        fc = [c for c in d["cases"] if not s or s.lower() in c.get("plaintiff", "").lower() or s in c.get("number", "") or s in c.get("nationalId", "")]
-        if fc:
-            for c in fc[::-1]:
-                col = "🟢" if c.get("status") == "متداولة" else "🔴" if c.get("status") == "محسومة" else "🟡"
-                with st.expander(f"{col} دعوى {c.get('number')} لسنة {c.get('year')} - {c.get('plaintiff')}"):
-                    c1, c2 = st.columns(2)
-                    with c1: st.write(f"**المحكمة:** {c.get('court')}"); st.write(f"**الدائرة:** {c.get('circle')}"); st.write(f"**المدعي:** {c.get('plaintiff')}"); st.write(f"**الرقم القومي:** {c.get('nationalId')}")
-                    with c2: st.write(f"**الحالة:** {c.get('status')}"); st.write(f"**تاريخ الجلسة:** {c.get('sessionDate')}"); st.write(f"**تاريخ التسجيل:** {c.get('date')}")
-                    st.write(f"**الوقائع:** {c.get('facts')}"); st.write(f"**الطلبات:** {c.get('requests')}")
-        else: st.info("لا توجد دعاوى")
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    event.target.closest('.sidebar-item').classList.add('active');
+}
 
-elif page == "📋 تسجيل الطعون":
-    st.header("📋 تسجيل الطعون")
-    t1, t2 = st.tabs(["➕ جديد", "📋 المسجل"])
-    
-    with t1:
-        with st.form("app_f"):
-            c1, c2 = st.columns(2)
-            with c1:
-                court = st.selectbox("المحكمة", ["", "محكمة استئناف", "محكمة النقض", "محكمة تأديبية", "محكمة القضاء الإداري (استئنافية)", "المحكمة الإدارية العليا"])
-                num = st.text_input("رقم الطعن")
-                appellant = st.text_input("الطاعن")
-            with c2:
-                year = st.number_input("لسنة", value=2026)
-                judgment = st.text_input("رقم الحكم المطعون فيه")
-                respondent = st.text_input("المطعون ضده", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
-            facts = st.text_area("ملخص الوقائع")
-            requests = st.text_area("طلبات الطاعن")
-            b1, b2 = st.columns(2)
-            with b1: sub = st.form_submit_button("💾 حفظ", use_container_width=True)
-            with b2: arc = st.form_submit_button("📁 أرشيف", use_container_width=True)
-            
-            if sub and num and appellant:
-                d = load_data()
-                d["appeals"].append({"id": int(datetime.now().timestamp()), "court": court, "number": num, "year": year, "judgmentNumber": judgment, "appellant": appellant, "respondent": respondent, "facts": facts, "requests": requests, "status": "متداولة", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                d["activities"].append({"action": f"تسجيل طعن {num}", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                save_data(d)
-                st.success("✅ تم الحفظ!")
-            if arc and num and appellant:
-                d = load_data()
-                d["appeals"].append({"id": int(datetime.now().timestamp()), "court": court, "number": num, "year": year, "judgmentNumber": judgment, "appellant": appellant, "respondent": respondent, "facts": facts, "requests": requests, "status": "متداولة", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                d["archive"].append({"id": int(datetime.now().timestamp()), "type": "طعن", "serial": len([a for a in d["archive"] if a["type"] == "طعن"]) + 1, "parties": f"{appellant} ضد {respondent}", "court": court, "sessionDate": "", "judgment": "", "lastAction": "تسجيل", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                save_data(d)
-                st.success("✅ تم الحفظ في الأرشيف!")
-    
-    with t2:
-        d = load_data()
-        if d["appeals"]:
-            for a in d["appeals"][::-1]:
-                with st.expander(f"طعن {a.get('number')} - {a.get('appellant')}"):
-                    st.write(f"**المحكمة:** {a.get('court')}"); st.write(f"**الطاعن:** {a.get('appellant')}"); st.write(f"**الحالة:** {a.get('status')}")
-        else: st.info("لا توجد طعون")
+function showTab(tab, contentId) {
+    tab.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    let parent = tab.closest('.page');
+    parent.querySelectorAll('[id]').forEach(el => {
+        if (el.id !== parent.id && !el.classList.contains('content-title')) {
+            if (el.id === contentId) el.style.display = 'block';
+            else if (parent.contains(el)) el.style.display = 'none';
+        }
+    });
+    document.getElementById(contentId).style.display = 'block';
+}
 
-elif page == "📝 مذكرة دفاع (مدعى عليها)":
-    st.header("📝 مذكرة دفاع - الهيئة مدعى عليها")
-    st.info("🤖 ارفع صورة الصحيفة للقراءة التلقائية")
-    
-    t1, t2 = st.tabs(["✏️ إدخال البيانات", "👁️ معاينة المذكرة"])
-    
-    with t1:
-        with st.form("memo_f"):
-            c1, c2 = st.columns(2)
-            with c1:
-                m_court = st.text_input("المحكمة")
-                m_num = st.text_input("رقم الدعوى")
-                m_plaintiff = st.text_input("اسم المدعي")
-            with c2:
-                m_circle = st.text_input("الدائرة")
-                m_year = st.number_input("لسنة", value=2026)
-                m_p_role = st.text_input("صفة المدعي")
-            m_facts = st.text_area("ملخص الوقائع", height=100)
-            m_requests = st.text_area("طلبات المدعي", height=80)
-            m_defenses = st.text_area("الدفوع القانونية (كل دفع في سطر)", height=120, placeholder="المادة 45 من القانون 79 لسنة 1975\nعدم قبول الدعوى لرفعها على غير ذي صفة\nسقوط الحق بالتقادم")
-            st.file_uploader("ارفع صورة الصحيفة للقراءة التلقائية", type=["pdf", "jpg", "jpeg", "png"])
-            
-            b1, b2, b3 = st.columns(3)
-            with b1: gen = st.form_submit_button("✨ صياغة", use_container_width=True)
-            with b2: sw = st.form_submit_button("💾 Word", use_container_width=True)
-            with b3: sp = st.form_submit_button("📄 PDF", use_container_width=True)
-            
-            if gen and m_court and m_num and m_facts:
-                dl = [d.strip() for d in m_defenses.split("\n") if d.strip()]
-                dh = ""
-                for i, d in enumerate(dl):
-                    am = re.search(r'المادة\s*(\d+)', d)
-                    an = am.group(1) if am else ""
-                    dh += f'<p style="margin-top:15px;"><strong>الدفع {i+1}:</strong></p><p>وحيث إن {d}</p><p>وقد نصت المادة {an or "القانونية"} على أن ...</p><p>ولما كان ما تقدم، فإن هذا الدفع يكون قائماً على أسس قانونية سليمة.</p>'
-                
-                st.session_state.memo = f'<div style="text-align:center;margin-bottom:30px;"><div style="font-size:18px;font-weight:bold;">الهيئة القومية للتأمين الاجتماعي</div><div style="font-size:14px;">الإدارة العامة للشئون القانونية</div><div style="margin-top:10px;font-size:16px;">مذكرة بدفاع الهيئة القومية للتأمين الاجتماعي</div><div style="font-size:14px;color:#666;">مدعى عليها</div></div><p><strong>المحكمة:</strong> {m_court}</p><p><strong>الدائرة:</strong> {m_circle}</p><p><strong>رقم الدعوى:</strong> {m_num} لسنة {m_year}</p><hr><p><strong>المدعي:</strong> {m_plaintiff} - {m_p_role}</p><p><strong>المدعى عليه:</strong> الهيئة القومية للتأمين الاجتماعي</p><hr><p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">موضوع الدعوى وملخص الوقائع</p><p style="text-align:justify;line-height:2;">{m_facts}</p><p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">طلبات المدعي</p><p style="text-align:justify;line-height:2;">{m_requests}</p><p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">الدفوع القانونية للهيئة</p>{dh or "<p>لم يتم إدخال دفوع</p>"}<p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">المنتهى</p><p style="text-align:justify;line-height:2;">لما تقدم من أسباب، ولكون الدعوى لا تستند إلى سند قانوني سليم، فإن الهيئة تلتمس الحكم برفض الدعوى لعدم سندها من الواقع والقانون، مع إلزام المدعي بالمصاريف ومقابل أتعاب المحاماة.</p><div style="margin-top:50px;display:flex;justify-content:space-between;"><div style="text-align:center;width:200px;"><div style="border-top:1px solid #333;margin-top:60px;padding-top:5px;">عضو الإدارة القانونية</div></div><div style="text-align:center;width:200px;"><div style="border-top:1px solid #333;margin-top:60px;padding-top:5px;">مدير الإدارة القانونية</div></div></div>'
-                st.success("✅ تم صياغة المذكرة! اذهب لعلامة التبويب 'معاينة المذكرة'")
-                d = load_data()
-                d["activities"].append({"action": f"صياغة مذكرة دفاع للدعوى {m_num}", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                save_data(d)
-            
-            if sw and "memo" in st.session_state:
-                html = f'<html dir="rtl"><head><meta charset="utf-8"><title>مذكرة دفاع</title></head><body style="font-family:Arial;padding:40px;">{st.session_state.memo}</body></html>'
-                b64 = base64.b64encode(html.encode()).decode()
-                st.markdown(f'<a href="data:text/html;base64,{b64}" download="مذكرة_دفاع_{m_num}.html">⬇️ تحميل HTML</a>', unsafe_allow_html=True)
-    
-    with t2:
-        if "memo" in st.session_state:
-            st.markdown(st.session_state.memo, unsafe_allow_html=True)
-            if st.button("🖨️ طباعة"): st.markdown('<script>window.print();</script>', unsafe_allow_html=True)
-        else: st.info("اضغط 'صياغة المذكرة' أولاً لإنشاء المحتوى")
+function saveCase() {
+    let caseData = {
+        id: Date.now(),
+        court: document.getElementById('caseCourt').value,
+        circle: document.getElementById('caseCircle').value,
+        number: document.getElementById('caseNum').value,
+        year: document.getElementById('caseYear').value,
+        plaintiff: document.getElementById('casePlaintiff').value,
+        nationalId: document.getElementById('caseNid').value,
+        facts: document.getElementById('caseFacts').value,
+        requests: document.getElementById('caseRequests').value,
+        sessionDate: document.getElementById('caseDate').value,
+        status: document.getElementById('caseStatus').value,
+        date: new Date().toLocaleString('ar-EG')
+    };
+    if (!caseData.number || !caseData.plaintiff) { alert('أدخل رقم الدعوى والمدعي'); return; }
+    data.cases.push(caseData);
+    data.activities.push({ action: `تسجيل دعوى ${caseData.number}`, date: new Date().toLocaleString('ar-EG') });
+    saveData();
+    alert('✅ تم الحفظ!');
+    clearCase();
+}
 
-st.markdown("---")
-st.markdown("<div style='text-align:center; color:#666; padding:20px;'>مع تحيات أ/ وليد حماد | الإدارة العامة للشئون القانونية | الهيئة القومية للتأمين الاجتماعي</div>", unsafe_allow_html=True)
+function archiveCase() {
+    saveCase();
+    let lastCase = data.cases[data.cases.length - 1];
+    data.archive.push({
+        id: Date.now(), type: 'دعوى', serial: data.archive.filter(a => a.type === 'دعوى').length + 1,
+        parties: `${lastCase.plaintiff} ضد الهيئة`, court: lastCase.court,
+        sessionDate: lastCase.sessionDate, lastAction: 'تسجيل', date: new Date().toLocaleString('ar-EG')
+    });
+    saveData();
+    alert('✅ تم الحفظ في الأرشيف!');
+}
+
+function clearCase() {
+    document.getElementById('caseCourt').value = '';
+    document.getElementById('caseCircle').value = '';
+    document.getElementById('caseNum').value = '';
+    document.getElementById('casePlaintiff').value = '';
+    document.getElementById('caseNid').value = '';
+    document.getElementById('caseFacts').value = '';
+    document.getElementById('caseRequests').value = '';
+    document.getElementById('caseDate').value = '';
+}
+
+function searchCases() {
+    let s = document.getElementById('caseSearch').value.toLowerCase();
+    let filtered = data.cases.filter(c => !s || c.plaintiff.toLowerCase().includes(s) || c.number.includes(s) || c.nationalId.includes(s));
+    document.getElementById('casesTable').innerHTML = filtered.map(c => 
+        `<tr><td>${c.number} لسنة ${c.year}</td><td>${c.plaintiff}</td><td>${c.court}</td><td>${c.status}</td><td>${c.sessionDate}</td></tr>`
+    ).join('');
+}
+
+function generateMemo() {
+    let court = document.getElementById('memoCourt').value;
+    let circle = document.getElementById('memoCircle').value;
+    let num = document.getElementById('memoNum').value;
+    let year = document.getElementById('memoYear').value;
+    let plaintiff = document.getElementById('memoPlaintiff').value;
+    let role = document.getElementById('memoRole').value;
+    let facts = document.getElementById('memoFacts').value;
+    let requests = document.getElementById('memoRequests').value;
+    let defenses = document.getElementById('memoDefenses').value.split('\n').filter(d => d.trim());
+    
+    if (!court || !num || !facts) { alert('أدخل المحكمة ورقم الدعوى والوقائع'); return; }
+    
+    let dh = defenses.map((d, i) => {
+        let m = d.match(/المادة\s*(\d+)/);
+        let an = m ? m[1] : '';
+        return `<p style="margin-top:15px;"><strong>الدفع ${i+1}:</strong></p><p>وحيث إن ${d}</p><p>وقد نصت المادة ${an || 'القانونية'} على أن ...</p><p>ولما كان ما تقدم، فإن هذا الدفع يكون قائماً على أسس قانونية سليمة.</p>`;
+    }).join('');
+    
+    let memo = `
+        <div class="preview-header">
+            <h2>الهيئة القومية للتأمين الاجتماعي</h2>
+            <h3>الإدارة العامة للشئون القانونية</h3>
+            <h2 style="margin-top:10px;">مذكرة بدفاع الهيئة القومية للتأمين الاجتماعي</h2>
+            <h3 style="color:#999;">مدعى عليها</h3>
+        </div>
+        <p><strong>المحكمة:</strong> ${court}</p>
+        <p><strong>الدائرة:</strong> ${circle}</p>
+        <p><strong>رقم الدعوى:</strong> ${num} لسنة ${year}</p>
+        <hr>
+        <p><strong>المدعي:</strong> ${plaintiff} - ${role}</p>
+        <p><strong>المدعى عليه:</strong> الهيئة القومية للتأمين الاجتماعي</p>
+        <hr>
+        <h3 style="text-align:center; margin:20px 0;">موضوع الدعوى وملخص الوقائع</h3>
+        <p style="text-align:justify; line-height:2;">${facts}</p>
+        <h3 style="text-align:center; margin:20px 0;">طلبات المدعي</h3>
+        <p style="text-align:justify; line-height:2;">${requests}</p>
+        <h3 style="text-align:center; margin:20px 0;">الدفوع القانونية للهيئة</h3>
+        ${dh || '<p>لم يتم إدخال دفوع</p>'}
+        <h3 style="text-align:center; margin:20px 0;">المنتهى</h3>
+        <p style="text-align:justify; line-height:2;">لما تقدم من أسباب، ولكون الدعوى لا تستند إلى سند قانوني سليم، فإن الهيئة تلتمس الحكم برفض الدعوى لعدم سندها من الواقع والقانون، مع إلزام المدعي بالمصاريف ومقابل أتعاب المحاماة.</p>
+        <div style="display:flex; justify-content:space-between; margin-top:50px;">
+            <div style="text-align:center;"><div class="signature-line">عضو الإدارة القانونية</div></div>
+            <div style="text-align:center;"><div class="signature-line">مدير الإدارة القانونية</div></div>
+        </div>
+    `;
+    
+    document.getElementById('memoContent').innerHTML = memo;
+    data.activities.push({ action: `صياغة مذكرة دفاع للدعوى ${num}`, date: new Date().toLocaleString('ar-EG') });
+    saveData();
+    alert('✅ تم الصياغة!');
+    showTab(document.querySelector('#memo .tab:nth-child(2)'), 'memoPreview');
+}
+
+function downloadMemo() {
+    let content = document.getElementById('memoContent').innerHTML;
+    let html = `<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>مذكرة دفاع</title><style>body{font-family:Arial;padding:40px;line-height:2;}</style></head><body>${content}</body></html>`;
+    let blob = new Blob([html], {type: 'text/html'});
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = 'مذكرة_دفاع.html';
+    a.click();
+}
+
+function printMemo() {
+    let content = document.getElementById('memoContent').innerHTML;
+    let w = window.open('', '_blank');
+    w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><title>مذكرة دفاع</title><style>body{font-family:Arial;padding:40px;line-height:2;}</style></head><body>${content}</body></html>`);
+    w.document.close();
+    w.print();
+}
+
+// تحديث عند التحميل
+updateDashboard();
+searchCases();
+</script>
+
+</body>
+</html>
+'''
+
+with open('/mnt/agents/output/index.html', 'w', encoding='utf-8') as f:
+    f.write(html_code)
+
+import os
+size = os.path.getsize('/mnt/agents/output/index.html')
+print(f"✅ HTML app saved: {size:,} bytes ({size/1024:.1f} KB)")
