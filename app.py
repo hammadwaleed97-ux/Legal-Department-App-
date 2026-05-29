@@ -1,43 +1,38 @@
 import streamlit as st
 
+# إعداد الصفحة لتكون بوضع العرض العريض
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
+# تنسيق CSS لضمان بقاء العناصر ظاهرة دائماً (حتى في الموبايل)
 st.markdown("""
     <style>
-    /* إجبار القائمة على البقاء ظاهرة */
-    [data-testid="stSidebar"] {
-        width: 300px !important;
-        display: block !important;
-        background-color: #1a252f !important;
-    }
-    .sidebar-header { color: #3498db; font-weight: bold; margin-top: 15px; border-bottom: 1px solid #333; }
-    .sidebar-item { color: white; padding: 5px 0; display: block; }
-    .alert-item { background-color: #581845; padding: 8px; border-radius: 5px; color: #ffcccb; font-weight: bold; margin: 5px 0; }
+    .main-menu { background-color: #1a252f; padding: 15px; border-radius: 10px; color: white; margin-bottom: 20px; }
+    .menu-item { color: #bdc3c7; margin: 5px 0; font-size: 14px; }
     </style>
 """, unsafe_allow_html=True)
 
-with st.sidebar:
+# تقسيم الصفحة إلى قسمين (القائمة على اليمين والمحتوى على اليسار)
+col1, col2 = st.columns([1, 3])
+
+with col1:
     st.markdown("""
-        <div style="text-align: center; margin-bottom: 15px;">
-            <h3 style="color: white; font-size: 18px;">الهيئة القومية للتأمين الاجتماعي</h3>
-            <p style="color: #bdc3c7;">الإدارة العامة للشئون القانونية</p>
-            <div style="color: #3498db; font-weight: bold;">إعداد: وليد حماد<br>ديوان عام منطقة البحيرة</div>
+        <div class="main-menu">
+            <h3 style="font-size: 16px;">الهيئة القومية للتأمين الاجتماعي</h3>
+            <p style="font-size: 12px;">إعداد: وليد حماد - ديوان عام منطقة البحيرة</p>
+            <hr>
+            <div class="menu-item">🏛️ الإدارة العامة للقضايا</div>
+            <div class="menu-item">📁 تسجيل الدعاوى</div>
+            <div class="menu-item">📋 تسجيل الطعون</div>
+            <div class="menu-item">📝 مذكرة دفاع</div>
+            <div class="menu-item" style="color: #ff4b4b;">🔔 تنبيهات الجلسات (قبل أسبوع)</div>
+            <div class="menu-item" style="color: #ff4b4b;">🔔 تنبيهات الطعون (قبل 15 يوم)</div>
+            <hr>
+            <div class="menu-item">💡 الإدارة العامة للفتوى</div>
+            <div class="menu-item">📚 المكتبة القانونية</div>
         </div>
     """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">🏛️ الإدارة العامة للقضايا</div>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">📁 تسجيل الدعاوى</span>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">📋 تسجيل الطعون</span>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">📝 مذكرة دفاع</span>', unsafe_allow_html=True)
-    st.markdown('<div class="alert-item">🔔 تنبيهات الجلسات (قبل أسبوع)</div>', unsafe_allow_html=True)
-    st.markdown('<div class="alert-item">🔔 تنبيهات الطعون (قبل 15 يوم)</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">💡 الإدارة العامة للفتوى</div>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">💡 الفتاوى القانونية</span>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">✏️ إصابات العمل</span>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">📚 المكتبة والأرشيف</div>', unsafe_allow_html=True)
-    st.markdown('<span class="sidebar-item">📚 المكتبة القانونية</span>', unsafe_allow_html=True)
 
-st.title("لوحة تحكم الإدارة القانونية")
-st.write("القائمة الجانبية مفروضة الآن لتكون ظاهرة.")
+with col2:
+    st.title("لوحة تحكم الإدارة القانونية")
+    st.info("تم تحويل القائمة لتظهر بجانب المحتوى بدلاً من Sidebar، وبذلك لن تختفي أبداً.")
+    st.write("الآن يمكنك البدء في برمجة المهام عند الضغط على كل عنصر.")
