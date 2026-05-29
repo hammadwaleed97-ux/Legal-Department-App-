@@ -4,14 +4,7 @@ import os
 from datetime import datetime, date, timedelta
 
 st.set_page_config(page_title="الإدارة القانونية", page_icon="⚖️", layout="wide")
-
-st.markdown("""
-<style>
-.stApp { direction: rtl; }
-div[data-testid="stSidebar"] { direction: rtl; }
-.stTextInput > div > div > input, .stTextArea > div > div > textarea, .stSelectbox > div > div > div { direction: rtl; }
-</style>
-""", unsafe_allow_html=True)
+st.markdown("<style>.stApp {direction: rtl;} div[data-testid='stSidebar'] {direction: rtl;}</style>", unsafe_allow_html=True)
 
 DATA_FILE = "data.json"
 
@@ -30,6 +23,7 @@ st.subheader("الإدارة العامة للشئون القانونية")
 
 page = st.sidebar.radio("📂 القائمة", ["📊 لوحة التحكم", "📁 الدعاوى", "📋 الطعون"])
 
+# تنبيهات
 def check_alerts():
     data = load_data()
     alerts = []
@@ -56,6 +50,7 @@ def check_alerts():
                 except: pass
     return alerts
 
+# لوحة التحكم
 if page == "📊 لوحة التحكم":
     st.header("📊 لوحة التحكم")
     data = load_data()
@@ -72,6 +67,7 @@ if page == "📊 لوحة التحكم":
             else: st.info(f"⚠️ {a['type']}: {a['msg']}")
     else: st.success("✅ لا توجد تنبيهات حالياً")
 
+# الدعاوى
 elif page == "📁 الدعاوى":
     st.header("📁 تسجيل الدعاوى")
     t1, t2 = st.tabs(["➕ جديدة", "📋 المسجلة"])
@@ -110,6 +106,7 @@ elif page == "📁 الدعاوى":
                     st.write(f"**المحكمة:** {c.get('court')}"); st.write(f"**الحالة:** {c.get('status')}"); st.write(f"**الجلسة:** {c.get('sessionDate')}")
         else: st.info("لا توجد دعاوى")
 
+# الطعون
 elif page == "📋 الطعون":
     st.header("📋 تسجيل الطعون")
     t1, t2 = st.tabs(["➕ جديد", "📋 المسجل"])
@@ -143,4 +140,4 @@ elif page == "📋 الطعون":
         else: st.info("لا توجد طعون")
 
 st.markdown("---")
-st.markdown("<div style='text-align:center; color:#666;'>مع تحيات أ/ وليد حماد | الإدارة العامة للشئون القانونية | الهيئة القومية للتأمين الاجتماعي</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center; color:#666;'>مع تحيات أ/ وليد حماد | الهيئة القومية للتأمين الاجتماعي</div>", unsafe_allow_html=True)
