@@ -130,7 +130,7 @@ elif page == "📋 الطعون":
             if st.form_submit_button("💾 حفظ", use_container_width=True) and num and appellant:
                 d = load_data()
                 d["appeals"].append({"id": int(datetime.now().timestamp()), "court": court, "number": num, "year": year, "judgmentNumber": judgment, "appellant": appellant, "facts": facts, "requests": requests, "status": "متداولة", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
-                d["activities"].append({"action": f"تسجيل طعن {num}", "date": datetime.now().strftime("%%Y-%m-%d %H:%M")})
+                d["activities"].append({"action": f"تسجيل طعن {num}", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
                 save_data(d)
                 st.success("✅ تم الحفظ!")
     
