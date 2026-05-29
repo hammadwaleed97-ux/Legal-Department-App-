@@ -1,53 +1,572 @@
-import streamlit as st
+
+import os
+
+# ================== الكود المختصر الكامل - نسخة محدثة ==================
+code = r'''import streamlit as st
 import json
 import os
 from datetime import datetime, date, timedelta
 import base64
+import re
 
-# ================== PAGE CONFIG ==================
-st.set_page_config(
-    page_title="نظام الإدارة القانونية - الهيئة القومية للتأمين الاجتماعي",
-    page_icon="⚖️",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="الإدارة القانونية", page_icon="⚖️", layout="wide")
 
-# ================== SAFE CSS ==================
 st.markdown("""
 <style>
-    .stApp { direction: rtl; text-align: right; }
-    div[data-testid="stSidebar"] { direction: rtl; }
+.stApp { direction: rtl; }
+div[data-testid="stSidebar"] { direction: rtl; }
+.stTextInput > div > div > input, .stTextArea > div > div > textarea, .stSelectbox > div > div > div { direction: rtl; }
 </style>
 """, unsafe_allow_html=True)
 
-# ================== DATA PERSISTENCE ==================
-DATA_FILE = "legal_system_data.json"
+DATA_FILE = "legal_data.json"
 
 def load_data():
     if os.path.exists(DATA_FILE):
-        try:
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except:
-            pass
-    return {
-        "cases": [], "appeals": [], "fatwas": [], 
-        "investigations": [], "library": [], "archive": [], "activities": []
-    }
+        with open(DATA_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {"cases": [], "appeals": [], "fatwas": [], "investigations": [], "library": [], "archive": [], "activities": []}
 
 def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# ================== MAIN UI ==================
+def add_activity(action, type_):
+    data = load_data()
+    data["activities"].append({"action": action, "type": type_, "date": datetime.now().strftime("%Y-%m-%d %H:%M"), "user": "أ/ وليد حماد"})
+    save_data(data)
+
+# ================== التنبيهات ==================
+def check_alerts():
+    data = load_data()
+    alerts = []
+    today = date.today()
+    
+    # تنبيهات الجلسات (قبل 7 أيام)
+    for c in data.get("cases", []):
+        sd = c.get("sessionDate", "")
+        if sd and sd != "None":
+            try:
+                d = datetime.strptime(sd, "%Y-%m-%d").date()
+                diff = (d - today).days
+                if 0 <= diff <= 7 and c.get("status") == "متداولة":
+                    alerts.append({"type": "جلسة", "msg": "دعوى " + c.get('number', '') + " - جلسة بعد " + str(diff) + " أيام", "days": diff, "priority": "high" if diff <= 3 else "medium"})
+            except: pass
+    
+    # تنبيهات الطعون (قبل 15 يوم)
+    deadlines = {"محكمة استئناف": 40, "محكمة النقض": 60, "محكمة تأديبية": 30, "محكمة القضاء الإداري (استئنافية)": 40, "المحكمة الإدارية العليا": 60}
+    for a in data.get("appeals", []):
+        if a.get("status") == "متداولة":
+            ad = a.get("date", "")
+            court = a.get("court", "")
+            if ad:
+                try:
+                    d = datetime.strptime(ad[:10], "%Y-%m-%d").date()
+                    dl = d + timedelta(days=deadlines.get(court, 40))
+                    rem = (dl - today).days
+                    if 0 <= rem <= 15:
+                        alerts.append({"type": "طعن", "msg": "طعن " + a.get('number', '') + " - " + court + " - متبقي " + str(rem) + " يوم", "days": rem, "priority": "high" if rem <= 5 else "medium"})
+                except: pass
+    
+    return alerts
+
+# ================== الهيدر ==================
 st.title("⚖️ الهيئة القومية للتأمين الاجتماعي")
 st.subheader("الإدارة العامة للشئون القانونية")
 st.markdown("---")
 
-# تجربة عرض بسيطة للتأكد من عمل الكود
-st.success("تم تشغيل النظام بنجاح!")
-st.write("مرحباً بك في نظام الإدارة القانونية.")
+# ================== القائمة الجانبية ==================
+st.sidebar.title("📂 القائمة")
+page = st.sidebar.radio("", [
+    "📊 لوحة التحكم", "📁 الدعاوى", "📋 الطعون", "📝 مذكرة دفاع", "📄 استئناف", "⚖️ نقض", "🏛️ إداري",
+    "💡 فتاوى", "🩹 إصابات", "💑 زواج عرفي", "🔍 تحقيقات", "⚖️ نيابة إدارية", "👮 نيابة عامة",
+    "📚 مكتبة", "🗄️ أرشيف", "🔎 بحث"
+])
 
-# ================== FOOTER ==================
+# ================== لوحة التحكم ==================
+if page == "📊 لوحة التحكم":
+    st.header("📊 لوحة التحكم")
+    data = load_data()
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("دعاوى متداولة", len([c for c in data["cases"] if c.get("status") == "متداولة"]))
+    c2.metric("طعون", len(data["appeals"]))
+    c3.metric("فتاوى", len(data["fatwas"]))
+    c4.metric("تحقيقات", len(data["investigations"]))
+    
+    alerts = check_alerts()
+    if alerts:
+        st.warning("🔔 تنبيهات عاجلة")
+        for a in alerts:
+            if a["priority"] == "high": st.error("🚨 " + a['type'] + " - " + str(a['days']) + " أيام: " + a['msg'])
+            else: st.info("⚠️ " + a['type'] + " - " + str(a['days']) + " أيام: " + a['msg'])
+    
+    st.info("🤖 المساعد الذكي: ارفع المستندات لقراءتها وصياغة المذكرات تلقائياً")
+    
+    st.subheader("آخر النشاطات")
+    if data["activities"]:
+        for a in data["activities"][-10:][::-1]:
+            st.write("**" + a['action'] + "** | " + a['type'] + " | " + a['date'])
+    else: st.info("لا توجد نشاطات")
+
+# ================== الدعاوى ==================
+elif page == "📁 الدعاوى":
+    st.header("📁 تسجيل الدعاوى")
+    t1, t2 = st.tabs(["➕ جديدة", "📋 المسجلة"])
+    
+    with t1:
+        with st.form("case_f"):
+            c1, c2 = st.columns(2)
+            with c1:
+                court = st.selectbox("المحكمة", ["", "محكمة ابتدائية", "محكمة إدارية", "محكمة القضاء الإداري", "محكمة تأديبية"])
+                num = st.text_input("رقم الدعوى")
+                plaintiff = st.text_input("المدعي")
+                p_role = st.text_input("صفة المدعي", placeholder="صاحب معاش")
+            with c2:
+                circle = st.text_input("الدائرة")
+                year = st.number_input("لسنة", value=2026)
+                nid = st.text_input("الرقم القومي", max_chars=14)
+                defendant = st.text_input("المدعى عليه", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
+            facts = st.text_area("ملخص الوقائع")
+            requests = st.text_area("طلبات المدعي")
+            c3, c4 = st.columns(2)
+            with c3: s_date = st.date_input("تاريخ الجلسة")
+            with c4: status = st.selectbox("الحالة", ["متداولة", "محسومة", "مؤجلة"])
+            st.file_uploader("رفع صورة الصحيفة", type=["pdf", "jpg", "jpeg", "png"])
+            
+            b1, b2, b3 = st.columns(3)
+            with b1: sub = st.form_submit_button("💾 حفظ", use_container_width=True)
+            with b2: arc = st.form_submit_button("📁 أرشيف", use_container_width=True)
+            with b3: clr = st.form_submit_button("🔄 تفريغ", use_container_width=True)
+            
+            if sub and num and plaintiff:
+                d = load_data()
+                d["cases"].append({"id": int(datetime.now().timestamp()), "court": court, "circle": circle, "number": num, "year": year, "plaintiff": plaintiff, "nationalId": nid, "plaintiffRole": p_role, "defendant": defendant, "facts": facts, "requests": requests, "sessionDate": str(s_date), "status": status, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("تسجيل دعوى " + num, "دعوى"); st.success("✅ تم الحفظ!")
+            if arc and num and plaintiff:
+                d = load_data()
+                d["cases"].append({"id": int(datetime.now().timestamp()), "court": court, "circle": circle, "number": num, "year": year, "plaintiff": plaintiff, "nationalId": nid, "plaintiffRole": p_role, "defendant": defendant, "facts": facts, "requests": requests, "sessionDate": str(s_date), "status": status, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                d["archive"].append({"id": int(datetime.now().timestamp()), "type": "دعوى", "serial": len([a for a in d["archive"] if a["type"] == "دعوى"]) + 1, "parties": plaintiff + " ضد " + defendant, "court": court, "sessionDate": str(s_date), "judgment": "", "lastAction": "تسجيل", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("أرشفة دعوى " + num, "دعوى"); st.success("✅ تم الحفظ في الأرشيف!")
+    
+    with t2:
+        d = load_data()
+        s = st.text_input("🔍 بحث بالاسم أو رقم الدعوى")
+        fc = [c for c in d["cases"] if not s or s.lower() in c.get("plaintiff", "").lower() or s in c.get("number", "") or s in c.get("nationalId", "")]
+        if fc:
+            for c in fc[::-1]:
+                col = "🟢" if c.get("status") == "متداولة" else "🔴" if c.get("status") == "محسومة" else "🟡"
+                with st.expander(col + " دعوى " + c.get('number', '') + " لسنة " + str(c.get('year', '')) + " - " + c.get('plaintiff', '')):
+                    c1, c2 = st.columns(2)
+                    with c1: st.write("**المحكمة:** " + c.get('court', '')); st.write("**الدائرة:** " + c.get('circle', '')); st.write("**المدعي:** " + c.get('plaintiff', '')); st.write("**الرقم القومي:** " + c.get('nationalId', ''))
+                    with c2: st.write("**الحالة:** " + c.get('status', '')); st.write("**تاريخ الجلسة:** " + c.get('sessionDate', '')); st.write("**تاريخ التسجيل:** " + c.get('date', ''))
+                    st.write("**الوقائع:** " + c.get('facts', '')); st.write("**الطلبات:** " + c.get('requests', ''))
+        else: st.info("لا توجد دعاوى")
+
+# ================== الطعون ==================
+elif page == "📋 الطعون":
+    st.header("📋 تسجيل الطعون")
+    t1, t2 = st.tabs(["➕ جديد", "📋 المسجل"])
+    
+    with t1:
+        with st.form("app_f"):
+            c1, c2 = st.columns(2)
+            with c1:
+                court = st.selectbox("المحكمة", ["", "محكمة استئناف", "محكمة النقض", "محكمة تأديبية", "محكمة القضاء الإداري (استئنافية)", "المحكمة الإدارية العليا"])
+                num = st.text_input("رقم الطعن")
+                appellant = st.text_input("الطاعن")
+            with c2:
+                year = st.number_input("لسنة", value=2026)
+                judgment = st.text_input("رقم الحكم المطعون فيه")
+                respondent = st.text_input("المطعون ضده", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
+            facts = st.text_area("ملخص الوقائع")
+            requests = st.text_area("طلبات الطاعن")
+            b1, b2 = st.columns(2)
+            with b1: sub = st.form_submit_button("💾 حفظ", use_container_width=True)
+            with b2: arc = st.form_submit_button("📁 أرشيف", use_container_width=True)
+            
+            if sub and num and appellant:
+                d = load_data()
+                d["appeals"].append({"id": int(datetime.now().timestamp()), "court": court, "number": num, "year": year, "judgmentNumber": judgment, "appellant": appellant, "respondent": respondent, "facts": facts, "requests": requests, "status": "متداولة", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("تسجيل طعن " + num, "طعن"); st.success("✅ تم الحفظ!")
+            if arc and num and appellant:
+                d = load_data()
+                d["appeals"].append({"id": int(datetime.now().timestamp()), "court": court, "number": num, "year": year, "judgmentNumber": judgment, "appellant": appellant, "respondent": respondent, "facts": facts, "requests": requests, "status": "متداولة", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                d["archive"].append({"id": int(datetime.now().timestamp()), "type": "طعن", "serial": len([a for a in d["archive"] if a["type"] == "طعن"]) + 1, "parties": appellant + " ضد " + respondent, "court": court, "sessionDate": "", "judgment": "", "lastAction": "تسجيل", "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("أرشفة طعن " + num, "طعن"); st.success("✅ تم الحفظ في الأرشيف!")
+    
+    with t2:
+        d = load_data()
+        if d["appeals"]:
+            for a in d["appeals"][::-1]:
+                with st.expander("طعن " + a.get('number', '') + " - " + a.get('appellant', '')):
+                    st.write("**المحكمة:** " + a.get('court', '')); st.write("**الطاعن:** " + a.get('appellant', '')); st.write("**الحالة:** " + a.get('status', ''))
+        else: st.info("لا توجد طعون")
+
+# ================== مذكرة دفاع ==================
+elif page == "📝 مذكرة دفاع":
+    st.header("📝 مذكرة دفاع - الهيئة مدعى عليها")
+    st.info("🤖 ارفع صورة الصحيفة للقراءة التلقائية")
+    
+    t1, t2 = st.tabs(["✏️ البيانات", "👁️ المعاينة"])
+    
+    with t1:
+        with st.form("memo_f"):
+            c1, c2 = st.columns(2)
+            with c1:
+                m_court = st.text_input("المحكمة")
+                m_num = st.text_input("رقم الدعوى")
+                m_plaintiff = st.text_input("المدعي")
+            with c2:
+                m_circle = st.text_input("الدائرة")
+                m_year = st.number_input("لسنة", value=2026)
+                m_p_role = st.text_input("صفة المدعي")
+            m_facts = st.text_area("ملخص الوقائع")
+            m_requests = st.text_area("طلبات المدعي")
+            m_defenses = st.text_area("الدفوع القانونية (كل دفع في سطر)", placeholder="المادة 45 من القانون 79 لسنة 1975\nعدم قبول الدعوى لرفعها على غير ذي صفة\nسقوط الحق بالتقادم")
+            st.file_uploader("رفع صورة الصحيفة", type=["pdf", "jpg", "jpeg", "png"])
+            
+            b1, b2, b3 = st.columns(3)
+            with b1: gen = st.form_submit_button("✨ صياغة", use_container_width=True)
+            with b2: sw = st.form_submit_button("💾 Word", use_container_width=True)
+            with b3: sp = st.form_submit_button("📄 PDF", use_container_width=True)
+            
+            if gen and m_court and m_num and m_facts:
+                dl = [d.strip() for d in m_defenses.split("\n") if d.strip()]
+                dh = ""
+                for i, d in enumerate(dl):
+                    am = re.search(r'المادة\s*(\d+)', d)
+                    an = am.group(1) if am else ""
+                    dh += '<p style="margin-top:15px;"><strong>الدفع ' + str(i+1) + ':</strong></p><p>وحيث إن ' + d + '</p><p>وقد نصت المادة ' + (an or "القانونية") + ' على أن ...</p><p>ولما كان ما تقدم، فإن هذا الدفع يكون قائماً على أسس قانونية سليمة.</p>'
+                
+                st.session_state.memo = '<div style="text-align:center;margin-bottom:30px;"><div style="font-size:18px;font-weight:bold;">الهيئة القومية للتأمين الاجتماعي</div><div style="font-size:14px;">الإدارة العامة للشئون القانونية</div><div style="margin-top:10px;font-size:16px;">مذكرة بدفاع الهيئة</div><div style="font-size:14px;color:#666;">مدعى عليها</div></div>' + \
+                '<p><strong>المحكمة:</strong> ' + m_court + '</p><p><strong>الدائرة:</strong> ' + m_circle + '</p><p><strong>رقم الدعوى:</strong> ' + m_num + ' لسنة ' + str(m_year) + '</p><hr>' + \
+                '<p><strong>المدعي:</strong> ' + m_plaintiff + ' - ' + m_p_role + '</p><p><strong>المدعى عليه:</strong> الهيئة القومية للتأمين الاجتماعي</p><hr>' + \
+                '<p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">موضوع الدعوى وملخص الوقائع</p><p style="text-align:justify;line-height:2;">' + m_facts + '</p>' + \
+                '<p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">طلبات المدعي</p><p style="text-align:justify;line-height:2;">' + m_requests + '</p>' + \
+                '<p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">الدفوع القانونية للهيئة</p>' + (dh or "<p>لم يتم إدخال دفوع</p>") + \
+                '<p style="text-align:center;font-weight:bold;font-size:16px;margin:20px 0;">المنتهى</p>' + \
+                '<p style="text-align:justify;line-height:2;">لما تقدم من أسباب، ولكون الدعوى لا تستند إلى سند قانوني سليم، فإن الهيئة تلتمس الحكم برفض الدعوى لعدم سندها من الواقع والقانون، مع إلزام المدعي بالمصاريف ومقابل أتعاب المحاماة.</p>' + \
+                '<div style="margin-top:50px;display:flex;justify-content:space-between;"><div style="text-align:center;width:200px;"><div style="border-top:1px solid #333;margin-top:60px;padding-top:5px;">عضو الإدارة القانونية</div></div><div style="text-align:center;width:200px;"><div style="border-top:1px solid #333;margin-top:60px;padding-top:5px;">مدير الإدارة القانونية</div></div></div>'
+                
+                st.success("✅ تم الصياغة! اذهب للمعاينة")
+                add_activity("صياغة مذكرة " + m_num, "مذكرة")
+            
+            if sw and "memo" in st.session_state:
+                html = '<html dir="rtl"><head><meta charset="utf-8"><title>مذكرة دفاع</title></head><body style="font-family:Arial;padding:40px;">' + st.session_state.memo + '</body></html>'
+                b64 = base64.b64encode(html.encode()).decode()
+                st.markdown('<a href="data:text/html;base64,' + b64 + '" download="مذكرة_' + m_num + '.html">⬇️ تحميل HTML</a>', unsafe_allow_html=True)
+    
+    with t2:
+        if "memo" in st.session_state:
+            st.markdown(st.session_state.memo, unsafe_allow_html=True)
+            if st.button("🖨️ طباعة"): st.markdown('<script>window.print();</script>', unsafe_allow_html=True)
+        else: st.info("اضغط صياغة أولاً")
+
+# ================== صحيفة استئناف ==================
+elif page == "📄 استئناف":
+    st.header("📄 صحيفة استئناف مقامة من الهيئة")
+    with st.form("app_sheet"):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("المحكمة", value="محكمة الاستئناف")
+            st.text_input("رقم الحكم المستأنف")
+            st.text_input("المستأنف", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
+        with c2:
+            st.text_input("السنة", value="2026")
+            st.text_input("تاريخ جلسة الحكم")
+            st.text_input("منطوق الحكم")
+        st.text_area("ملخص الوقائع")
+        st.text_area("طلبات المستأنف")
+        st.file_uploader("رفع الصحيفة والحكم", type=["pdf", "jpg", "jpeg", "png"])
+        b1, b2, b3 = st.columns(3)
+        with b1: st.form_submit_button("✨ صياغة", use_container_width=True)
+        with b2: st.form_submit_button("💾 Word", use_container_width=True)
+        with b3: st.form_submit_button("📄 PDF", use_container_width=True)
+
+# ================== صحيفة طعن بالنقض ==================
+elif page == "⚖️ نقض":
+    st.header("⚖️ صحيفة طعن بالنقض مقامة من الهيئة")
+    with st.form("cass"):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("المحكمة", value="محكمة النقض", disabled=True)
+            st.text_input("رقم الحكم المطعون فيه")
+            st.text_input("الطاعن", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
+        with c2:
+            st.text_input("السنة", value="2026")
+            st.text_input("تاريخ جلسة الحكم الابتدائي")
+            st.text_input("تاريخ جلسة الحكم الاستئنافي")
+        st.text_area("ملخص الوقائع أمام الابتدائية")
+        st.text_area("ملخص الوقائع أمام الاستئناف")
+        st.text_area("أسباب الطعن", placeholder="أخطاء في تطبيق القانون - مخالفة النص - قصور في التسبيب")
+        st.file_uploader("رفع الصحف والأحكام", type=["pdf", "jpg", "jpeg", "png"])
+        b1, b2, b3 = st.columns(3)
+        with b1: st.form_submit_button("✨ صياغة", use_container_width=True)
+        with b2: st.form_submit_button("💾 Word", use_container_width=True)
+        with b3: st.form_submit_button("📄 PDF", use_container_width=True)
+
+# ================== صحيفة طعن إداري ==================
+elif page == "🏛️ إداري":
+    st.header("🏛️ صحيفة طعن أمام المحكمة الإدارية العليا")
+    with st.form("admin"):
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("المحكمة", value="المحكمة الإدارية العليا", disabled=True)
+            st.text_input("رقم الحكم المطعون فيه")
+            st.text_input("الطاعن", value="الهيئة القومية للتأمين الاجتماعي", disabled=True)
+        with c2:
+            st.text_input("السنة", value="2026")
+            st.text_input("تاريخ جلسة القضاء الإداري")
+            st.text_input("تاريخ جلسة الاستئناف")
+        st.text_area("ملخص الوقائع أمام القضاء الإداري")
+        st.text_area("ملخص الوقائع أمام الإدارية العليا")
+        st.file_uploader("رفع الصحيفة والحكم", type=["pdf", "jpg", "jpeg", "png"])
+        b1, b2, b3 = st.columns(3)
+        with b1: st.form_submit_button("✨ صياغة", use_container_width=True)
+        with b2: st.form_submit_button("💾 Word", use_container_width=True)
+        with b3: st.form_submit_button("📄 PDF", use_container_width=True)
+
+# ================== فتاوى ==================
+elif page == "💡 فتاوى":
+    st.header("💡 الفتاوى القانونية")
+    t1, t2 = st.tabs(["➕ جديدة", "📋 الأرشيف"])
+    
+    with t1:
+        with st.form("fatwa_f"):
+            ft = st.selectbox("نوع الفتوى", ["فتوى قانونية عامة", "إصابة عمل", "شكوى زواج عرفي"])
+            req = st.text_input("الجهة الطالبة")
+            facts = st.text_area("ملخص الوقائع")
+            question = st.text_area("مثار البحث", placeholder="ما هو السؤال القانوني؟")
+            
+            if st.form_submit_button("✨ صياغة الرأي", use_container_width=True):
+                if ft == "إصابة عمل": st.session_state.op = "بناءً على المادة 51 من القانون رقم 79 لسنة 1975..."
+                elif ft == "شكوى زواج عرفي": st.session_state.op = "بالنسبة للزواج العرفي، فإن المادة 17 مكرر..."
+                else: st.session_state.op = "بعد الاطلاع على الوقائع... يتبين أن..."
+                st.success("✅ تم الصياغة!")
+            
+            op = st.text_area("الرأي القانوني", value=st.session_state.get("op", ""), height=150)
+            result = st.text_input("النتيجة")
+            st.file_uploader("رفع مذكرة الإحالة", type=["pdf", "jpg", "jpeg", "png"])
+            
+            if st.form_submit_button("💾 حفظ", use_container_width=True):
+                d = load_data()
+                d["fatwas"].append({"id": int(datetime.now().timestamp()), "type": ft, "requester": req, "facts": facts, "question": question, "opinion": op, "result": result, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("فتوى " + ft, "فتوى"); st.success("✅ تم الحفظ!")
+    
+    with t2:
+        d = load_data()
+        if d["fatwas"]:
+            for f in d["fatwas"][::-1]:
+                with st.expander(f.get('type', '') + " - " + f.get('requester', '')):
+                    st.write("**السؤال:** " + f.get('question', '')); st.write("**الرأي:** " + f.get('opinion', '')); st.write("**النتيجة:** " + f.get('result', ''))
+        else: st.info("لا توجد فتاوى")
+
+# ================== إصابات عمل ==================
+elif page == "🩹 إصابات":
+    st.header("🩹 إصابات العمل")
+    with st.form("inj_f"):
+        c1, c2 = st.columns(2)
+        with c1: st.text_input("اسم المصاب"); st.text_input("الرقم التأميني")
+        with c2: st.date_input("تاريخ الإصابة"); st.text_input("المكتب التأميني")
+        st.text_area("ملخص الوقائع")
+        st.text_area("مثار البحث", value="هل تستحق إصابة العمل معاشاً؟")
+        st.file_uploader("رفع المستندات", type=["pdf", "jpg", "jpeg", "png"])
+        if st.form_submit_button("✨ صياغة الرأي", use_container_width=True): st.success("✅ تم الصياغة!")
+        st.form_submit_button("💾 حفظ", use_container_width=True)
+
+# ================== زواج عرفي ==================
+elif page == "💑 زواج عرفي":
+    st.header("💑 شكاوى الزواج العرفي")
+    with st.form("mar_f"):
+        c1, c2 = st.columns(2)
+        with c1: st.text_input("اسم المستفيد"); st.text_input("الرقم القومي", max_chars=14)
+        with c2: st.text_input("اسم الزوج/الزوجة"); st.date_input("تاريخ الزواج")
+        st.text_area("ملخص الوقائع")
+        st.text_area("مثار البحث", value="هل يحق للزوجة في الزواج العرفي الحصول على معاش؟")
+        st.file_uploader("رفع المستندات", type=["pdf", "jpg", "jpeg", "png"])
+        if st.form_submit_button("✨ صياغة الرأي", use_container_width=True): st.success("✅ تم الصياغة!")
+        st.form_submit_button("💾 حفظ", use_container_width=True)
+
+# ================== تحقيقات ==================
+elif page == "🔍 تحقيقات":
+    st.header("🔍 تحقيقات الهيئة")
+    t1, t2 = st.tabs(["➕ جديد", "📋 المسجل"])
+    
+    with t1:
+        with st.form("inv_f"):
+            c1, c2 = st.columns(2)
+            with c1:
+                num = st.text_input("رقم التحقيق")
+                idate = st.date_input("تاريخ الإحالة")
+                vtype = st.text_input("نوع المخالفة")
+            with c2:
+                year = st.number_input("لسنة", value=2026)
+                violator = st.text_input("اسم المخالف")
+                office = st.text_input("المكتب/المنطقة التأمينية")
+            facts = st.text_area("ملخص الوقائع")
+            questions = st.text_area("س و ج")
+            action = st.text_area("مذكرة التصرف")
+            st.file_uploader("رفع مذكرة الإحالة", type=["pdf", "jpg", "jpeg", "png"])
+            b1, b2 = st.columns(2)
+            with b1: sub = st.form_submit_button("💾 حفظ", use_container_width=True)
+            with b2: close = st.form_submit_button("🔒 قفل", use_container_width=True)
+            
+            if sub and num and violator:
+                d = load_data()
+                d["investigations"].append({"id": int(datetime.now().timestamp()), "number": num, "year": year, "date": str(idate), "violationType": vtype, "violator": violator, "office": office, "facts": facts, "questions": questions, "action": action, "status": "مفتوح", "dateCreated": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("تحقيق " + num, "تحقيق"); st.success("✅ تم الحفظ!")
+            if close: st.success("🔒 تم القفل!")
+    
+    with t2:
+        d = load_data()
+        if d["investigations"]:
+            for i in d["investigations"][::-1]:
+                with st.expander("تحقيق " + i.get('number', '') + " - " + i.get('violator', '')):
+                    st.write("**المخالف:** " + i.get('violator', '')); st.write("**نوع المخالفة:** " + i.get('violationType', '')); st.write("**الحالة:** " + i.get('status', ''))
+        else: st.info("لا توجد تحقيقات")
+
+# ================== نيابة إدارية ==================
+elif page == "⚖️ نيابة إدارية":
+    st.header("⚖️ النيابة الإدارية")
+    with st.form("ad_pros"):
+        c1, c2 = st.columns(2)
+        with c1: st.text_input("رقم القضية"); st.number_input("لسنة", value=2026)
+        with c2: st.date_input("تاريخ القضية"); st.text_input("نوع المخالفة")
+        st.text_input("اسم المخالف")
+        st.text_input("المكتب/المنطقة التأمينية")
+        st.text_area("ملخص الوقائع")
+        st.text_area("آخر إجراء")
+        st.form_submit_button("💾 حفظ", use_container_width=True)
+
+# ================== نيابة عامة ==================
+elif page == "👮 نيابة عامة":
+    st.header("👮 النيابة العامة")
+    with st.form("pu_pros"):
+        c1, c2 = st.columns(2)
+        with c1: st.text_input("رقم القضية"); st.number_input("لسنة", value=2026)
+        with c2: st.date_input("تاريخ القضية"); st.text_input("نوع المخالفة")
+        st.text_input("اسم المخالف")
+        st.text_input("المكتب/المنطقة التأمينية")
+        st.text_area("ملخص الوقائع")
+        st.text_area("آخر إجراء")
+        st.form_submit_button("💾 حفظ", use_container_width=True)
+
+# ================== المكتبة القانونية ==================
+elif page == "📚 مكتبة":
+    st.header("📚 المكتبة القانونية")
+    t1, t2 = st.tabs(["➕ رفع", "📋 الوثائق"])
+    
+    with t1:
+        with st.form("lib_f"):
+            ltype = st.selectbox("نوع الوثيقة", ["قانون", "لائحة", "قرار وزاري", "منشور وزاري", "قرار رئيس الهيئة", "منشور رئيس الهيئة", "كتاب دوري", "تعليمات", "المرصد الفني", "رسائل", "مذكرات اللجنة", "فتاوى مجلس الدولة", "أحكام قضائية", "أخرى"])
+            title = st.text_input("عنوان الوثيقة")
+            doc_num = st.text_input("رقم الوثيقة")
+            year = st.number_input("السنة", value=2026)
+            st.file_uploader("اختر ملف PDF", type=["pdf"])
+            if st.form_submit_button("⬆️ رفع", use_container_width=True):
+                d = load_data()
+                d["library"].append({"id": int(datetime.now().timestamp()), "type": ltype, "title": title, "docNumber": doc_num, "year": year, "date": datetime.now().strftime("%Y-%m-%d %H:%M")})
+                save_data(d); add_activity("رفع وثيقة: " + title, "مكتبة"); st.success("✅ تم الرفع!")
+    
+    with t2:
+        d = load_data()
+        s = st.text_input("🔍 بحث")
+        types = list(set([l.get("type") for l in d["library"]]))
+        flt = st.selectbox("تصفية", ["الكل"] + types) if types else st.selectbox("تصفية", ["الكل"])
+        fl = d["library"]
+        if s: fl = [l for l in fl if s.lower() in l.get("title", "").lower()]
+        if flt != "الكل": fl = [l for l in fl if l.get("type") == flt]
+        if fl:
+            for doc in fl[::-1]:
+                with st.expander(doc.get('type', '') + " - " + doc.get('title', '')):
+                    st.write("**الرقم:** " + doc.get('docNumber', '')); st.write("**السنة:** " + str(doc.get('year', '')))
+        else: st.info("لا توجد وثائق")
+
+# ================== أرشيف الحفظ ==================
+elif page == "🗄️ أرشيف":
+    st.header("🗄️ أرشيف الحفظ")
+    at = st.tabs(["الدعاوى", "الطعون", "الفتاوى", "التحقيقات"])
+    d = load_data()
+    
+    with at[0]:
+        ca = [a for a in d["archive"] if a.get("type") == "دعوى"]
+        if ca:
+            for i, item in enumerate(ca):
+                with st.expander("#" + str(i+1) + " - " + item.get('parties', '')):
+                    st.write("**المحكمة:** " + item.get('court', '')); st.write("**تاريخ الجلسة:** " + item.get('sessionDate', '')); st.write("**آخر إجراء:** " + item.get('lastAction', ''))
+        else: st.info("لا توجد دعاوى")
+    
+    with at[1]:
+        aa = [a for a in d["archive"] if a.get("type") == "طعن"]
+        if aa:
+            for i, item in enumerate(aa):
+                with st.expander("#" + str(i+1) + " - " + item.get('parties', '')):
+                    st.write("**المحكمة:** " + item.get('court', '')); st.write("**آخر إجراء:** " + item.get('lastAction', ''))
+        else: st.info("لا توجد طعون")
+    
+    with at[2]:
+        if d["fatwas"]:
+            for i, f in enumerate(d["fatwas"]):
+                with st.expander("#" + str(i+1) + " - " + f.get('type', '') + " - " + f.get('requester', '')):
+                    st.write("**الموضوع:** " + f.get('question', '')); st.write("**النتيجة:** " + f.get('result', ''))
+        else: st.info("لا توجد فتاوى")
+    
+    with at[3]:
+        if d["investigations"]:
+            for i, inv in enumerate(d["investigations"]):
+                with st.expander("#" + str(i+1) + " - " + inv.get('violator', '') + " - " + inv.get('violationType', '')):
+                    st.write("**الحالة:** " + inv.get('status', ''))
+        else: st.info("لا توجد تحقيقات")
+
+# ================== البحث المتقدم ==================
+elif page == "🔎 بحث":
+    st.header("🔎 البحث المتقدم")
+    st.markdown("### البحث عن سابقة إقامة دعوى من ذات الخصوم والموضوع والسبب")
+    c1, c2 = st.columns(2)
+    with c1:
+        s_name = st.text_input("البحث بالاسم")
+        s_nid = st.text_input("البحث بالرقم القومي", max_chars=14)
+    with c2:
+        s_num = st.text_input("رقم الدعوى")
+        s_year = st.number_input("السنة", value=2026)
+    
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button("🔍 بحث", use_container_width=True):
+            d = load_data()
+            res = []
+            for c in d["cases"]:
+                if (s_name and (s_name.lower() in c.get("plaintiff", "").lower() or s_name.lower() in c.get("defendant", "").lower())) or (s_nid and c.get("nationalId") == s_nid) or (s_num and c.get("number") == s_num) or (s_year and c.get("year") == s_year):
+                    res.append(("دعوى", c))
+            for a in d["appeals"]:
+                if (s_name and (s_name.lower() in a.get("appellant", "").lower() or s_name.lower() in a.get("respondent", "").lower())) or (s_num and a.get("number") == s_num) or (s_year and a.get("year") == s_year):
+                    res.append(("طعن", a))
+            st.session_state.res = res
+    with b2:
+        if st.button("🔄 تفريغ", use_container_width=True): st.session_state.res = []
+    
+    if "res" in st.session_state and st.session_state.res:
+        st.success("تم العثور على " + str(len(st.session_state.res)) + " نتيجة")
+        for t, item in st.session_state.res:
+            if t == "دعوى":
+                with st.expander("دعوى " + item.get('number', '') + " - " + item.get('plaintiff', '') + " ضد " + item.get('defendant', '')):
+                    st.write("**المحكمة:** " + item.get('court', '')); st.write("**الحالة:** " + item.get('status', ''))
+            else:
+                with st.expander("طعن " + item.get('number', '') + " - " + item.get('appellant', '') + " ضد " + item.get('respondent', '')):
+                    st.write("**المحكمة:** " + item.get('court', '')); st.write("**الحالة:** " + item.get('status', ''))
+    elif "res" in st.session_state: st.warning("لا توجد نتائج")
+
+# ================== الفوتر ==================
 st.markdown("---")
-st.markdown("**مع تحيات وليد حماد الادارة العامة للشءون القانونية ديوان عام منطقة البحيرة**")
+st.markdown("<div style='text-align:center; color:#666;'>مع تحيات أ/ وليد حماد | الإدارة العامة للشئون القانونية | الهيئة القومية للتأمين الاجتماعي</div>", unsafe_allow_html=True)
+'''
+
+# Save the file
+with open('/mnt/agents/output/app.py', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+size = os.path.getsize('/mnt/agents/output/app.py')
+lines = len(code.split('\n'))
+print(f"✅ File saved: app.py")
+print(f"📊 Size: {size:,} bytes ({size/1024:.1f} KB)")
+print(f"📈 Lines: {lines}")
