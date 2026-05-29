@@ -3,45 +3,70 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# تنسيق CSS لجعل القائمة والأيقونات ظاهرة وتنسيق اللوجو
+# تنسيق CSS لضمان بقاء القائمة ظاهرة وتنسيقها بشكل جميل
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] { background-color: #1a252f; color: #ffffff; padding: 20px; }
-    .logo-box { text-align: center; color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-    .author-info { font-size: 14px; color: #3498db; margin-top: 10px; line-height: 1.6; }
-    .menu-btn { font-size: 16px; margin: 10px 0; color: #ffffff; }
-    .alert-box { color: #ff4b4b; font-weight: bold; background: #2c3e50; padding: 10px; border-radius: 5px; margin: 5px 0; }
+    /* تنسيق القائمة الجانبية */
+    [data-testid="stSidebar"] {
+        background-color: #1a252f;
+        color: white;
+        padding-top: 20px;
+    }
+    /* تنسيق العناوين داخل القائمة */
+    .sidebar-header {
+        color: #3498db;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #333;
+    }
+    /* تنسيق العناصر */
+    .sidebar-item {
+        color: white;
+        font-size: 15px;
+        padding: 8px 0;
+        display: block;
+    }
+    .alert-item {
+        background-color: #581845;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+        color: #ffcccb;
+        font-weight: bold;
+    }
     </style>
 """, unsafe_allow_html=True)
 
 # الشريط الجانبي (القائمة)
 with st.sidebar:
+    # اللوجو والبيانات
     st.markdown("""
-        <div class="logo-box">
-            <h3>الهيئة القومية للتأمين الاجتماعـــــــي</h3>
-            <p>الإدارة العامة للشئون القانونية</p>
-            <div class="author-info">
-                إعداد: وليد حماد<br>
-                ديوان عام منطقة البحيرة
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h3 style="color: white;">الهيئة القومية للتأمين الاجتماعي</h3>
+            <p style="color: #bdc3c7;">الإدارة العامة للشئون القانونية</p>
+            <div style="color: #3498db; font-weight: bold;">
+                إعداد: وليد حماد<br>ديوان عام منطقة البحيرة
             </div>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("### 🏛️ الإدارة العامة للقضايا")
-    st.markdown("📁 تسجيل الدعاوى")
-    st.markdown("📋 تسجيل الطعون")
-    st.markdown("📝 مذكرة دفاع")
-    st.markdown('<div class="alert-box">🔔 تنبيهات الجلسات (قبل أسبوع)</div>', unsafe_allow_html=True)
-    st.markdown('<div class="alert-box">🔔 تنبيهات الطعون (قبل 15 يوم)</div>', unsafe_allow_html=True)
+    # القوائم ظاهرة دائماً
+    st.markdown('<div class="sidebar-header">🏛️ الإدارة العامة للقضايا</div>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">📁 تسجيل الدعاوى</span>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">📋 تسجيل الطعون</span>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">📝 مذكرة دفاع</span>', unsafe_allow_html=True)
+    st.markdown('<div class="alert-item">🔔 تنبيهات الجلسات (قبل أسبوع)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="alert-item">🔔 تنبيهات الطعون (قبل 15 يوم)</div>', unsafe_allow_html=True)
     
-    st.markdown("### 💡 الإدارة العامة للفتوى")
-    st.markdown("💡 الفتاوى القانونية")
-    st.markdown("✏️ إصابات العمل")
+    st.markdown('<div class="sidebar-header">💡 الإدارة العامة للفتوى</div>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">💡 الفتاوى القانونية</span>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">✏️ إصابات العمل</span>', unsafe_allow_html=True)
     
-    st.markdown("### 📚 المكتبة والأرشيف")
-    st.markdown("📚 المكتبة القانونية")
+    st.markdown('<div class="sidebar-header">📚 المكتبة والأرشيف</div>', unsafe_allow_html=True)
+    st.markdown('<span class="sidebar-item">📚 المكتبة القانونية</span>', unsafe_allow_html=True)
 
 # المحتوى الرئيسي
 st.title("لوحة تحكم الإدارة القانونية")
-st.success("مرحباً بك أستاذ وليد، تم تحديث الواجهة لتكون الأيقونات ظاهرة دائماً.")
-st.write("النظام الآن مجهز بالكامل للمرحلة القادمة: ربط ملفات المكتبة والتحقيقات بالذكاء الاصطناعي.")
+st.write("تم ضبط القائمة لتكون ظاهرة دائماً. يمكنك الآن البدء في ربط كل قسم بمهامه البرمجية.")
