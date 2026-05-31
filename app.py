@@ -1,15 +1,16 @@
-import streamlit as st
-
-# إعداد الصفحة
-st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
-
-# التنسيق الموحد: إخفاء السهم + إضافة تعديلات اللوجو
 st.markdown("""
     <style>
-    /* إخفاء السهم الجانبي بجميع الطرق الممكنة */
-    [data-testid="stSidebarCollapseButton"] { display: none !important; }
-    button[kind="header"] { display: none !important; }
-    #stSidebarCollapseButton { display: none !important; }
+    /* الحل الجذري لإخفاء السهم وكل ما يتعلق بهيدر القائمة */
+    [data-testid="stSidebarCollapseButton"], 
+    [data-testid="collapsedControl"], 
+    .st-emotion-cache-12fmueu, 
+    button[kind="header"] { 
+        display: none !important; 
+        visibility: hidden !important; 
+    }
+    
+    /* التأكد من إخفاء أي عنصر تداخل في الأعلى */
+    header { visibility: hidden !important; }
     
     [data-testid="stSidebar"] { background-color: #0b1e30 !important; color: white; }
     
@@ -19,7 +20,7 @@ st.markdown("""
         border-radius: 0 0 20px 20px;
         color: #ffffff;
         text-align: center;
-        margin: -20px -10px 20px -10px;
+        margin: -40px -10px 20px -10px; /* تم تعديل الهامش للأعلى لإخفاء فراغ الهيدر */
     }
     .footer-text {
         font-size: 0.8rem;
@@ -48,31 +49,3 @@ st.markdown("""
     }
     </style>
     """, unsafe_allow_html=True)
-
-# الشعار (مع إضافة اسمك)
-st.markdown("""
-    <div class="header-frame">
-        <div style="font-size: 3rem;">⚖️</div>
-        <div style="font-size: 1.3rem; font-weight: bold;">الهيئة القومية للتأمين الاجتماعي</div>
-        <div style="font-size: 1.1rem; margin-top: 5px;">الإدارة العامة للشؤون القانونية</div>
-        <div style="font-size: 0.9rem; color: #a0c4e0;">ديوان عام منطقة البحيرة</div>
-        <div class="footer-text">إعداد: وليد حماد</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# الأيقونات
-st.markdown("""
-    <div class="icon-grid">
-        <div class="icon-card">📁<br>القضايا</div>
-        <div class="icon-card">📝<br>الفتاوى</div>
-        <div class="icon-card">🔍<br>التحقيقات</div>
-        <div class="icon-card">📚<br>المكتبة</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# القائمة الجانبية
-st.sidebar.title("🏛️ القائمة الرئيسية")
-choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
-
-st.sidebar.markdown("---")
-st.sidebar.write("الإدارة العامة للشؤون القانونية")
