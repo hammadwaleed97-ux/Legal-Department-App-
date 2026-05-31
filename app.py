@@ -1,56 +1,58 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
-from datetime import datetime
 
-# إعداد الصفحة
+# 1. إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# حقن التنسيق الاحترافي الخاص بك (من ملفك الأصلي)
-st.markdown(f"""
-<style>
-    /* دمج تنسيقك الخاص */
-    [data-testid="stSidebar"] {{ background-color: #0b1e30 !important; width: 300px !important; }}
-    .stApp {{ background-color: #eef2f7; }}
-    .css-1544g2n {{ padding: 0 !important; }}
-    h1 {{ color: #0b1e30; }}
-</style>
-""", unsafe_allow_html=True)
+# 2. التنسيق باللون الأزرق الداكن (هوية الإدارة)
+st.markdown("""
+    <style>
+    /* اللون الأساسي للأزرق الداكن */
+    [data-testid="stSidebar"] { background-color: #0b1e30 !important; }
+    
+    /* تنسيق العناوين والأيقونات */
+    .title-box { 
+        background: linear-gradient(135deg, #0b1e30, #2c5f9e); 
+        padding: 25px; 
+        border-radius: 15px; 
+        color: white; 
+        text-align: center; 
+        margin-bottom: 20px;
+    }
+    .icon-style { font-size: 3rem; margin-bottom: 10px; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# إعداد قاعدة البيانات
-conn = sqlite3.connect("legal.db", check_same_thread=False)
-c = conn.cursor()
-c.execute("CREATE TABLE IF NOT EXISTS cases (id INTEGER PRIMARY KEY, case_no TEXT, case_type TEXT, status TEXT)")
-conn.commit()
+# 3. محتوى الصفحة الرئيسية
+if "menu" not in st.session_state: st.session_state.menu = "الرئيسية"
 
-# Sidebar (القائمة الجانبية)
-with st.sidebar:
-    st.markdown("""
-    <div style="text-align:center; padding: 20px;">
-        <div style="font-size:2rem;">⚖️</div>
-        <div style="font-weight:800; color:#fff;">الهيئة القومية للتأمين الاجتماعي</div>
-        <div style="color:#6ea8ce; font-size:0.8rem;">الإدارة العامة للشئون القانونية</div>
+# العنوان مع الأيقونات
+st.markdown("""
+    <div class="title-box">
+        <div class="icon-style">⚖️</div>
+        <h1>ديوان عام منطقة البحيرة</h1>
+        <p>الإدارة العامة للشؤون القانونية — نظام التحكم الذكي</p>
     </div>
     """, unsafe_allow_html=True)
-    
-    menu = st.radio("القائمة الرئيسية", ["لوحة التحكم", "القضايا القانونية", "الفتاوى", "التحقيقات", "المكتبة"])
 
-# المحتوى الرئيسي
-if menu == "لوحة التحكم":
-    st.title("لوحة تحكم ديوان عام منطقة البحيرة")
-    st.metric("إجمالي القضايا", "15")
+# إضافة سهم توجيهي (كعنصر جذب)
+st.markdown("<div style='text-align:center; font-size:2rem;'>⬇️</div>", unsafe_allow_html=True)
 
-elif menu == "القضايا القانونية":
-    st.title("📁 القضايا القانونية")
-    with st.form("case_form"):
-        c_no = st.text_input("رقم القضية")
-        c_type = st.selectbox("نوع القضية", ["مدني", "تأمين"])
-        if st.form_submit_button("إضافة"):
-            c.execute("INSERT INTO cases (case_no, case_type, status) VALUES (?, ?, ?)", (c_no, c_type, "جارية"))
-            conn.commit()
-    
-    st.table(pd.read_sql("SELECT * FROM cases", conn))
+# عرض الأيقونات التوضيحية
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.info("📁 إحصاء القضايا")
+with col2:
+    st.info("📝 الفتاوى")
+with col3:
+    st.info("🔍 التحقيقات")
+with col4:
+    st.info("📚 المكتبة")
 
-# Footer
+# قائمة التنقل (التي ستظهر في الموبايل بالضغط على السهم)
+st.sidebar.title("🏛️ القائمة الرئيسية")
+choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
+
 st.sidebar.markdown("---")
-st.sidebar.caption("الإصدار 2.0.0 | أ/ وليد حماد")
+st.sidebar.write("مع تحيات وليد حماد")
