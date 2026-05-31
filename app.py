@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# إعداد الصفحة
+# الإعدادات الأساسية
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: إخفاء عناصر Streamlit + اللوجو
+# تنسيق CSS
 st.markdown("""
     <style>
     [data-testid='stSidebar'], #stDecoration, [data-testid='stToolbar'], header { display: none !important; }
@@ -16,7 +16,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# دالة عرض الهوية الموحدة
 def show_header():
     st.markdown("""
         <div class="header-frame">
@@ -25,38 +24,29 @@ def show_header():
         </div>
         """, unsafe_allow_html=True)
 
-# تهيئة الصفحة الحالية
+# إدارة الصفحات
 if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
-# --- التنقل بين الصفحات ---
 if st.session_state.page == "الرئيسية":
     show_header()
     st.write("### لوحة التحكم الرئيسية")
     
-    # شبكة الأيقونات
-    cols1, cols2, cols3 = st.columns(3)
-    if cols1[0].button("📁 القضايا"): st.session_state.page = "القضايا"; st.rerun()
-    if cols1[1].button("📝 الفتاوى"): st.session_state.page = "الفتاوى"; st.rerun()
-    if cols2[0].button("🔍 التحقيقات"): st.session_state.page = "التحقيقات"; st.rerun()
-    if cols2[1].button("📚 المكتبة"): st.session_state.page = "المكتبة"; st.rerun()
-    if cols3[0].button("📦 الأرشيف"): st.session_state.page = "الأرشيف"; st.rerun()
-    if cols3[1].button("🔔 التنبيهات والتقارير"): st.session_state.page = "التنبيهات"; st.rerun()
+    # توزيع الأيقونات بطريقة آمنة
+    c1, c2 = st.columns(2)
+    if c1.button("📁 القضايا"): st.session_state.page = "القضايا"; st.rerun()
+    if c2.button("📝 الفتاوى"): st.session_state.page = "الفتاوى"; st.rerun()
+    
+    c3, c4 = st.columns(2)
+    if c3.button("🔍 التحقيقات"): st.session_state.page = "التحقيقات"; st.rerun()
+    if c4.button("📚 المكتبة"): st.session_state.page = "المكتبة"; st.rerun()
+    
+    c5, c6 = st.columns(2)
+    if c5.button("📦 الأرشيف"): st.session_state.page = "الأرشيف"; st.rerun()
+    if c6.button("🔔 التنبيهات والتقارير"): st.session_state.page = "التنبيهات"; st.rerun()
 
 elif st.session_state.page == "القضايا":
     show_header()
     if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
     st.header("📁 إدارة القضايا القانونية")
-    
-    # تفريغ المعطيات المطلوبة (القسم القضائي)
-    court_type = st.radio("اختر نوع المحاكم:", ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"])
-    
-    if court_type == "المحاكم الابتدائية":
-        action = st.selectbox("اختر الإجراء:", ["صياغة مذكرة بدفاع (الهيئة مدعى عليها)", "صياغة مذكرة بدفاع (الهيئة مدعية)"])
-        # هنا سنبدأ إضافة تفاصيل النموذج...
-        st.write(f"جاري إعداد نموذج: {action}")
-
-elif st.session_state.page == "التنبيهات":
-    show_header()
-    if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
-    st.header("🔔 التنبيهات والتقارير")
-    st.info("سجل متابعة الجلسات والإنجازات القانونية.")
+    # هنا سيبدأ بناء قسم القضايا التفصيلي
+    st.info("جاري تجهيز قسم القضايا...")
