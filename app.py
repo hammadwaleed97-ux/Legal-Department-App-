@@ -1,10 +1,38 @@
 import streamlit as st
 
-# (بقية الإعدادات كما هي سابقاً لضمان تناسق الشكل)
+# الإعدادات
+st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
+
+# التنسيق
+st.markdown("""
+    <style>
+    [data-testid='stSidebar'], header { display: none !important; }
+    .header-frame { background: linear-gradient(135deg, #0b1e30, #1a3a6e); padding: 20px; color: white; text-align: center; border-radius: 0 0 20px 20px; margin-bottom: 20px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+def show_header():
+    st.markdown("""<div class="header-frame"><h3>الهيئة القومية للتأمين الاجتماعـــــــي</h3><p>الإدارة العامة للشئون القانونية | مع تحيات أ/ وليد حماد</p></div>""", unsafe_allow_html=True)
+
+# إدارة الصفحات
+if 'page' not in st.session_state: 
+    st.session_state.page = "الرئيسية"
+
+if st.session_state.page == "الرئيسية":
+    show_header()
+    st.write("### لوحة التحكم الرئيسية")
+    if st.button("📁 إدارة القضايا"): 
+        st.session_state.page = "القضايا"
+        st.rerun()
+    if st.button("📝 الفتاوى"): 
+        st.session_state.page = "الفتاوى"
+        st.rerun()
 
 elif st.session_state.page == "القضايا":
     show_header()
-    if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
+    if st.button("⬅️ عودة للرئيسية"): 
+        st.session_state.page = "الرئيسية"
+        st.rerun()
     
     st.header("📁 إدارة القضايا")
     
@@ -13,34 +41,14 @@ elif st.session_state.page == "القضايا":
     
     with tab1:
         st.subheader("أولاً: الإدارة العامة للقضايا - القسم القضائي")
-        
-        # اختيار نوع المحكمة
-        court_level = st.radio("اختر نوع المحاكم:", 
-                               ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"])
-        
-        # تفريغ المسارات بناءً على نوع المحكمة
-        if court_level == "المحاكم الابتدائية":
-            st.write("### بيانات المحاكم الابتدائية")
-            case_type = st.selectbox("نوع الدعوى:", ["عمالية", "تأمينية", "مدنية"])
-            st.text_input("رقم الدعوى")
-            st.date_input("تاريخ الجلسة")
-            
-        elif court_level == "المحاكم الاستئنافية":
-            st.write("### بيانات المحاكم الاستئنافية")
-            st.text_input("رقم الاستئناف")
-            st.text_input("رقم الدعوى المستأنف حكمها")
-            
-        elif court_level == "محكمة النقض":
-            st.write("### بيانات محكمة النقض")
-            st.text_input("رقم الطعن")
-            st.text_input("رقم الحكم المطعون فيه")
-            
+        court_level = st.radio("اختر نوع المحاكم:", ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"])
+        st.text_input("رقم الدعوى")
         st.button("حفظ بيانات القضية")
-
+        
     with tab2:
         st.subheader("ثانياً: التنبيهات")
-        st.info("سيتم عرض تنبيهات الجلسات القريبة هنا.")
+        st.info("نظام متابعة التنبيهات.")
         
     with tab3:
         st.subheader("ثالثاً: التقارير")
-        st.write("إحصائيات إنجاز القضايا موثقة حسب المحكمة.")
+        st.write("نظام تقارير الإنجاز.")
