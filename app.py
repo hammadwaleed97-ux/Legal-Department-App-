@@ -1,55 +1,65 @@
 import streamlit as st
 
-# إعداد الصفحة
+# 1. إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# تنسيق CSS ليكون مطابقاً للصورة
+# 2. كود CSS القسري (لضمان الثبات التام ومنع التداخل)
 st.markdown("""
-    <style>
+<style>
+    /* إخفاء زر الطي الافتراضي */
+    section[data-testid="stSidebar"] > div:first-child {
+        background-color: #0b1e30 !important;
+        width: 300px !important;
+    }
+    
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+
+    /* تثبيت القائمة */
     [data-testid="stSidebar"] {
-        background-color: #1a252f;
-        color: white;
+        width: 300px !important;
     }
-    .sidebar-header {
-        color: #3498db;
-        font-weight: bold;
-        margin-top: 15px;
-        padding-bottom: 5px;
-        border-bottom: 1px solid #333;
+
+    /* ضبط المحتوى الرئيسي ليكون بجانب القائمة */
+    .stApp {
+        margin-right: 300px !important;
     }
-    .sidebar-item {
-        color: white;
-        padding: 8px 0;
-        cursor: pointer;
+
+    /* تنسيق النصوص في القائمة */
+    [data-testid="stSidebar"] * {
+        color: #ffffff !important;
+        font-family: sans-serif;
     }
-    </style>
+</style>
 """, unsafe_allow_html=True)
 
-# الشريط الجانبي (القائمة)
+# 3. بناء القائمة الجانبية
 with st.sidebar:
-    st.markdown("### الهيئة القومية للتأمين الاجتماعي")
-    st.markdown("الإدارة العامة للشئون القانونية")
+    st.markdown("### 🏛️ الهيئة القومية للتأمين")
     st.markdown("---")
+    menu = ["🏠 الرئيسية", "📊 لوحة التحكم", "⚖️ الإدارة العامة للقضايا", "💡 الفتوى والتشريع", "📝 التحقيقات", "📚 المكتبة القانونية"]
+    choice = st.radio("القائمة الرئيسية", menu, label_visibility="collapsed")
     
-    st.markdown('<div class="sidebar-header">الرئيسية</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">📊 لوحة التحكم</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">الإدارة العامة للقضايا</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">📁 تسجيل الدعاوى</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">📋 تسجيل الطعون</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">📝 مذكرة دفاع</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">⚖️ صحيفة استئناف</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">الإدارة العامة للفتوى</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">💡 الفتاوى القانونية</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">✏️ إصابات العمل</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">التحقيقات والنيابات</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">🔍 تحقيقات الهيئة</div>', unsafe_allow_html=True)
-    
-    st.markdown('<div class="sidebar-header">المكتبة والأرشيف</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-item">📚 المكتبة القانونية</div>', unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("مع تحيات وليد حماد")
+    st.caption("الادارة العامة للشؤون القانونية")
+    st.caption("ديوان عام منطقة البحيرة")
 
-# المحتوى الرئيسي
-st.title("لوحة تحكم الإدارة القانونية")
-st.write("مرحباً بك أستاذ وليد. النظام جاهز للبدء في ربط المهام البرمجية.")
+# 4. المحتوى الرئيسي
+st.title("لوحة تحكم ديوان عام منطقة البحيرة")
+st.write("مرحباً بك في نظام الإدارة القانونية المتطور.")
+
+# بطاقات إحصائية (KPIs)
+col1, col2, col3 = st.columns(3)
+col1.metric("إجمالي القضايا", "15")
+col2.metric("القضايا المنتهية", "10")
+col3.metric("تحت الإجراء", "5")
+
+# جدول القضايا
+st.header("سجل القضايا")
+st.table({
+    "الرقم": ["2024/101", "2024/102", "2024/103"],
+    "الموضوع": ["طلب فتوى", "دعوى قضائية", "تحقيق إداري"],
+    "الحالة": ["مؤجلة", "جارية", "مغلقة"]
+})
