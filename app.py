@@ -1,54 +1,39 @@
 import streamlit as st
 import pandas as pd
 
-# [إعدادات الهوية - ثابتة]
+# الإعدادات
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
-st.markdown("""
-    <style>
-    .header-frame { background: linear-gradient(135deg, #0b1e30, #1a3a6e); padding: 25px; color: #ffffff; text-align: center; border-radius: 0 0 20px 20px; }
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("<style>[data-testid='stSidebar'], #stDecoration, [data-testid='stToolbar'], header { display: none !important; } .header-frame { background: linear-gradient(135deg, #0b1e30, #1a3a6e); padding: 20px; color: white; text-align: center; border-radius: 0 0 20px 20px; }</style>", unsafe_allow_html=True)
 
 def show_header():
-    st.markdown("""
-        <div class="header-frame">
-            <h3>الهيئة القومية للتأمين الاجتماعـــــــي</h3>
-            <p>الإدارة العامة للشئون القانونية | مع تحيات أ/ وليد حماد</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown("""<div class="header-frame"><h3>الهيئة القومية للتأمين الاجتماعـــــــي</h3><p>الإدارة العامة للشئون القانونية | مع تحيات أ/ وليد حماد</p></div>""", unsafe_allow_html=True)
 
-show_header()
+# إدارة الصفحات
+if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
-# [نظام إدارة قسم القضايا]
-st.subheader("أولاً: الإدارة العامة للقضايا - القسم القضائي")
+if st.session_state.page == "الرئيسية":
+    show_header()
+    st.write("### لوحة التحكم")
+    cols1 = st.columns(2)
+    if cols1[0].button("📁 القضايا"): st.session_state.page = "القضايا"; st.rerun()
+    if cols1[1].button("📝 الفتاوى"): st.session_state.page = "الفتاوى"; st.rerun()
+    cols2 = st.columns(2)
+    if cols2[0].button("🔍 التحقيقات"): st.session_state.page = "التحقيقات"; st.rerun()
+    if cols2[1].button("📚 المكتبة"): st.session_state.page = "المكتبة"; st.rerun()
+    cols3 = st.columns(2)
+    if cols3[0].button("📦 الأرشيف"): st.session_state.page = "الأرشيف"; st.rerun()
+    if cols3[1].button("🔔 التنبيهات والتقارير"): st.session_state.page = "التنبيهات"; st.rerun()
 
-# القائمة الفرعية للقضاء العادي
-c_type = st.radio("اختر نوع المحاكم:", ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"], horizontal=True)
+elif st.session_state.page == "القضايا":
+    show_header()
+    if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
+    st.header("📁 إدارة القضايا")
+    # هنا تضع تفاصيل القسم القضائي (التي بدأناها)
+    st.radio("نوع المحاكم:", ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"])
+    # ... (باقي الكود الخاص بالنماذج) ...
 
-if c_type == "المحاكم الابتدائية":
-    sub_task = st.selectbox("اختر الإجراء:", ["صياغة مذكرة بدفاع (الهيئة مدعى عليها)", "صياغة مذكرة بدفاع (الهيئة مدعية)"])
-    
-    with st.expander("بيانات الدعوى والمستندات"):
-        col1, col2 = st.columns(2)
-        court = col1.text_input("المحكمة")
-        circuit = col2.text_input("الدائرة")
-        case_num = col1.text_input("رقم الدعوى")
-        case_year = col2.text_input("لسنة")
-        p1 = st.text_input("اسم المدعى وصفته")
-        p2 = st.text_input("اسم المدعى عليه وصفته")
-        facts = st.text_area("ملخص الوقائع أو ارفع صورة الصحيفة")
-        file_upload = st.file_uploader("رفع صورة الصحيفة لقراءتها", type=['pdf', 'jpg', 'png'])
-
-    if st.button("صياغة المذكرة"):
-        st.info("جاري استخدام الذكاء الاصطناعي لصياغة المذكرة وترتيب الدفوع قانونياً...")
-        # هنا سيتم ربط الـ API الخاص بـ Gemini لقراءة الملفات والصياغة
-        st.success("تمت الصياغة بنجاح")
-        st.write("--- نص المذكرة المقترح ---")
-        st.write("مذكرة بدفاع الهيئة القومية للتأمين الاجتماعي (بصفتها...)")
-        # التوقيعات المطلوبة
-        st.markdown("<br><br><b>عن الهيئة:</b><br>____________________<br><b>عضو الإدارة القانونية</b> ⠀⠀⠀⠀⠀⠀ <b>مدير الإدارة القانونية</b>", unsafe_allow_html=True)
-
-    st.download_button("حفظ بصيغة Word", "محتوى المذكرة", file_name="مذكرة_دفاع.docx")
-    st.download_button("حفظ بصيغة PDF", "محتوى المذكرة", file_name="مذكرة_دفاع.pdf")
-
-# (سيتم إضافة باقي الأقسام الاستئنافية والنقض بنفس هذا المنطق)
+elif st.session_state.page == "التنبيهات":
+    show_header()
+    if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
+    st.header("🔔 التنبيهات والتقارير")
+    st.info("هنا ستظهر تقارير الجلسات القادمة ومتابعة القضايا.")
