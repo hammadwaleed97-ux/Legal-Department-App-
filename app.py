@@ -3,15 +3,15 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق الموحد الثابت (تم إضافة كود إخفاء السهم)
+# التنسيق الموحد الثابت (تم تحديث كود إخفاء السهم ليكون أكثر قوة)
 st.markdown("""
     <style>
-    /* إخفاء سهم القائمة الجانبية */
-    [data-testid="stSidebarCollapseButton"] {
-        display: none !important;
-    }
+    /* إخفاء سهم القائمة الجانبية بشكل قسري */
+    button[kind="header"] { display: none !important; }
+    [data-testid="stSidebarCollapseButton"] { display: none !important; visibility: hidden !important; }
     
     [data-testid="stSidebar"] { background-color: #0b1e30 !important; color: white; }
+    
     .header-frame {
         background: linear-gradient(135deg, #0b1e30, #1a3a6e);
         padding: 30px;
@@ -61,7 +61,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# القائمة الجانبية (ستظل موجودة ولكن بدون السهم)
+# القائمة الجانبية
 st.sidebar.title("🏛️ القائمة الرئيسية")
 choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
 
