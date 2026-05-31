@@ -3,17 +3,21 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: اللون الأزرق الداكن وتوسيط الأزرار
+# التنسيق: تصغير الخط قليلاً لضمان بقاء العنوان في سطر واحد
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
     .hero-container {
         background-color: #1a3a6e;
-        padding: 30px;
+        padding: 25px;
         border-radius: 20px;
         text-align: center;
         color: white;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
+    }
+    .hero-container h3 {
+        font-size: 0.9em; /* تصغير الخط لضمان عدم انكسار السطر */
+        margin: 5px;
     }
     .button-container {
         display: flex;
@@ -34,7 +38,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# الرأس (اللوجو بعد التعديل: السطر الأول كما طلبت)
+# الرأس (اللوجو بعد تصغير الخط)
 st.markdown("""
     <div class="hero-container">
         <h3>الهيئة القومية للتأمين الاجتماعي</h3>
@@ -49,7 +53,7 @@ st.markdown("""
 st.markdown('<div class="button-container">', unsafe_allow_html=True)
 
 if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
-if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
+if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتاوى"; st.rerun()
 if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
 if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
 if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
