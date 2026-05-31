@@ -3,7 +3,7 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: الأزرق الداكن وتوزيع الأزرار
+# التنسيق: توسيط الأزرار في منتصف الصفحة
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -15,16 +15,21 @@ st.markdown("""
         color: white;
         margin-bottom: 30px;
     }
+    /* جعل الأزرار في المنتصف بعرض محدد */
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     div.stButton > button {
-        width: 100%;
-        height: 60px;
+        width: 300px; /* تحديد عرض الزر ليكون متناسقاً في المنتصف */
+        height: 50px;
         border: 2px solid #1a3a6e;
         color: #1a3a6e;
         font-weight: bold;
         background-color: white;
         border-radius: 10px;
-        margin-bottom: 15px;
-        font-size: 1.1em;
+        margin-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -40,18 +45,13 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# التوزيع: 2 يمين، 2 شمال، وواحدة في المنتصف
-col1, col2 = st.columns(2)
+# وضع الأزرار في حاوية مخصصة للتوسيط
+st.markdown('<div class="button-container">', unsafe_allow_html=True)
 
-with col1:
-    if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
-    if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
+if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
+if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
+if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
+if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
+if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
 
-with col2:
-    if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
-    if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
-
-# زر الأرشيف في المنتصف تماماً
-col_mid1, col_mid2, col_mid3 = st.columns([1, 2, 1])
-with col_mid2:
-    if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
