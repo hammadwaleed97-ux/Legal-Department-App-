@@ -3,7 +3,7 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# تنسيق CSS بالأزرق الداكن
+# التنسيق: الأزرق الداكن وتنسيق الإطارات
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -14,22 +14,30 @@ st.markdown("""
         border-radius: 10px;
         background-color: #f8f9fa;
         margin-bottom: 30px;
+        color: #1a3a6e;
     }
-    .header-box h3, .header-box h4, .header-box p { color: #1a3a6e; }
     div.stButton > button {
         width: 100%;
-        border: 1px solid #1a3a6e;
+        border: 2px solid #1a3a6e;
         color: #1a3a6e;
         font-weight: bold;
+        background-color: white;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    div.stButton > button:hover {
+        background-color: #1a3a6e;
+        color: white;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# العنوان الرئيسي الموحد
+# العنوان الرئيسي (بدون الفاصل العمودي)
 st.markdown("""
     <div class="header-box">
         <h3>الهيئة القومية للتأمين الاجتماعي</h3>
-        <h4>الإدارة العامة للشئون القانونية | ديوان عام منطقة البحيرة</h4>
+        <p style="font-size: 1.2em; font-weight: bold;">الإدارة العامة للشئون القانونية ديوان عام منطقة البحيرة</p>
         <p>إعداد: أ/ وليد شعبان حماد</p>
     </div>
     """, unsafe_allow_html=True)
@@ -38,7 +46,6 @@ st.markdown("""
 if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
 if st.session_state.page == "الرئيسية":
-    # توزيع الأزرار حسب التقسيمة
     if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
     if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
     if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
@@ -48,4 +55,3 @@ if st.session_state.page == "الرئيسية":
 elif st.session_state.page == "القضايا":
     if st.button("⬅️ عودة للرئيسية"): st.session_state.page = "الرئيسية"; st.rerun()
     st.header("⚖️ الإدارة العامة للقضايا")
-    # هنا سيتم وضع تفاصيل القضايا
