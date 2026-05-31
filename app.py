@@ -1,51 +1,65 @@
 import streamlit as st
 
-# 1. إعداد الصفحة لتعمل بكامل العرض
+# إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# 2. التنسيق: إطار أزرق داكن يملأ الصفحة + تنسيق الخطوط
+# التنسيق الموحد
 st.markdown("""
     <style>
-    /* جعل الهامش الجانبي يتناسب مع اللون */
     [data-testid="stSidebar"] { background-color: #0b1e30 !important; color: white; }
-    
-    /* الإطار الأزرق الكامل في الصفحة الرئيسية */
     .header-frame {
         background: linear-gradient(135deg, #0b1e30, #1a3a6e);
-        padding: 40px;
-        border-radius: 20px;
+        padding: 30px;
+        border-radius: 0 0 20px 20px;
         color: #ffffff;
         text-align: center;
-        margin: -10px -10px 20px -10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin: -20px -10px 20px -10px;
     }
-    .main-title { font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; }
-    .sub-title { font-size: 1.2rem; color: #a0c4e0; margin-bottom: 5px; }
-    .org-name { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; }
+    .icon-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        padding: 20px;
+        background-color: #f0f2f6;
+        border-radius: 15px;
+        margin-top: 20px;
+    }
+    .icon-card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        font-weight: bold;
+        color: #0b1e30;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. عرض الهوية داخل الإطار
+# الشعار وبيانات الإدارة
 st.markdown("""
     <div class="header-frame">
-        <div style="font-size: 4rem; margin-bottom: 10px;">⚖️</div>
-        <div class="org-name">الهيئة القومية للتأمين الاجتماعي</div>
-        <div class="main-title">الإدارة العامة للشؤون القانونية</div>
-        <div class="sub-title">ديوان عام منطقة البحيرة</div>
+        <div style="font-size: 3rem;">⚖️</div>
+        <div style="font-size: 1.3rem; font-weight: bold;">الهيئة القومية للتأمين الاجتماعي</div>
+        <div style="font-size: 1.1rem; margin-top: 5px;">الإدارة العامة للشؤون القانونية</div>
+        <div style="font-size: 0.9rem; color: #a0c4e0;">ديوان عام منطقة البحيرة</div>
     </div>
     """, unsafe_allow_html=True)
 
-# 4. سهم توجيهي بسيط
-st.markdown("<div style='text-align:center; font-size:2.5rem; margin-bottom:20px;'>⬇️</div>", unsafe_allow_html=True)
+# شبكة الأيقونات (نزلت تحت اللوجو كما طلبت)
+st.markdown("""
+    <div class="icon-grid">
+        <div class="icon-card">📁<br>القضايا</div>
+        <div class="icon-card">📝<br>الفتاوى</div>
+        <div class="icon-card">🔍<br>التحقيقات</div>
+        <div class="icon-card">📚<br>المكتبة</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-# 5. القائمة الجانبية (للتنقل)
+# القائمة الجانبية
 st.sidebar.title("🏛️ القائمة الرئيسية")
 choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
 
-# 6. ربط المحتوى بالصفحة
-if choice == "الرئيسية":
-    st.success("مرحباً بك في نظام الإدارة الذكي - ديوان عام منطقة البحيرة")
-    st.write("استخدم القائمة الجانبية للانتقال بين الأقسام.")
-
 st.sidebar.markdown("---")
 st.sidebar.write("مع تحيات وليد حماد")
+st.sidebar.write("الإدارة العامة للشؤون القانونية")
