@@ -3,7 +3,7 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: توسيط الأزرار وتعديل الهوية البصرية
+# التنسيق: اللون الأزرق الداكن وتوسيط الأزرار
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -21,7 +21,7 @@ st.markdown("""
         align-items: center;
     }
     div.stButton > button {
-        width: 350px; /* تم زيادة العرض قليلاً ليناسب التصميم */
+        width: 350px;
         height: 55px;
         border: 2px solid #1a3a6e;
         color: #1a3a6e;
@@ -34,7 +34,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# الرأس (اللوجو بعد التعديل: كلمة الاجتماعي في السطر الأول)
+# الرأس (اللوجو بعد التعديل: السطر الأول كما طلبت)
 st.markdown("""
     <div class="hero-container">
         <h3>الهيئة القومية للتأمين الاجتماعي</h3>
