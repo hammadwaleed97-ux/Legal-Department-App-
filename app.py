@@ -1,65 +1,56 @@
 import streamlit as st
 import sqlite3
 import pandas as pd
+from datetime import datetime
 
-# 1. إعداد الصفحة لتكون واسعة
+# إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# 2. تنسيق CSS لضمان عدم تداخل القائمة مع المحتوى
-# لقد أضفنا خاصية z-index و padding-left دقيقة لضبط العرض
-st.markdown("""
-    <style>
-    [data-testid="stSidebar"] {
-        width: 300px !important;
-        flex-shrink: 0;
-    }
-    .main .block-container {
-        padding-left: 320px !important;
-        padding-right: 20px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+# حقن التنسيق الاحترافي الخاص بك (من ملفك الأصلي)
+st.markdown(f"""
+<style>
+    /* دمج تنسيقك الخاص */
+    [data-testid="stSidebar"] {{ background-color: #0b1e30 !important; width: 300px !important; }}
+    .stApp {{ background-color: #eef2f7; }}
+    .css-1544g2n {{ padding: 0 !important; }}
+    h1 {{ color: #0b1e30; }}
+</style>
+""", unsafe_allow_html=True)
 
-# 3. إعداد قاعدة البيانات
+# إعداد قاعدة البيانات
 conn = sqlite3.connect("legal.db", check_same_thread=False)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS cases (id INTEGER PRIMARY KEY, case_no TEXT, case_type TEXT, status TEXT)")
 conn.commit()
 
-# القائمة الجانبية
+# Sidebar (القائمة الجانبية)
 with st.sidebar:
-    st.title("🏛️ الإدارة العامة")
-    menu = ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"]
-    choice = st.radio("القائمة", menu)
-    st.markdown("---")
-    st.write("مع تحيات وليد حماد")
-    st.write("ديوان عام منطقة البحيرة")
+    st.markdown("""
+    <div style="text-align:center; padding: 20px;">
+        <div style="font-size:2rem;">⚖️</div>
+        <div style="font-weight:800; color:#fff;">الهيئة القومية للتأمين الاجتماعي</div>
+        <div style="color:#6ea8ce; font-size:0.8rem;">الإدارة العامة للشئون القانونية</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    menu = st.radio("القائمة الرئيسية", ["لوحة التحكم", "القضايا القانونية", "الفتاوى", "التحقيقات", "المكتبة"])
 
-# 4. عرض المحتوى بناءً على اختيار القائمة
-if choice == "الرئيسية":
+# المحتوى الرئيسي
+if menu == "لوحة التحكم":
     st.title("لوحة تحكم ديوان عام منطقة البحيرة")
     st.metric("إجمالي القضايا", "15")
 
-elif choice == "القضايا":
-    st.title("إدارة القضايا")
-    # نموذج إضافة قضية
-    with st.form("add_case"):
+elif menu == "القضايا القانونية":
+    st.title("📁 القضايا القانونية")
+    with st.form("case_form"):
         c_no = st.text_input("رقم القضية")
-        c_type = st.selectbox("نوع القضية", ["مدني", "تأمين", "إداري"])
-        submitted = st.form_submit_button("حفظ القضية")
-        if submitted:
+        c_type = st.selectbox("نوع القضية", ["مدني", "تأمين"])
+        if st.form_submit_button("إضافة"):
             c.execute("INSERT INTO cases (case_no, case_type, status) VALUES (?, ?, ?)", (c_no, c_type, "جارية"))
             conn.commit()
-            st.success("تم الحفظ بنجاح!")
     
-    # عرض القضايا
-    df = pd.read_sql("SELECT * FROM cases", conn)
-    st.table(df)
+    st.table(pd.read_sql("SELECT * FROM cases", conn))
 
-elif choice == "الفتاوى":
-    st.title("قسم الفتوى والتشريع")
-    st.info("هذا القسم قيد التطوير...")
-
-elif choice == "التحقيقات":
-    st.title("قسم التحقيقات")
-    st.info("هذا القسم قيد التطوير...")
+# Footer
+st.sidebar.markdown("---")
+st.sidebar.caption("الإصدار 2.0.0 | أ/ وليد حماد")
