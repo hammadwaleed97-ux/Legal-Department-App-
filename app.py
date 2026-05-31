@@ -24,6 +24,7 @@ st.markdown("""
         border-radius: 10px;
         padding: 15px;
         margin-bottom: 15px;
+        text-align: right; /* لمحاذاة النص والأيقونة بشكل جيد */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -39,18 +40,9 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# التوزيع: 2 يمين، 2 يسار، وواحدة في المنتصف
-col1, col2 = st.columns(2)
-
-with col1:
-    if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
-    if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
-
-with col2:
-    if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
-    if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
-
-# واحدة في المنتصف بالأسفل
-st.markdown("<div style='display: flex; justify-content: center;'>", unsafe_allow_html=True)
-if st.button("📦 الأرشيف الإلكتروني", use_container_width=False): st.session_state.page = "الأرشيف"; st.rerun()
-st.markdown("</div>", unsafe_allow_html=True)
+# الأزرار مع الأيقونات المزدوجة (لتحقيق التماثل الذي طلبته)
+if st.button("⚖️ الإدارة العامة للقضايا ⚖️"): st.session_state.page = "القضايا"; st.rerun()
+if st.button("📝 الإدارة العامة للفتوى 📝"): st.session_state.page = "الفتوى"; st.rerun()
+if st.button("📚 المكتبة القانونية 📚"): st.session_state.page = "المكتبة"; st.rerun()
+if st.button("🔍 الإدارة العامة للتحقيقات والنيابات 🔍"): st.session_state.page = "التحقيقات"; st.rerun()
+if st.button("📦 الأرشيف الإلكتروني 📦"): st.session_state.page = "الأرشيف"; st.rerun()
