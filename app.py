@@ -3,7 +3,7 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: اللون الأزرق الداكن وتوزيع الأزرار
+# التنسيق: الأزرق الداكن وتوزيع الأزرار
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -24,6 +24,7 @@ st.markdown("""
         background-color: white;
         border-radius: 10px;
         margin-bottom: 15px;
+        font-size: 1.1em;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -39,7 +40,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# توزيع الأزرار: 2 يمين، 2 يسار، وواحدة في المنتصف بالأسفل
+# التوزيع: 2 يمين، 2 شمال، وواحدة في المنتصف
 col1, col2 = st.columns(2)
 
 with col1:
@@ -50,8 +51,7 @@ with col2:
     if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
     if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
 
-# زر في المنتصف بالأسفل
-st.write("---") # فاصل بسيط
-center_col1, center_col2, center_col3 = st.columns([1, 2, 1])
-with center_col2:
+# زر الأرشيف في المنتصف تماماً
+col_mid1, col_mid2, col_mid3 = st.columns([1, 2, 1])
+with col_mid2:
     if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
