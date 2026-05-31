@@ -1,61 +1,74 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime, timedelta
 
-# إعداد الصفحة
+# 1. الإعدادات والتنسيق (الثابت)
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: إخفاء كل شيء يخص Streamlit + تصميم الشبكة الثنائي
 st.markdown("""
     <style>
-    /* إخفاء القائمة الجانبية، شريط الأدوات، وكل أزرار الهيدر */
     [data-testid="stSidebar"], #stDecoration, [data-testid="stToolbar"], header { display: none !important; }
-    
     .header-frame {
         background: linear-gradient(135deg, #0b1e30, #1a3a6e);
-        padding: 30px;
-        color: #ffffff;
-        text-align: center;
-        border-radius: 0 0 20px 20px;
-        margin-top: -60px; /* سحب التصميم للأعلى لإخفاء الشريط العلوي */
-    }
-    
-    /* شبكة أيقونات ثنائية الأعمدة */
-    .icon-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        padding: 20px;
-        margin-top: 20px;
-    }
-    .icon-card {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 15px;
-        text-align: center;
-        border: 1px solid #dee2e6;
-        font-weight: bold;
-        color: #0b1e30;
+        padding: 25px; color: #ffffff; text-align: center; 
+        border-radius: 0 0 20px 20px; margin-top: -60px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# الشعار
 st.markdown("""
     <div class="header-frame">
         <div style="font-size: 2.5rem;">⚖️</div>
-        <h3>الهيئة القومية للتأمين الاجتماعي</h3>
-        <p>الإدارة العامة للشؤون القانونية - ديوان عام منطقة البحيرة</p>
-        <small>إعداد: وليد حماد</small>
+        <h3>إدارة القضايا القانونية</h3>
+        <small>ديوان عام منطقة البحيرة | إعداد: وليد حماد</small>
     </div>
     """, unsafe_allow_html=True)
 
-# شبكة الأيقونات الثنائية
-st.markdown("""
-    <div class="icon-grid">
-        <div class="icon-card">📁<br>القضايا</div>
-        <div class="icon-card">📝<br>الفتاوى</div>
-        <div class="icon-card">🔍<br>التحقيقات</div>
-        <div class="icon-card">📚<br>المكتبة</div>
-        <div class="icon-card">📦<br>الأرشيف</div>
-        <div class="icon-card">🏠<br>الرئيسية</div>
-    </div>
-    """, unsafe_allow_html=True)
+# 2. تهيئة قاعدة البيانات المؤقتة
+if 'cases' not in st.session_state:
+    st.session_state.cases = pd.DataFrame(columns=["رقم القضية", "السنة", "النوع", "تاريخ الجلسة", "الحالة"])
+
+# 3. نظام التبويبات للعمليات
+tab1, tab2, tab3 = st.tabs(["➕ إضافة قضية", "📂 عرض القضايا", "🔔 التنبيهات والتقارير"])
+
+with tab1:
+    st.subheader("إدراج قضية جديدة")
+    with st.form("case_form", clear_on_submit=True):
+        c1, c2 = st.columns(2)
+        num = c1.text_input("رقم القضية")
+        year = c2.number_input("السنة", 2000, 2030, 2026)
+        ctype = st.selectbox("نوع القضية", ["عمالية", "تأمينية", "مدنية", "إدارية"])
+        cdate = st.date_input("تاريخ الجلسة القادمة")
+        
+        if st.form_submit_button("حفظ القضية"):
+            new_entry = pd.DataFrame([{"رقم القضية": num, "السنة": year, "النوع": ctype, "تاريخ الجلسة": cdate, "الحالة": "قيد التداول"}])
+            st.session_state.cases = pd.concat([st.session_state.cases, new_entry], ignore_index=True)
+            st.success("تم إدراج القضية بنجاح في النظام")
+
+with tab2:
+    st.subheader("سجل القضايا")
+    if not st.session_state.cases.empty:
+        st.table(st.session_state.cases)
+    else:
+        st.info("لا توجد قضايا مسجلة حالياً.")
+
+with tab3:
+    st.subheader("🔔 التنبيهات والتقارير القانونية")
+    if not st.session_state.cases.empty:
+        today = datetime.now().date()
+        cases_df = st.session_state.cases.copy()
+        cases_df["تاريخ الجلسة"] = pd.to_datetime(cases_df["تاريخ الجلسة"]).dt.date
+        
+        # التنبيهات: قضايا الأسبوع القادم
+        upcoming = cases_df[cases_df["تاريخ الجلسة"] <= (today + timedelta(days=7))]
+        upcoming = upcoming[upcoming["تاريخ الجلسة"] >= today]
+        
+        if not upcoming.empty:
+            st.warning("⚠️ قضايا عاجلة (جلسة خلال 7 أيام):")
+            st.dataframe(upcoming)
+        else:
+            st.success("✅ لا توجد جلسات عاجلة في الأسبوع القادم.")
+            
+        st.write(f"📊 إجمالي القضايا المسجلة: **{len(st.session_state.cases)}**")
+    else:
+        st.write("نظام التنبيهات فارغ لعدم وجود قضايا.")
