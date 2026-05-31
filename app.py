@@ -1,54 +1,47 @@
 import streamlit as st
 
-# الإعدادات
+# إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق
+# تنسيق CSS ليكون مطابقاً للهوية الإدارية
 st.markdown("""
     <style>
-    [data-testid='stSidebar'], header { display: none !important; }
-    .header-frame { background: linear-gradient(135deg, #0b1e30, #1a3a6e); padding: 20px; color: white; text-align: center; border-radius: 0 0 20px 20px; margin-bottom: 20px; }
+    .main-title { background: #f0f2f6; padding: 20px; border-radius: 10px; text-align: center; border: 2px solid #1a3a6e; }
+    .btn-container { display: flex; justify-content: center; gap: 20px; margin-top: 30px; }
+    div.stButton > button { width: 250px; height: 60px; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-def show_header():
-    st.markdown("""<div class="header-frame"><h3>الهيئة القومية للتأمين الاجتماعـــــــي</h3><p>الإدارة العامة للشئون القانونية | مع تحيات أ/ وليد حماد</p></div>""", unsafe_allow_html=True)
+# العنوان الرئيسي كما في 388e49a4-3715-41f3-94f8-25eea5301b47
+st.markdown("""
+    <div class="main-title">
+        <h3>الهيئة القومية للتأمين الاجتماعي</h3>
+        <h4>الإدارة العامة للشئون القانونية | ديوان عام منطقة البحيرة</h4>
+        <p>إعداد: أ/ وليد شعبان حماد</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # إدارة الصفحات
-if 'page' not in st.session_state: 
-    st.session_state.page = "الرئيسية"
+if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
 if st.session_state.page == "الرئيسية":
-    show_header()
-    st.write("### لوحة التحكم الرئيسية")
-    if st.button("📁 إدارة القضايا"): 
-        st.session_state.page = "القضايا"
-        st.rerun()
-    if st.button("📝 الفتاوى"): 
-        st.session_state.page = "الفتاوى"
-        st.rerun()
+    st.write("---")
+    # توزيع الأزرار حسب التقسيمة الإدارية
+    col1, col2 = st.columns(2)
+    
+    if col1.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
+    if col2.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
+    
+    st.write("---")
+    st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+    if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    st.write("---")
+    if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
+    if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
 
+# منطق التنقل لباقي الصفحات (سنبدأ بناءها تباعاً)
 elif st.session_state.page == "القضايا":
-    show_header()
-    if st.button("⬅️ عودة للرئيسية"): 
-        st.session_state.page = "الرئيسية"
-        st.rerun()
-    
-    st.header("📁 إدارة القضايا")
-    
-    # التبويبات بالترتيب المطلوب
-    tab1, tab2, tab3 = st.tabs(["القسم القضائي", "🔔 التنبيهات", "📊 التقارير"])
-    
-    with tab1:
-        st.subheader("أولاً: الإدارة العامة للقضايا - القسم القضائي")
-        court_level = st.radio("اختر نوع المحاكم:", ["المحاكم الابتدائية", "المحاكم الاستئنافية", "محكمة النقض"])
-        st.text_input("رقم الدعوى")
-        st.button("حفظ بيانات القضية")
-        
-    with tab2:
-        st.subheader("ثانياً: التنبيهات")
-        st.info("نظام متابعة التنبيهات.")
-        
-    with tab3:
-        st.subheader("ثالثاً: التقارير")
-        st.write("نظام تقارير الإنجاز.")
+    # هنا سنضع محتوى القضايا الذي اتفقنا عليه
+    pass
