@@ -3,7 +3,7 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق الموحد
+# التنسيق الموحد الثابت
 st.markdown("""
     <style>
     [data-testid="stSidebar"] { background-color: #0b1e30 !important; color: white; }
@@ -22,7 +22,7 @@ st.markdown("""
         padding: 20px;
         background-color: #f0f2f6;
         border-radius: 15px;
-        margin-top: 20px;
+        margin-top: 10px;
     }
     .icon-card {
         background: white;
@@ -34,9 +34,9 @@ st.markdown("""
         color: #0b1e30;
     }
     </style>
-    """, unsafe_allow_html=True)
+    """, unsafe_html=True)
 
-# الشعار وبيانات الإدارة
+# الشعار
 st.markdown("""
     <div class="header-frame">
         <div style="font-size: 3rem;">⚖️</div>
@@ -44,9 +44,9 @@ st.markdown("""
         <div style="font-size: 1.1rem; margin-top: 5px;">الإدارة العامة للشؤون القانونية</div>
         <div style="font-size: 0.9rem; color: #a0c4e0;">ديوان عام منطقة البحيرة</div>
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_html=True)
 
-# شبكة الأيقونات (نزلت تحت اللوجو كما طلبت)
+# الأيقونات الثابتة
 st.markdown("""
     <div class="icon-grid">
         <div class="icon-card">📁<br>القضايا</div>
@@ -54,9 +54,9 @@ st.markdown("""
         <div class="icon-card">🔍<br>التحقيقات</div>
         <div class="icon-card">📚<br>المكتبة</div>
     </div>
-    """, unsafe_allow_html=True)
+    """, unsafe_html=True)
 
-# القائمة الجانبية
+# القائمة الجانبية (للتنقل)
 st.sidebar.title("🏛️ القائمة الرئيسية")
 choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
 
