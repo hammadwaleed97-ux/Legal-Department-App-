@@ -3,57 +3,59 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: إخفاء القائمة الجانبية + إطار يغطي الجزء العلوي
+# التنسيق: إخفاء كل شيء يخص Streamlit + تصميم الشبكة الثنائي
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] { display: none !important; }
-    #stDecoration { display: none !important; }
+    /* إخفاء القائمة الجانبية، شريط الأدوات، وكل أزرار الهيدر */
+    [data-testid="stSidebar"], #stDecoration, [data-testid="stToolbar"], header { display: none !important; }
     
-    /* جعل الإطار الأزرق يغطي مساحة واسعة ليخفي أي تداخل */
     .header-frame {
         background: linear-gradient(135deg, #0b1e30, #1a3a6e);
-        padding: 40px 20px;
+        padding: 30px;
         color: #ffffff;
         text-align: center;
-        margin: -60px -10px 30px -10px;
+        border-radius: 0 0 20px 20px;
+        margin-top: -60px; /* سحب التصميم للأعلى لإخفاء الشريط العلوي */
     }
     
-    /* توزيع الأيقونات في الصفحة بالكامل */
-    .main-grid {
+    /* شبكة أيقونات ثنائية الأعمدة */
+    .icon-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 25px;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
         padding: 20px;
+        margin-top: 20px;
     }
-    .icon-box {
+    .icon-card {
         background: #f8f9fa;
-        padding: 30px;
-        border-radius: 20px;
+        padding: 20px;
+        border-radius: 15px;
         text-align: center;
-        border: 2px solid #e9ecef;
-        transition: transform 0.3s, border-color 0.3s;
+        border: 1px solid #dee2e6;
+        font-weight: bold;
+        color: #0b1e30;
     }
-    .icon-box:hover { transform: translateY(-10px); border-color: #1a3a6e; }
     </style>
     """, unsafe_allow_html=True)
 
 # الشعار
 st.markdown("""
     <div class="header-frame">
-        <div style="font-size: 3rem;">⚖️</div>
-        <h1>الهيئة القومية للتأمين الاجتماعي</h1>
-        <h3>الإدارة العامة للشؤون القانونية - ديوان عام منطقة البحيرة</h3>
-        <p style="color: #88aacc;">إعداد: وليد حماد</p>
+        <div style="font-size: 2.5rem;">⚖️</div>
+        <h3>الهيئة القومية للتأمين الاجتماعي</h3>
+        <p>الإدارة العامة للشؤون القانونية - ديوان عام منطقة البحيرة</p>
+        <small>إعداد: وليد حماد</small>
     </div>
     """, unsafe_allow_html=True)
 
-# الأيقونات موزعة في الصفحة
+# شبكة الأيقونات الثنائية
 st.markdown("""
-    <div class="main-grid">
-        <div class="icon-box"><h1>📁</h1><h3>القضايا</h3></div>
-        <div class="icon-box"><h1>📝</h1><h3>الفتاوى</h3></div>
-        <div class="icon-box"><h1>🔍</h1><h3>التحقيقات</h3></div>
-        <div class="icon-box"><h1>📚</h1><h3>المكتبة</h3></div>
-        <div class="icon-box"><h1>🏠</h1><h3>الرئيسية</h3></div>
+    <div class="icon-grid">
+        <div class="icon-card">📁<br>القضايا</div>
+        <div class="icon-card">📝<br>الفتاوى</div>
+        <div class="icon-card">🔍<br>التحقيقات</div>
+        <div class="icon-card">📚<br>المكتبة</div>
+        <div class="icon-card">📦<br>الأرشيف</div>
+        <div class="icon-card">🏠<br>الرئيسية</div>
     </div>
     """, unsafe_allow_html=True)
