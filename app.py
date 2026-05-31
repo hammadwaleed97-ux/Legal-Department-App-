@@ -3,12 +3,13 @@ import streamlit as st
 # إعداد الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق الموحد الثابت (تم تحديث كود إخفاء السهم ليكون أكثر قوة)
+# التنسيق الموحد: إخفاء السهم + إضافة تعديلات اللوجو
 st.markdown("""
     <style>
-    /* إخفاء سهم القائمة الجانبية بشكل قسري */
+    /* إخفاء السهم الجانبي بجميع الطرق الممكنة */
+    [data-testid="stSidebarCollapseButton"] { display: none !important; }
     button[kind="header"] { display: none !important; }
-    [data-testid="stSidebarCollapseButton"] { display: none !important; visibility: hidden !important; }
+    #stSidebarCollapseButton { display: none !important; }
     
     [data-testid="stSidebar"] { background-color: #0b1e30 !important; color: white; }
     
@@ -19,6 +20,13 @@ st.markdown("""
         color: #ffffff;
         text-align: center;
         margin: -20px -10px 20px -10px;
+    }
+    .footer-text {
+        font-size: 0.8rem;
+        color: #88aacc;
+        margin-top: 10px;
+        border-top: 1px solid #3d5a80;
+        padding-top: 5px;
     }
     .icon-grid {
         display: grid;
@@ -41,13 +49,14 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# الشعار
+# الشعار (مع إضافة اسمك)
 st.markdown("""
     <div class="header-frame">
         <div style="font-size: 3rem;">⚖️</div>
         <div style="font-size: 1.3rem; font-weight: bold;">الهيئة القومية للتأمين الاجتماعي</div>
         <div style="font-size: 1.1rem; margin-top: 5px;">الإدارة العامة للشؤون القانونية</div>
         <div style="font-size: 0.9rem; color: #a0c4e0;">ديوان عام منطقة البحيرة</div>
+        <div class="footer-text">إعداد: وليد حماد</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -66,5 +75,4 @@ st.sidebar.title("🏛️ القائمة الرئيسية")
 choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
 
 st.sidebar.markdown("---")
-st.sidebar.write("مع تحيات وليد حماد")
 st.sidebar.write("الإدارة العامة للشؤون القانونية")
