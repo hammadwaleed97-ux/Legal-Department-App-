@@ -17,6 +17,8 @@ st.markdown("""
         margin: -40px -10px 20px -10px;
     }
     .footer-text { font-size: 0.8rem; color: #88aacc; margin-top: 5px; }
+    /* تنسيق شبكة الأزرار لتشمل 5 أقسام */
+    .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -31,24 +33,27 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # تهيئة حالة الصفحة
-if 'page' not in st.session_state:
-    st.session_state.page = "الرئيسية"
+if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
-# نظام التنقل بالأزرار (4 أزرار)
-col1, col2, col3, col4 = st.columns(4)
-
+# نظام التنقل (استخدام صفين ليظهر بشكل ممتاز على الموبايل)
+col1, col2, col3 = st.columns(3)
 if col1.button("🏠 الرئيسية"): st.session_state.page = "الرئيسية"
 if col2.button("📁 القضايا"): st.session_state.page = "القضايا"
 if col3.button("📝 الفتاوى"): st.session_state.page = "الفتاوى"
-if col4.button("📚 المكتبة"): st.session_state.page = "المكتبة"
 
-# عرض المحتوى حسب اختيار المستخدم
+col4, col5 = st.columns(2)
+if col4.button("🔍 التحقيقات"): st.session_state.page = "التحقيقات"
+if col5.button("📚 المكتبة"): st.session_state.page = "المكتبة"
+
+# عرض المحتوى
 st.markdown("---")
 if st.session_state.page == "الرئيسية":
-    st.write("### أهلاً بك في نظام الإدارة القانونية الذكي")
+    st.write("### 🏛️ الصفحة الرئيسية")
 elif st.session_state.page == "القضايا":
-    st.write("### إدارة القضايا القانونية")
+    st.write("### 📁 إدارة القضايا القانونية")
 elif st.session_state.page == "الفتاوى":
-    st.write("### قسم الفتاوى")
+    st.write("### 📝 قسم الفتاوى")
+elif st.session_state.page == "التحقيقات":
+    st.write("### 🔍 قسم التحقيقات")
 elif st.session_state.page == "المكتبة":
-    st.write("### المكتبة القانونية")
+    st.write("### 📚 المكتبة القانونية")
