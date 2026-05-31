@@ -1,13 +1,18 @@
 import streamlit as st
 
-# إعداد الصفحة
+# 1. إعداد الصفحة لتعمل بكامل العرض
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق الموحد
+# 2. التنسيق: إخفاء السهم، القائمة الجانبية، والشريط العلوي تماماً
 st.markdown("""
     <style>
+    /* إخفاء القائمة الجانبية (Sidebar) */
     [data-testid="stSidebar"] { display: none !important; }
+    
+    /* إخفاء شريط الأدوات العلوي (Toolbar/Decoration) الذي أشرت إليه */
     #stDecoration { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
+    
     .header-frame {
         background: linear-gradient(135deg, #0b1e30, #1a3a6e);
         padding: 20px;
@@ -17,12 +22,10 @@ st.markdown("""
         margin: -40px -10px 20px -10px;
     }
     .footer-text { font-size: 0.8rem; color: #88aacc; margin-top: 5px; }
-    /* تنسيق شبكة الأزرار لتشمل 5 أقسام */
-    .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
     </style>
     """, unsafe_allow_html=True)
 
-# الشعار
+# 3. عرض الهوية داخل الإطار
 st.markdown("""
     <div class="header-frame">
         <div style="font-size: 2.5rem;">⚖️</div>
@@ -32,10 +35,11 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# تهيئة حالة الصفحة
+# 4. تهيئة حالة الصفحة
 if 'page' not in st.session_state: st.session_state.page = "الرئيسية"
 
-# نظام التنقل (استخدام صفين ليظهر بشكل ممتاز على الموبايل)
+# 5. نظام التنقل بالأزرار (صفين ليظهر بشكل ممتاز على الموبايل)
+st.markdown("---")
 col1, col2, col3 = st.columns(3)
 if col1.button("🏠 الرئيسية"): st.session_state.page = "الرئيسية"
 if col2.button("📁 القضايا"): st.session_state.page = "القضايا"
@@ -45,7 +49,7 @@ col4, col5 = st.columns(2)
 if col4.button("🔍 التحقيقات"): st.session_state.page = "التحقيقات"
 if col5.button("📚 المكتبة"): st.session_state.page = "المكتبة"
 
-# عرض المحتوى
+# 6. عرض المحتوى بناءً على اختيار المستخدم
 st.markdown("---")
 if st.session_state.page == "الرئيسية":
     st.write("### 🏛️ الصفحة الرئيسية")
