@@ -3,10 +3,10 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# تهيئة حالة الصفحة
+# تهيئة الحالة
 if 'page' not in st.session_state: st.session_state.page = "main"
 
-# التنسيق العام
+# التنسيق الموحد
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -41,30 +41,32 @@ if st.session_state.page == "main":
 # 2. الإدارة العامة للقضايا
 elif st.session_state.page == "القضايا":
     show_header()
-    st.subheader("⚖️ القسم القضائي")
-    tabs = st.tabs(["القضاء العادي", "محكمة النقض", "مجلس الدولة", "تسجيل الدعاوى", "تسجيل الطعون", "أرشيف الحفظ", "التنبيهات والتقارير"])
-    with tabs[0]: st.write("إجراءات القضاء العادي (المحاكم الابتدائية، الاستئنافية...)")
-    with tabs[1]: st.write("إجراءات محكمة النقض")
-    # ... وهكذا لبقية الأقسام
-    if st.button("العودة للقائمة الرئيسية"): st.session_state.page = "main"; st.rerun()
+    st.subheader("⚖️ الإدارة العامة للقضايا")
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["القضاء العادي", "محكمة النقض", "مجلس الدولة", "تسجيل الدعاوى والطعون", "التنبيهات والتقارير"])
+    with tab1: st.write("صياغة مذكرات (مدعي/مدعى عليه)، استئناف، مذكرات استئنافية")
+    with tab2: st.write("صياغة طعون، مذكرات دفاع (طاعن/مطعون ضده)")
+    with tab3: st.write("المحاكم الإدارية، التأديبية، القضاء الإداري، الإدارية العليا")
+    with tab4: st.write("تسجيل الدعاوى والطعون وأرشيف الحفظ")
+    with tab5: st.write("التنبيهات، التقارير، البحث عن سابقة فصل")
+    if st.button("العودة للرئيسية"): st.session_state.page = "main"; st.rerun()
 
 # 3. الإدارة العامة للفتوى
 elif st.session_state.page == "الفتوى":
     show_header()
-    st.subheader("📝 قسم الإفتاء القانوني")
-    st.write("فتاوى، إصابات العمل، الزواج العرفي، أرشيف الفتاوى")
-    if st.button("العودة للقائمة الرئيسية"): st.session_state.page = "main"; st.rerun()
+    st.subheader("📝 الإدارة العامة للفتوى")
+    st.write("فتاوى، إصابات عمل، شكاوى الزواج العرفي، أرشيف الفتاوى")
+    if st.button("العودة للرئيسية"): st.session_state.page = "main"; st.rerun()
 
-# 4. الإدارة العامة للتحقيقات
+# 4. التحقيقات والنيابات
 elif st.session_state.page == "التحقيقات":
     show_header()
     st.subheader("🔍 الإدارة العامة للتحقيقات والنيابات")
     st.write("تحقيقات الهيئة، النيابة الإدارية، النيابة العامة، أرشيف التحقيقات")
-    if st.button("العودة للقائمة الرئيسية"): st.session_state.page = "main"; st.rerun()
+    if st.button("العودة للرئيسية"): st.session_state.page = "main"; st.rerun()
 
 # 5. المكتبة القانونية
 elif st.session_state.page == "المكتبة":
     show_header()
-    st.subheader("📚 المكتبة القانونية المتكاملة")
-    st.write("القوانين، اللوائح، القرارات، المنشورات، الكتب الدورية، فتاوى مجلس الدولة، أحكام قضائية")
-    if st.button("العودة للقائمة الرئيسية"): st.session_state.page = "main"; st.rerun()
+    st.subheader("📚 المكتبة القانونية")
+    st.write("قوانين، لوائح، قرارات وزارية، منشورات، تعليمات، أحكام قضائية، مذكرات فنية")
+    if st.button("العودة للرئيسية"): st.session_state.page = "main"; st.rerun()
