@@ -34,7 +34,7 @@ st.markdown("""
         color: #0b1e30;
     }
     </style>
-    """, unsafe_html=True)
+    """, unsafe_allow_html=True)
 
 # الشعار
 st.markdown("""
@@ -44,9 +44,9 @@ st.markdown("""
         <div style="font-size: 1.1rem; margin-top: 5px;">الإدارة العامة للشؤون القانونية</div>
         <div style="font-size: 0.9rem; color: #a0c4e0;">ديوان عام منطقة البحيرة</div>
     </div>
-    """, unsafe_html=True)
+    """, unsafe_allow_html=True)
 
-# الأيقونات الثابتة
+# الأيقونات الثابتة (بدون السهم)
 st.markdown("""
     <div class="icon-grid">
         <div class="icon-card">📁<br>القضايا</div>
@@ -54,9 +54,9 @@ st.markdown("""
         <div class="icon-card">🔍<br>التحقيقات</div>
         <div class="icon-card">📚<br>المكتبة</div>
     </div>
-    """, unsafe_html=True)
+    """, unsafe_allow_html=True)
 
-# القائمة الجانبية
+# القائمة الجانبية (للتنقل)
 st.sidebar.title("🏛️ القائمة الرئيسية")
 choice = st.sidebar.radio("اختر القسم", ["الرئيسية", "القضايا", "الفتاوى", "التحقيقات"])
 
