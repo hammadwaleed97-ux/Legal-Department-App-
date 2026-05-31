@@ -3,7 +3,7 @@ import streamlit as st
 # إعدادات الصفحة
 st.set_page_config(layout="wide", page_title="نظام الإدارة القانونية")
 
-# التنسيق: الأزرق الداكن وتوسيع الأزرار
+# التنسيق: اللون الأزرق الداكن وتوزيع الأزرار
 st.markdown("""
     <style>
     [data-testid='stSidebar'], header { display: none !important; }
@@ -15,7 +15,6 @@ st.markdown("""
         color: white;
         margin-bottom: 30px;
     }
-    /* جعل الأزرار تأخذ عرضاً أكبر وتظهر بشكل متناسق */
     div.stButton > button {
         width: 100%;
         height: 60px;
@@ -24,9 +23,7 @@ st.markdown("""
         font-weight: bold;
         background-color: white;
         border-radius: 10px;
-        padding: 10px 20px;
-        margin-bottom: 10px;
-        font-size: 1.1em;
+        margin-bottom: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -42,9 +39,19 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# عرض الأزرار بعرض كامل (سيزيل الفراغات الجانبية التي أشرت إليها)
-if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
-if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
-if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
-if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
-if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
+# توزيع الأزرار: 2 يمين، 2 يسار، وواحدة في المنتصف بالأسفل
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("⚖️ الإدارة العامة للقضايا"): st.session_state.page = "القضايا"; st.rerun()
+    if st.button("📝 الإدارة العامة للفتوى"): st.session_state.page = "الفتوى"; st.rerun()
+
+with col2:
+    if st.button("🔍 الإدارة العامة للتحقيقات والنيابات"): st.session_state.page = "التحقيقات"; st.rerun()
+    if st.button("📚 المكتبة القانونية"): st.session_state.page = "المكتبة"; st.rerun()
+
+# زر في المنتصف بالأسفل
+st.write("---") # فاصل بسيط
+center_col1, center_col2, center_col3 = st.columns([1, 2, 1])
+with center_col2:
+    if st.button("📦 الأرشيف الإلكتروني"): st.session_state.page = "الأرشيف"; st.rerun()
