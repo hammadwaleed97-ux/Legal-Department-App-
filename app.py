@@ -23,23 +23,32 @@ show_header()
 tab1, tab2 = st.tabs(["⚖️ القسم القضائي", "📚 المكتبة القانونية"])
 
 with tab1:
+    # التبويبات الفرعية للقسم القضائي
     sub1, sub2, sub3, sub4 = st.tabs(["بيانات الدعوى", "التنبيهات", "التقارير", "أرشيف الحفظ"])
+    
     with sub1:
         st.text_input("المحكمة")
         st.text_input("رقم الدعوى")
         st.text_input("الدائرة")
         st.text_input("سنة")
         st.text_area("بيانات الخصوم والموضوع")
-        st.file_uploader("ارفع صورة الصحيفة")
-        col1, col2, col3 = st.columns(3)
-        col1.button("صياغة المذكرة")
-        col2.button("حفظ Word")
-        col3.button("حفظ PDF")
+        st.file_uploader("ارفع صورة الصحيفة", type=['png', 'jpg', 'pdf'])
+        
+        # أزرار الإجراءات
+        st.button("صياغة المذكرة")
+        col1, col2 = st.columns(2)
+        col1.button("حفظ Word")
+        col2.button("حفظ PDF")
+        
         st.write("---")
         st.text("عضو الإدارة القانونية: __________ | مدير الإدارة القانونية: __________")
 
+    with sub2: st.info("شاشة التنبيهات القضائية")
+    with sub3: st.info("شاشة التقارير")
+    with sub4: st.info("شاشة أرشيف الحفظ")
+
 with tab2:
-    options = ["القوانين", "اللوائح", "القرارات الوزارية", "الكتب الدورية", "منشورات", "تعليمات", "فتاوى مجلس الدولة", "أحكام قضائية", "مرصد فني", "رسائل الهيئة", "مذكرات اللجنة القانونية"]
+    options = ["القوانين", "اللوائح", "القرارات الوزارية", "الكتب الدورية"]
     st.selectbox("اختر نوع التشريع", options)
     st.file_uploader("تحميل المستند")
     st.button("فتح التشريع")
