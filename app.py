@@ -2,7 +2,7 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 
-# 1. تهيئة قاعدة البيانات
+# (كود قاعدة البيانات كما هو ثابت)
 def init_db():
     conn = sqlite3.connect('legal_system.db')
     c = conn.cursor()
@@ -13,31 +13,29 @@ def init_db():
     conn.close()
 init_db()
 
-# 2. الهيدر
+# الهيدر المنسق
 st.markdown("""
     <div style="background-color: #1a3a6e; padding: 15px; border-radius: 8px; color: white; text-align: center; margin-bottom: 20px;">
         <h3 style="margin: 0; font-size: 18px;">الهيئة القومية للتأمين الاجتماعي - الإدارة العامة للشئون القانونية - ديوان عام منطقة البحيرة</h3>
     </div>
 """, unsafe_allow_html=True)
 
-# 3. حماية المكتبة (تظهر فقط عند إدخال الباسورد)
-st.subheader("🔒 الدخول الخاص للإدارة")
-admin_pwd = st.text_input("أدخل كلمة المرور الخاصة بك لإظهار المكتبة", type="password")
+# 🔒 منطقة التحكم في المكتبة (لك أنت فقط)
+st.subheader("إدارة المكتبة القانونية")
+pwd = st.text_input("أدخل كلمة المرور الخاصة بك للوصول للمكتبة", type="password")
 
-if admin_pwd == "WALID2026": # كلمة سر خاصة بك، يمكنك تغييرها
-    DRIVE_LINK = "https://drive.google.com/drive/folders/12qOOtQncyClP9g6zi6VQQ2SozfWAlLke"
+if pwd == "WALID2026": # يمكنك تغيير هذه الكلمة
+    st.success("مرحباً أستاذ وليد، المكتبة متاحة الآن:")
     st.markdown(f'''
-        <div style="text-align: center; margin-bottom: 20px;">
-            <a href="{DRIVE_LINK}" target="_blank" 
-            style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-            📂 فتح مكتبة الإدارة القانونية
-            </a>
-        </div>
+        <a href="https://drive.google.com/drive/folders/12qOOtQncyClP9g6zi6VQQ2SozfWAlLke" target="_blank" 
+        style="background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        📂 فتح المجلد المخصص للمكتبة القانونية فقط
+        </a>
     ''', unsafe_allow_html=True)
-elif admin_pwd != "":
-    st.error("كلمة المرور غير صحيحة")
+elif pwd != "":
+    st.error("كلمة مرور غير صحيحة")
 
-# 4. باقي التطبيق (متاح للجميع)
+# أقسام القضايا (متاحة للجميع)
 tab1, tab2, tab3, tab4 = st.tabs(["⚖️ قضاء عادي", "🏛️ محكمة النقض", "⚖️ مجلس الدولة", "📊 سجل المتابعة"])
 
-# ... (نفس كود حفظ القضايا السابق)
+# ... (باقي كود القضايا كما هو)
