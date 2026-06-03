@@ -1,25 +1,31 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime
 
-st.title("⚖️ المستشار القانوني الذكي")
+st.set_page_config(page_title="نظام إدارة القضايا", layout="wide")
 
-# قاعدة بيانات موسعة
-law_database = {
-    "معاش": "بناءً على قانون التأمينات رقم 148 لسنة 2019، يستحق المعاش عند بلوغ سن الشيخوخة أو العجز أو الوفاة، مع توافر مدد الاشتراك المطلوبة.",
-    "منحة": "تُصرف منحة قطع المعاش للمستحقين وفقاً للشروط المحددة بالمادة 10 من قانون التأمينات الموحد.",
-}
+st.title("📂 نظام إدارة القضايا - ديوان عام منطقة البحيرة")
 
-question = st.text_area("اطرح استفسارك القانوني:")
+# تهيئة ملف البيانات (إذا لم يكن موجوداً)
+if 'cases' not in st.session_state:
+    st.session_state.cases = pd.DataFrame(columns=["رقم القضية", "اسم الخصم", "الموضوع", "التاريخ", "الحالة"])
 
-if st.button("تحليل"):
-    found = False
-    # البحث بذكاء: إذا وجد أي كلمة من قاعدة البيانات داخل سؤالك
-    for key, value in law_database.items():
-        if key in question:
-            st.success("النتيجة القانونية:")
-            st.write(value)
-            found = True
+# واجهة الإدخال
+with st.sidebar:
+    st.header("إضافة قضية جديدة")
+    case_no = st.text_input("رقم القضية")
+    opponent = st.text_input("اسم الخصم")
+    topic = st.text_area("موضوع القضية")
+    status = st.selectbox("الحالة", ["قيد التداول", "محجوزة للحكم", "تم الفصل فيها"])
     
-    if not found:
-        st.warning("عذراً، لم أجد إجابة في قاعدة البيانات. يرجى محاولة استخدام كلمات مثل (معاش، منحة، عجز).")
+    if st.button("حفظ القضية"):
+        new_case = {"رقم القضية": case_no, "اسم الخصم": opponent, "الموضوع": topic, "التاريخ": datetime.now().strftime("%Y-%m-%d"), "الحالة": status}
+        st.session_state.cases = pd.concat([st.session_state.cases, pd.DataFrame([new_case])], ignore_index=True)
+        st.success("تم حفظ القضية!")
 
-st.sidebar.write("ديوان عام منطقة البحيرة")
+# عرض القضايا
+st.subheader("سجل القضايا")
+st.table(st.session_state.cases)
+
+st.sidebar.markdown("---")
+st.sidebar.write("مع تحيات وليد حماد - الإدارة العامة للشئون القانونية")
