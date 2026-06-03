@@ -2,30 +2,69 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-st.set_page_config(page_title="نظام إدارة القضايا", layout="wide")
+# إعداد الصفحة
+st.set_page_config(page_title="نظام الإدارة القانونية", layout="wide")
 
-st.title("📂 نظام إدارة القضايا - ديوان عام منطقة البحيرة")
+# التصميم والألوان (CSS)
+st.markdown("""
+    <style>
+    .main { background-color: #f5f7f9; }
+    h1 { color: #003366; text-align: center; }
+    .stButton>button { background-color: #003366; color: white; width: 100%; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# تهيئة ملف البيانات (إذا لم يكن موجوداً)
+# العنوان واللوجو
+st.title("⚖️ الإدارة العامة للشئون القانونية - ديوان عام منطقة البحيرة")
+
+# تهيئة بيانات القضايا في الذاكرة
 if 'cases' not in st.session_state:
-    st.session_state.cases = pd.DataFrame(columns=["رقم القضية", "اسم الخصم", "الموضوع", "التاريخ", "الحالة"])
+    st.session_state.cases = pd.DataFrame(columns=["رقم القضية", "الموضوع", "تاريخ الجلسة", "الحالة"])
 
-# واجهة الإدخال
-with st.sidebar:
-    st.header("إضافة قضية جديدة")
-    case_no = st.text_input("رقم القضية")
-    opponent = st.text_input("اسم الخصم")
-    topic = st.text_area("موضوع القضية")
-    status = st.selectbox("الحالة", ["قيد التداول", "محجوزة للحكم", "تم الفصل فيها"])
+# القوائم الجانبية
+menu = st.sidebar.radio("القائمة الرئيسية", ["إضافة قضية", "متابعة القضايا", "التقارير"])
+
+# 1. إضافة قضية
+if menu == "إضافة قضية":
+    st.subheader("إضافة قضية جديدة")
+    with st.form("case_form"):
+        case_no = st.text_input("رقم القضية")
+        subject = st.text_area("موضوع القضية")
+        date = st.date_input("تاريخ الجلسة القادمة")
+        status = st.selectbox("الحالة", ["قيد التداول", "محجوزة للحكم", "منتهية"])
+        submit = st.form_submit_button("حفظ القضية")
+        
+        if submit:
+            new_data = {"رقم القضية": case_no, "الموضوع": subject, "تاريخ الجلسة": date, "الحالة": status}
+            st.session_state.cases = pd.concat([st.session_state.cases, pd.DataFrame([new_data])], ignore_index=True)
+            st.success("تم حفظ القضية بنجاح!")
+
+# 2. متابعة القضايا والتنبيهات
+elif menu == "متابعة القضايا":
+    st.subheader("سجل القضايا المتابع")
+    st.dataframe(st.session_state.cases, use_container_width=True)
     
-    if st.button("حفظ القضية"):
-        new_case = {"رقم القضية": case_no, "اسم الخصم": opponent, "الموضوع": topic, "التاريخ": datetime.now().strftime("%Y-%m-%d"), "الحالة": status}
-        st.session_state.cases = pd.concat([st.session_state.cases, pd.DataFrame([new_case])], ignore_index=True)
-        st.success("تم حفظ القضية!")
+    # التنبيهات البسيطة
+    st.subheader("⚠️ تنبيهات عاجلة")
+    today = datetime.now().date()
+    urgent = st.session_state.cases[pd.to_datetime(st.session_state.cases["تاريخ الجلسة"]).dt.date <= today]
+    if not urgent.empty:
+        st.warning("هناك قضايا موعد جلستها اليوم أو مضى!")
+        st.write(urgent)
+    else:
+        st.info("لا توجد قضايا عاجلة حالياً.")
 
-# عرض القضايا
-st.subheader("سجل القضايا")
-st.table(st.session_state.cases)
+# 3. التقارير
+elif menu == "التقارير":
+    st.subheader("تقرير حالة القضايا")
+    if not st.session_state.cases.empty:
+        report = st.session_state.cases['الحالة'].value_counts()
+        st.bar_chart(report)
+    else:
+        st.write("لا توجد بيانات كافية لاستخراج تقرير.")
 
+# التوقيع الرسمي في الجانب
 st.sidebar.markdown("---")
-st.sidebar.write("مع تحيات وليد حماد - الإدارة العامة للشئون القانونية")
+st.sidebar.write("مع تحيات وليد حماد")
+st.sidebar.write("الإدارة العامة للشئون القانونية")
+st.sidebar.write("ديوان عام منطقة البحيرة")
