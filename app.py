@@ -223,3 +223,154 @@ with col2:
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
+# =====================================
+# إنشاء جدول القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+litigation_type TEXT,
+
+claimant_type TEXT,
+claimant TEXT,
+
+defendant_type TEXT,
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_type TEXT,
+
+court TEXT,
+
+court_name TEXT,
+
+subject TEXT,
+
+session_date TEXT,
+session_action TEXT,
+
+decision_date TEXT,
+decision_action TEXT,
+
+reason TEXT,
+
+notes TEXT,
+
+judgment_result TEXT,
+
+mobile TEXT,
+
+status TEXT DEFAULT 'متداولة',
+
+created_at TEXT
+
+)
+
+""")
+
+# =====================================
+# جدول القضايا المحذوفة
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS deleted_cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+original_case_id INTEGER,
+
+litigation_type TEXT,
+
+claimant TEXT,
+
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+subject TEXT,
+
+delete_reason TEXT,
+
+deleted_at TEXT
+
+)
+
+""")
+
+conn.commit()
+
+# =====================================
+# تعريف الصفحات
+# =====================================
+
+if st.session_state.page == "alerts":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    🔔 التنبيهات
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة التنبيهات فى الجزء القادم")
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📊 التقارير
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة التقارير فى الجزء القادم")
+
+elif st.session_state.page == "archive":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📂 أرشيف القضايا
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة الأرشيف فى الجزء القادم")
+
+elif st.session_state.page == "all_cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📋 حصر عام القضايا المتداولة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة الحصر العام فى الجزء القادم")
+
+elif st.session_state.page == "search":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    🔍 البحث عن دعوى
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة البحث فى الجزء القادم")
+
+elif st.session_state.page == "deleted":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    ❌ القضايا المحذوفة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.info("سيتم إضافة سجل المحذوفات فى الجزء القادم")
