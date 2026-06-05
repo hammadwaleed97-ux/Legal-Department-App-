@@ -15,41 +15,42 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 # =====================================
-# CSS - تم تعديل استهداف القوائم لضمان ظهور النص
+# CSS - الكود النهائي المضمون لظهور النصوص
 # =====================================
 st.markdown("""
 <style>
 .stApp { background:#062456; }
+
+/* النصوص العامة */
 label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; }
 
-/* تنسيق حاوية القائمة المنسدلة */
-[data-baseweb="select"] {
-    background-color: white !important;
+/* إصلاح جذري للقوائم المنسدلة */
+div[data-baseweb="select"] { 
+    background-color: white !important; 
+    border: 1px solid #ccc !important;
 }
 
-/* تنسيق النص داخل القائمة المنسدلة */
-[data-baseweb="select"] div, [data-baseweb="select"] span {
-    color: black !important;
+/* النص داخل الصندوق */
+div[data-baseweb="select"] div, div[data-baseweb="select"] span { 
+    color: black !important; 
     -webkit-text-fill-color: black !important;
 }
 
-/* تنسيق قائمة الخيارات المنبثقة عند الضغط */
+/* القائمة المنبثقة عند الضغط */
 div[role="listbox"] {
     background-color: white !important;
 }
 
+/* الخيارات داخل القائمة */
 div[role="option"] {
     color: black !important;
     background-color: white !important;
 }
 
-/* ضمان ظهور النص في الخيارات */
-div[role="option"] span {
-    color: black !important;
-}
-
+/* حقول الإدخال */
 input, textarea { color: black !important; background-color: white !important; }
 
+/* اللوجو والأزرار */
 .logo-box{ text-align:center; }
 div.stButton > button{ 
     width:320px; height:65px; border-radius:15px; border:none; 
