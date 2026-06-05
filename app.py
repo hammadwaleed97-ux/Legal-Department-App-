@@ -596,3 +596,81 @@ status_reason TEXT
 """)
 
 conn.commit()
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📋 حصر عام القضايا المتداولة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    cases_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        ORDER BY session_date ASC
+        """,
+        conn
+    )
+
+    if cases_df.empty:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        for _, row in cases_df.iterrows():
+
+            title = (
+                f"{row['claimant']} ضد {row['defendant']} | "
+                f"الدعوى رقم {row['case_no']} لسنة {row['judicial_year']} | "
+                f"جلسة {row['session_date']}"
+            )
+
+            with st.expander(title):
+
+                st.write(
+                    f"الخصوم : {row['claimant']} ضد {row['defendant']}"
+                )
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"السنة القضائية : {row['judicial_year']}"
+                )
+
+                st.write(
+                    f"الدائرة : {row['circuit']}"
+                )
+
+                st.write(
+                    f"نوع الإجراء : {row['litigation_type']}"
+                )
+
+                st.write(
+                    f"نوع الدعوى : {row['case_type']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"اسم المحكمة : {row['court_name']}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"تاريخ الجلسة الحالية : {row['session_date']}"
+                )
+
+                st.markdown("---")
