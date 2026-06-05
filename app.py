@@ -1,9 +1,4 @@
 import streamlit as st
-import sqlite3
-
-# =====================================
-# إعداد الصفحة
-# =====================================
 
 st.set_page_config(
     page_title="إدارة القضايا",
@@ -11,162 +6,131 @@ st.set_page_config(
     layout="wide"
 )
 
-# =====================================
-# التصميم
-# =====================================
-
 st.markdown("""
 <style>
 
-.stApp{
-    background:#071d45;
+.main{
+    background-color:#031d4a;
 }
 
-.stButton button{
-    width:100%;
-    height:75px;
-    background:#2450d3;
+[data-testid="stAppViewContainer"]{
+    background-color:#031d4a;
+}
+
+h1,h2,h3,p{
     color:white;
-    border:none;
-    border-radius:15px;
-    font-size:18px;
-    font-weight:bold;
+    text-align:center;
 }
 
-.stButton button:hover{
-    background:#3564ef;
+.stButton > button{
+    width:100%;
+    height:120px;
+    border-radius:20px;
+    font-size:22px;
+    font-weight:bold;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# =====================================
-# قاعدة البيانات
-# =====================================
+# =====================
+# اللوجو
+# =====================
 
-conn = sqlite3.connect(
-    "cases.db",
-    check_same_thread=False
-)
-
-cur = conn.cursor()
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases(
-id INTEGER PRIMARY KEY AUTOINCREMENT
-)
-""")
-
-conn.commit()
-
-# =====================================
-# اللوجو الرئيسي
-# =====================================
-
-st.markdown("""
-<div style="text-align:center">
-
-<div style="
-font-size:120px;
-margin-top:20px;
-">
+st.markdown(
+"""
+<h1 style='font-size:120px;text-align:center'>
 ⚖️
-</div>
+</h1>
+""",
+unsafe_allow_html=True
+)
 
-<div style="
-font-size:26px;
-font-weight:bold;
-color:white;
-margin-top:15px;
-">
+st.markdown(
+"""
+<h1>
 الهيئة القومية للتأمين الاجتماعى
-</div>
+</h1>
+""",
+unsafe_allow_html=True
+)
 
-<br>
-
-<div style="
-font-size:22px;
-font-weight:bold;
-color:white;
-">
+st.markdown(
+"""
+<h2>
 الإدارة العامة للشؤون القانونية
-</div>
+</h2>
+""",
+unsafe_allow_html=True
+)
 
-<br><br>
+st.markdown("<br>", unsafe_allow_html=True)
 
-<div style="
-font-size:20px;
-font-weight:bold;
-color:white;
-">
+st.markdown(
+"""
+<h2>
 إعداد
-</div>
+</h2>
 
-<br>
-
-<div style="
-font-size:24px;
-font-weight:bold;
-color:white;
-">
+<h1>
 وليد شعبان حماد
-</div>
+</h1>
 
-<br>
-
-<div style="
-font-size:24px;
-font-weight:bold;
-color:white;
-">
+<h2>
 ديوان عام منطقة البحيرة
-</div>
+</h2>
+""",
+unsafe_allow_html=True
+)
 
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-st.write("")
-st.write("")
-
-# =====================================
-# القائمة الرئيسية
-# =====================================
-
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-
+# =====================
 # الصف الأول
+# =====================
 
 col1,col2,col3 = st.columns(3)
 
 with col1:
-    if st.button("تسجيل القضايا"):
-        st.session_state.page = "cases"
+    btn1 = st.button(
+        "📁\nتسجيل القضايا",
+        use_container_width=True
+    )
 
 with col2:
-    if st.button("التنبيهات"):
-        st.session_state.page = "alerts"
+    btn2 = st.button(
+        "🔔\nالتنبيهات",
+        use_container_width=True
+    )
 
 with col3:
-    if st.button("التقارير"):
-        st.session_state.page = "reports"
+    btn3 = st.button(
+        "📊\nالتقارير",
+        use_container_width=True
+    )
 
-st.write("")
+st.markdown("<br>", unsafe_allow_html=True)
 
+# =====================
 # الصف الثاني
+# =====================
 
 col4,col5,col6 = st.columns(3)
 
 with col4:
-    if st.button("أرشيف القضايا"):
-        st.session_state.page = "archive"
+    btn4 = st.button(
+        "🗂️\nأرشيف القضايا",
+        use_container_width=True
+    )
 
 with col5:
-    if st.button("البحث عن دعوى"):
-        st.session_state.page = "search"
+    btn5 = st.button(
+        "🔎\nالبحث عن دعوى",
+        use_container_width=True
+    )
 
 with col6:
-    if st.button("القضايا المحذوفة"):
-        st.session_state.page = "deleted"
-
-page = st.session_state.page
+    btn6 = st.button(
+        "🗑️\nالقضايا المحذوفة",
+        use_container_width=True
+    )
