@@ -15,7 +15,7 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 # =====================================
-# CSS - تنسيق نهائي
+# CSS - تنسيق نهائي لضمان المظهر ووضوح النصوص
 # =====================================
 st.markdown("""
 <style>
@@ -23,9 +23,20 @@ st.markdown("""
 label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; font-size: 18px !important; }
 div[role="radiogroup"] label { color: white !important; font-weight: bold !important; }
 input, textarea { color: black !important; background-color: white !important; }
-.logo-box { text-align:center; }
+.logo-box { text-align:center; padding: 20px; }
 div.stButton > button { width:320px; height:65px; border-radius:15px; border:none; background:#2f55d4; color:white; font-size:20px; font-weight:bold; display:block; margin:auto; margin-bottom: 10px; }
 </style>
+""", unsafe_allow_html=True)
+
+# =====================================
+# اللوجو (تم إرجاعه كاملاً)
+# =====================================
+st.markdown("""
+<div class="logo-box">
+<div style="font-size:50px">⚖️</div>
+<div style="font-size:28px; font-weight:bold">الهيئة القومية للتأمين الاجتماعى</div>
+<div style="font-size:22px; font-weight:bold">الإدارة العامة للشؤون القانونية</div>
+</div>
 """, unsafe_allow_html=True)
 
 # =====================================
@@ -49,7 +60,7 @@ conn.commit()
 # =====================================
 # التنقل
 # =====================================
-if "page" not in st.session_state: st.session_state.page = "cases"
+if "page" not in st.session_state: st.session_state.page = "home"
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
     if st.button("⚖️ تسجيل القضايا", key="b1"): st.session_state.page = "cases"
@@ -65,7 +76,6 @@ with col2:
 if st.session_state.page == "cases":
     st.markdown("<h2 style='text-align:center'>⚖️ تسجيل القضايا</h2>", unsafe_allow_html=True)
     
-    # نموذج التسجيل
     litigation_type = st.radio("نوع الإجراء", ["دعوى", "استئناف", "نقض"], horizontal=True, key="s1")
     claimant_type = st.radio("صفة الخصم الأول", ["المدعى", "المستأنف", "الطاعن"], horizontal=True, key="s2")
     claimant = st.text_input("اسم الخصم الأول")
@@ -86,8 +96,14 @@ if st.session_state.page == "cases":
     mobile = st.text_input("رقم الموبايل")
 
     if st.button("💾 حفظ القضية"):
-        cur.execute("INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, subject, session_date, decision_date, reason, notes, judgment_result, mobile, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, subject, str(session_date), str(decision_date), reason, notes, judgment_result, mobile, "متداولة"))
+        # تم ضبط المدخلات لتطابق تماماً أعمدة الجدول الـ 19
+        cur.execute("""INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, 
+        case_no, judicial_year, circuit, case_type, court, court_name, subject, 
+        session_date, decision_date, reason, notes, judgment_result, mobile, status) 
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (litigation_type, claimant_type, claimant, defendant_type, defendant, 
+         case_no, judicial_year, circuit, case_type, court, court_name, subject, 
+         str(session_date), str(decision_date), reason, notes, judgment_result, mobile, "متداولة"))
         conn.commit()
         st.success("تم حفظ القضية بنجاح")
         st.rerun()
@@ -105,15 +121,17 @@ if st.session_state.page == "cases":
                 
                 if st.button(f"🗑️ حذف القضية {row['id']}", key=f"del_{row['id']}"):
                     final_reason = other_reason if delete_reason == "أخرى" else delete_reason
-                    cur.execute("INSERT INTO deleted_cases SELECT * FROM cases WHERE id=?", (row['id'],)) # اختصار للنقل
+                    # نقل البيانات للجدول الآخر
+                    cur.execute("INSERT INTO deleted_cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, subject, session_date, decision_date, reason, notes, judgment_result, mobile, delete_reason, delete_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (row['litigation_type'], row['claimant_type'], row['claimant'], row['defendant_type'], row['defendant'], row['case_no'], row['judicial_year'], row['circuit'], row['case_type'], row['court'], row['court_name'], row['subject'], row['session_date'], row['decision_date'], row['reason'], row['notes'], row['judgment_result'], row['mobile'], final_reason, str(datetime.now())))
                     cur.execute("DELETE FROM cases WHERE id=?", (row['id'],))
                     conn.commit()
                     st.rerun()
     else:
         st.info("لا توجد قضايا مسجلة")
 
-elif st.session_state.page == "deleted": st.header("❌ القضايا المحذوفة")
 elif st.session_state.page == "alerts": st.header("🔔 التنبيهات")
 elif st.session_state.page == "reports": st.header("📊 التقارير")
 elif st.session_state.page == "archive": st.header("📂 أرشيف القضايا")
 elif st.session_state.page == "search": st.header("🔍 البحث عن دعوى")
+elif st.session_state.page == "deleted": st.header("❌ القضايا المحذوفة")
