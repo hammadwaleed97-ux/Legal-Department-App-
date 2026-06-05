@@ -15,39 +15,17 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 # =====================================
-# CSS - الكود النهائي لضمان وضوح النصوص في القوائم
+# CSS - تنسيق نهائي
 # =====================================
 st.markdown("""
 <style>
 .stApp { background:#062456; }
-
-/* النصوص العامة */
-label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; }
-
-/* تنسيق القوائم المنسدلة لضمان ظهور النص بالأسود */
-div[data-baseweb="select"] { 
-    background-color: white !important; 
-    border: 1px solid #ccc !important;
-}
-
-div[data-baseweb="select"] div, div[data-baseweb="select"] span { 
-    color: black !important; 
-    -webkit-text-fill-color: black !important;
-}
-
-div[role="listbox"] {
-    background-color: white !important;
-}
-
-div[role="option"] {
-    color: black !important;
-    background-color: white !important;
-}
-
+label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; font-size: 18px !important; }
+/* تنسيق أزرار الاختيار */
+div[role="radiogroup"] label { color: white !important; font-weight: bold !important; }
 input, textarea { color: black !important; background-color: white !important; }
-
-.logo-box{ text-align:center; }
-div.stButton > button{ 
+.logo-box { text-align:center; }
+div.stButton > button { 
     width:320px; height:65px; border-radius:15px; border:none; 
     background:#2f55d4; color:white; font-size:20px; font-weight:bold; 
     display:block; margin:auto; margin-bottom: 10px;
@@ -67,11 +45,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================
-# التنقل بين الصفحات
+# التنقل
 # =====================================
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-
+if "page" not in st.session_state: st.session_state.page = "home"
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
     if st.button("⚖️ تسجيل القضايا", key="b1"): st.session_state.page = "cases"
@@ -82,60 +58,40 @@ with col2:
     if st.button("❌ القضايا المحذوفة", key="b6"): st.session_state.page = "deleted"
 
 # =====================================
-# جدول قاعدة البيانات
+# الجدول
 # =====================================
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    litigation_type TEXT, claimant_type TEXT, claimant TEXT,
-    defendant_type TEXT, defendant TEXT, case_no TEXT,
-    judicial_year TEXT, circuit TEXT, case_type TEXT,
-    court TEXT, court_name TEXT, subject TEXT,
-    session_date TEXT, decision_date TEXT, reason TEXT,
-    notes TEXT, judgment_result TEXT, mobile TEXT,
-    status TEXT DEFAULT 'متداولة'
-)
-""")
+cur.execute("""CREATE TABLE IF NOT EXISTS cases(
+    id INTEGER PRIMARY KEY AUTOINCREMENT, litigation_type TEXT, claimant_type TEXT, claimant TEXT,
+    defendant_type TEXT, defendant TEXT, case_no TEXT, judicial_year TEXT, circuit TEXT,
+    case_type TEXT, court TEXT, court_name TEXT, subject TEXT, session_date TEXT,
+    decision_date TEXT, reason TEXT, notes TEXT, judgment_result TEXT, mobile TEXT,
+    status TEXT DEFAULT 'متداولة')""")
 conn.commit()
 
 # =====================================
-# صفحة تسجيل القضايا
+# صفحة التسجيل (معدلة لاستخدام الأزرار)
 # =====================================
 if st.session_state.page == "cases":
     st.markdown("<h2 style='text-align:center'>⚖️ تسجيل القضايا</h2>", unsafe_allow_html=True)
     
-    litigation_type = st.selectbox("نوع الإجراء", ["دعوى", "استئناف", "نقض"], key="s1")
-    claimant_type = st.selectbox("صفة الخصم الأول", ["المدعى", "المستأنف", "الطاعن"], key="s2")
+    litigation_type = st.radio("نوع الإجراء", ["دعوى", "استئناف", "نقض"], horizontal=True, key="s1")
+    claimant_type = st.radio("صفة الخصم الأول", ["المدعى", "المستأنف", "الطاعن"], horizontal=True, key="s2")
     claimant = st.text_input("اسم الخصم الأول", key="t1")
-    defendant_type = st.selectbox("صفة الخصم الثاني", ["المدعى عليه", "المستأنف ضده", "المطعون ضده"], key="s3")
+    defendant_type = st.radio("صفة الخصم الثاني", ["المدعى عليه", "المستأنف ضده", "المطعون ضده"], horizontal=True, key="s3")
     defendant = st.text_input("اسم الخصم الثاني", key="t2")
     case_no = st.text_input("رقم الدعوى", key="t3")
     judicial_year = st.text_input("السنة القضائية", key="t4")
     circuit = st.text_input("الدائرة", key="t5")
     case_type = st.text_input("النوع", key="t6")
-    court = st.selectbox("المحكمة", ["الابتدائية", "الاستئناف", "النقض", "إدارية", "قضاء إدارى", "إدارية عليا"], key="s4")
+    court = st.radio("المحكمة", ["الابتدائية", "الاستئناف", "النقض", "إدارية", "قضاء إدارى", "إدارية عليا"], horizontal=True, key="s4")
     court_name = st.text_input("اسم المحكمة", key="t7")
     subject = st.text_area("موضوع الدعوى", key="t8")
     session_date = st.date_input("تاريخ الجلسة", key="d1")
     decision_date = st.date_input("تاريخ القرار", key="d2")
     reason = st.text_area("السبب", key="t9")
     notes = st.text_area("ملاحظات", key="t10")
-    judgment_result = st.selectbox("نتيجة الدعوى", ["متداولة", "لصالح الهيئة", "ضد الهيئة"], key="s5")
+    judgment_result = st.radio("نتيجة الدعوى", ["متداولة", "لصالح الهيئة", "ضد الهيئة"], horizontal=True, key="s5")
     mobile = st.text_input("رقم الموبايل", key="t11")
 
     if st.button("💾 حفظ القضية", key="save"):
-        cur.execute("""INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, 
-        case_no, judicial_year, circuit, case_type, court, court_name, subject, 
-        session_date, decision_date, reason, notes, judgment_result, mobile) 
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-        (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, 
-         circuit, case_type, court, court_name, subject, str(session_date), str(decision_date), 
-         reason, notes, judgment_result, mobile))
-        conn.commit()
-        st.success("تم حفظ القضية بنجاح")
-
-elif st.session_state.page == "alerts": st.header("🔔 التنبيهات")
-elif st.session_state.page == "reports": st.header("📊 التقارير")
-elif st.session_state.page == "archive": st.header("📂 أرشيف القضايا")
-elif st.session_state.page == "search": st.header("🔍 البحث عن دعوى")
-elif st.session_state.page == "deleted": st.header("❌ القضايا المحذوفة")
+        cur.execute("INSERT INTO cases VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
