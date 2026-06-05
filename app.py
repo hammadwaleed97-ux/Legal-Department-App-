@@ -674,19 +674,3 @@ if st.session_state.page == "all_cases":
                 )
 
                 st.markdown("---")
-st.subheader("متابعة القضية")
-
-                adjournment_reason = st.text_area(
-                    "سبب التأجيل",
-                    key=f"adj_{row['id']}"
-                )
-
-                next_session_date = st.date_input(
-                    "الجلسة القادمة",
-                    key=f"next_{row['id']}"
-                )
-
-                status_reason = st.text_area(
-                    "القرار أو الإجراء الجديد",
-                    key=f"status_{row['id']}"
-                )
