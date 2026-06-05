@@ -1,9 +1,9 @@
 import streamlit as st
 import sqlite3
 
-# ==================================
+# =====================================
 # إعداد الصفحة
-# ==================================
+# =====================================
 
 st.set_page_config(
     page_title="إدارة القضايا",
@@ -11,9 +11,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# ==================================
-# CSS
-# ==================================
+# =====================================
+# التنسيق
+# =====================================
 
 st.markdown("""
 <style>
@@ -22,19 +22,15 @@ st.markdown("""
     background:#071d45;
 }
 
-h1,h2,h3,h4,h5,h6,p,label{
-    color:white !important;
-}
-
 .stButton button{
     width:100%;
-    background:#1e40af;
+    background:#1d4ed8;
     color:white;
-    border-radius:12px;
     border:none;
+    border-radius:12px;
+    padding:15px;
     font-size:18px;
     font-weight:bold;
-    padding:14px;
 }
 
 .stButton button:hover{
@@ -44,9 +40,9 @@ h1,h2,h3,h4,h5,h6,p,label{
 </style>
 """, unsafe_allow_html=True)
 
-# ==================================
+# =====================================
 # قاعدة البيانات
-# ==================================
+# =====================================
 
 conn = sqlite3.connect(
     "cases.db",
@@ -63,104 +59,112 @@ id INTEGER PRIMARY KEY AUTOINCREMENT
 
 conn.commit()
 
-# ==================================
-# اللوجو الرئيسي
-# ==================================
+# =====================================
+# اللوجو
+# =====================================
 
 st.markdown("""
-
 <div style="text-align:center;">
 
 <div style="
-font-size:100px;
+font-size:90px;
 margin-bottom:10px;
 ">
 ⚖️
 </div>
 
 <div style="
-font-size:34px;
+font-size:24px;
 font-weight:bold;
 color:white;
-margin-bottom:25px;
+white-space:nowrap;
 ">
 الهيئة القومية للتأمين الاجتماعى
 </div>
 
+<br>
+
 <div style="
-font-size:28px;
+font-size:22px;
 font-weight:bold;
 color:white;
-margin-bottom:50px;
+white-space:nowrap;
 ">
 الإدارة العامة للشؤون القانونية
 </div>
+
+<br><br>
+
+<div style="
+font-size:20px;
+font-weight:bold;
+color:white;
+">
+إعداد
+</div>
+
+<br>
 
 <div style="
 font-size:24px;
 font-weight:bold;
 color:white;
-margin-bottom:15px;
-">
-إعداد
-</div>
-
-<div style="
-font-size:28px;
-font-weight:bold;
-color:white;
-margin-bottom:15px;
 ">
 وليد شعبان حماد
 </div>
 
+<br>
+
 <div style="
-font-size:28px;
+font-size:24px;
 font-weight:bold;
 color:white;
-margin-bottom:50px;
 ">
 ديوان عام منطقة البحيرة
 </div>
 
 </div>
-
 """, unsafe_allow_html=True)
 
-# ==================================
+st.write("")
+st.write("")
+
+# =====================================
 # القائمة الرئيسية
-# ==================================
+# =====================================
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
 
-row1_col1,row1_col2 = st.columns(2)
+# الصف الأول
 
-with row1_col1:
+c1,c2,c3 = st.columns(3)
+
+with c1:
     if st.button("إدارة القضايا"):
         st.session_state.page = "cases"
 
-with row1_col2:
+with c2:
     if st.button("التنبيهات"):
         st.session_state.page = "alerts"
 
-row2_col1,row2_col2 = st.columns(2)
-
-with row2_col1:
+with c3:
     if st.button("التقارير"):
         st.session_state.page = "reports"
 
-with row2_col2:
+# الصف الثاني
+
+c4,c5,c6 = st.columns(3)
+
+with c4:
     if st.button("أرشيف القضايا"):
         st.session_state.page = "archive"
 
-row3_col1,row3_col2 = st.columns(2)
-
-with row3_col1:
+with c5:
     if st.button("البحث عن دعوى"):
         st.session_state.page = "search"
 
-with row3_col2:
+with c6:
     if st.button("القضايا المحذوفة"):
         st.session_state.page = "deleted"
 
