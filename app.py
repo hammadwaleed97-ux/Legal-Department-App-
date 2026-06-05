@@ -1,11 +1,9 @@
 import streamlit as st
 import sqlite3
-import pandas as pd
-from datetime import datetime, timedelta
 
-# =====================================
+# ==================================
 # إعداد الصفحة
-# =====================================
+# ==================================
 
 st.set_page_config(
     page_title="إدارة القضايا",
@@ -13,52 +11,42 @@ st.set_page_config(
     layout="wide"
 )
 
-# =====================================
-# التصميم
-# =====================================
+# ==================================
+# CSS
+# ==================================
 
 st.markdown("""
 <style>
 
 .stApp{
     background:#071d45;
-    direction:rtl;
 }
 
 h1,h2,h3,h4,h5,h6,p,label{
     color:white !important;
-    text-align:center;
 }
 
 .stButton button{
-    background:#1d4ed8;
-    color:white;
-    border:none;
-    border-radius:12px;
     width:100%;
+    background:#1e40af;
+    color:white;
+    border-radius:12px;
+    border:none;
     font-size:18px;
     font-weight:bold;
-    padding:12px;
+    padding:14px;
 }
 
 .stButton button:hover{
     background:#2563eb;
 }
 
-div[data-baseweb="select"] *{
-    color:black !important;
-}
-
-input, textarea{
-    color:black !important;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
-# =====================================
+# ==================================
 # قاعدة البيانات
-# =====================================
+# ==================================
 
 conn = sqlite3.connect(
     "cases.db",
@@ -69,156 +57,110 @@ cur = conn.cursor()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS cases(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-litigation_type TEXT,
-
-claimant_type TEXT,
-claimant TEXT,
-
-defendant_type TEXT,
-defendant TEXT,
-
-case_no TEXT,
-judicial_year TEXT,
-
-circuit TEXT,
-case_type TEXT,
-
-court TEXT,
-court_name TEXT,
-
-subject TEXT,
-
-session_date TEXT,
-
-decision_date TEXT,
-
-reason TEXT,
-
-notes TEXT,
-
-judgment_result TEXT,
-
-mobile TEXT,
-
-status TEXT DEFAULT 'متداولة'
-)
-""")
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS deleted_cases(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-litigation_type TEXT,
-
-claimant_type TEXT,
-claimant TEXT,
-
-defendant_type TEXT,
-defendant TEXT,
-
-case_no TEXT,
-judicial_year TEXT,
-
-circuit TEXT,
-case_type TEXT,
-
-court TEXT,
-court_name TEXT,
-
-subject TEXT,
-
-session_date TEXT,
-
-decision_date TEXT,
-
-reason TEXT,
-
-notes TEXT,
-
-judgment_result TEXT,
-
-mobile TEXT,
-
-delete_reason TEXT,
-
-delete_date TEXT
+id INTEGER PRIMARY KEY AUTOINCREMENT
 )
 """)
 
 conn.commit()
 
-# =====================================
+# ==================================
 # اللوجو الرئيسي
-# =====================================
+# ==================================
 
 st.markdown("""
-<div style='text-align:center'>
 
-<div style='font-size:90px'>
+<div style="text-align:center;">
+
+<div style="
+font-size:100px;
+margin-bottom:10px;
+">
 ⚖️
 </div>
 
-<h1>
+<div style="
+font-size:34px;
+font-weight:bold;
+color:white;
+margin-bottom:25px;
+">
 الهيئة القومية للتأمين الاجتماعى
-</h1>
+</div>
 
-<h2>
+<div style="
+font-size:28px;
+font-weight:bold;
+color:white;
+margin-bottom:50px;
+">
 الإدارة العامة للشؤون القانونية
-</h2>
+</div>
 
-<br>
-
-<h3>
+<div style="
+font-size:24px;
+font-weight:bold;
+color:white;
+margin-bottom:15px;
+">
 إعداد
-</h3>
+</div>
 
-<h3>
+<div style="
+font-size:28px;
+font-weight:bold;
+color:white;
+margin-bottom:15px;
+">
 وليد شعبان حماد
-</h3>
+</div>
 
-<h3>
+<div style="
+font-size:28px;
+font-weight:bold;
+color:white;
+margin-bottom:50px;
+">
 ديوان عام منطقة البحيرة
-</h3>
+</div>
 
 </div>
+
 """, unsafe_allow_html=True)
 
-st.write("")
-
-# =====================================
+# ==================================
 # القائمة الرئيسية
-# =====================================
-
-c1,c2,c3,c4,c5,c6 = st.columns(6)
+# ==================================
 
 if "page" not in st.session_state:
-    st.session_state.page = "cases"
+    st.session_state.page = "home"
 
-with c1:
+row1_col1,row1_col2 = st.columns(2)
+
+with row1_col1:
     if st.button("إدارة القضايا"):
         st.session_state.page = "cases"
 
-with c2:
+with row1_col2:
     if st.button("التنبيهات"):
         st.session_state.page = "alerts"
 
-with c3:
+row2_col1,row2_col2 = st.columns(2)
+
+with row2_col1:
     if st.button("التقارير"):
         st.session_state.page = "reports"
 
-with c4:
+with row2_col2:
     if st.button("أرشيف القضايا"):
         st.session_state.page = "archive"
 
-with c5:
+row3_col1,row3_col2 = st.columns(2)
+
+with row3_col1:
     if st.button("البحث عن دعوى"):
         st.session_state.page = "search"
 
-with c6:
+with row3_col2:
     if st.button("القضايا المحذوفة"):
         st.session_state.page = "deleted"
 
