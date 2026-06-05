@@ -3,56 +3,62 @@ import sqlite3
 import pandas as pd
 from datetime import datetime, timedelta
 
+# =====================================
+# إعداد الصفحة
+# =====================================
+
 st.set_page_config(
     page_title="إدارة القضايا",
     page_icon="⚖️",
     layout="wide"
 )
 
-# =====================
-# تصميم الصفحة
-# =====================
+# =====================================
+# التصميم
+# =====================================
 
 st.markdown("""
 <style>
 
 .stApp{
-background-color:#0b1f3a;
-direction:rtl;
+    background:#071d45;
+    direction:rtl;
 }
 
-h1,h2,h3,h4,h5,h6,p,label,span{
-color:white !important;
+h1,h2,h3,h4,h5,h6,p,label{
+    color:white !important;
+    text-align:center;
 }
 
 .stButton button{
-background:#163d7a;
-color:white;
-border-radius:10px;
-font-weight:bold;
-width:100%;
+    background:#1d4ed8;
+    color:white;
+    border:none;
+    border-radius:12px;
+    width:100%;
+    font-size:18px;
+    font-weight:bold;
+    padding:12px;
+}
+
+.stButton button:hover{
+    background:#2563eb;
 }
 
 div[data-baseweb="select"] *{
-color:black !important;
+    color:black !important;
 }
 
-.stTextInput input{
-background:white;
-color:black;
-}
-
-.stTextArea textarea{
-background:white;
-color:black;
+input, textarea{
+    color:black !important;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# =====================
+# =====================================
 # قاعدة البيانات
-# =====================
+# =====================================
 
 conn = sqlite3.connect(
     "cases.db",
@@ -75,15 +81,12 @@ defendant_type TEXT,
 defendant TEXT,
 
 case_no TEXT,
-
 judicial_year TEXT,
 
 circuit TEXT,
-
 case_type TEXT,
 
 court TEXT,
-
 court_name TEXT,
 
 subject TEXT,
@@ -101,7 +104,6 @@ judgment_result TEXT,
 mobile TEXT,
 
 status TEXT DEFAULT 'متداولة'
-
 )
 """)
 
@@ -119,15 +121,12 @@ defendant_type TEXT,
 defendant TEXT,
 
 case_no TEXT,
-
 judicial_year TEXT,
 
 circuit TEXT,
-
 case_type TEXT,
 
 court TEXT,
-
 court_name TEXT,
 
 subject TEXT,
@@ -147,65 +146,80 @@ mobile TEXT,
 delete_reason TEXT,
 
 delete_date TEXT
-
 )
 """)
 
 conn.commit()
 
-# =====================
-# اللوجو
-# =====================
+# =====================================
+# اللوجو الرئيسي
+# =====================================
 
 st.markdown("""
 <div style='text-align:center'>
 
-<h1>⚖️</h1>
+<div style='font-size:90px'>
+⚖️
+</div>
 
-<h2>الهيئة القومية للتأمين الاجتماعى</h2>
+<h1>
+الهيئة القومية للتأمين الاجتماعى
+</h1>
 
-<h3>الإدارة العامة للشؤون القانونية</h3>
+<h2>
+الإدارة العامة للشؤون القانونية
+</h2>
 
-<h4>إعداد</h4>
+<br>
 
-<h4>وليد شعبان حماد</h4>
+<h3>
+إعداد
+</h3>
 
-<h4>ديوان عام منطقة البحيرة</h4>
+<h3>
+وليد شعبان حماد
+</h3>
+
+<h3>
+ديوان عام منطقة البحيرة
+</h3>
 
 </div>
 """, unsafe_allow_html=True)
 
-# =====================
+st.write("")
+
+# =====================================
 # القائمة الرئيسية
-# =====================
+# =====================================
 
 c1,c2,c3,c4,c5,c6 = st.columns(6)
 
 if "page" not in st.session_state:
-    st.session_state.page="cases"
+    st.session_state.page = "cases"
 
 with c1:
     if st.button("إدارة القضايا"):
-        st.session_state.page="cases"
+        st.session_state.page = "cases"
 
 with c2:
     if st.button("التنبيهات"):
-        st.session_state.page="alerts"
+        st.session_state.page = "alerts"
 
 with c3:
     if st.button("التقارير"):
-        st.session_state.page="reports"
+        st.session_state.page = "reports"
 
 with c4:
     if st.button("أرشيف القضايا"):
-        st.session_state.page="archive"
+        st.session_state.page = "archive"
 
 with c5:
     if st.button("البحث عن دعوى"):
-        st.session_state.page="search"
+        st.session_state.page = "search"
 
 with c6:
     if st.button("القضايا المحذوفة"):
-        st.session_state.page="deleted"
+        st.session_state.page = "deleted"
 
 page = st.session_state.page
