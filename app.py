@@ -674,3 +674,69 @@ if st.session_state.page == "all_cases":
                 )
 
                 st.markdown("---")
+st.subheader("متابعة القضية")
+
+                adjournment_reason = st.text_area(
+                    "سبب التأجيل",
+                    key=f"adj_{row['id']}"
+                )
+
+                next_session_date = st.date_input(
+                    "الجلسة القادمة",
+                    key=f"next_{row['id']}"
+                )
+
+                status_reason = st.text_area(
+                    "القرار أو الإجراء الجديد",
+                    key=f"status_{row['id']}"
+                )
+
+                if st.button(
+                    "💾 حفظ المتابعة",
+                    key=f"save_{row['id']}"
+                ):
+
+                    try:
+
+                        cur.execute(
+                            """
+                            INSERT INTO case_updates
+                            (
+                            case_id,
+                            update_date,
+                            adjournment_reason,
+                            next_session_date,
+                            status_reason
+                            )
+                            VALUES(?,?,?,?,?)
+                            """,
+                            (
+                                row["id"],
+                                str(datetime.now()),
+                                adjournment_reason,
+                                str(next_session_date),
+                                status_reason
+                            )
+                        )
+
+                        cur.execute(
+                            """
+                            UPDATE cases
+                            SET session_date=?
+                            WHERE id=?
+                            """,
+                            (
+                                str(next_session_date),
+                                row["id"]
+                            )
+                        )
+
+                        conn.commit()
+
+                        st.success("تم حفظ المتابعة")
+
+                        st.rerun()
+
+                    except Exception as e:
+
+                        st.error(f"خطأ بالحفظ: {e}")
