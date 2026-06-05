@@ -150,7 +150,81 @@ page = st.session_state.page
 # =====================
 # إدارة القضايا
 # =====================
+def create_word_report(df):
 
+    doc = Document()
+
+    doc.add_heading(
+        "الهيئة القومية للتأمين الاجتماعى",
+        0
+    )
+
+    doc.add_paragraph(
+        "الإدارة القانونية منطقة البحيرة"
+    )
+
+    table = doc.add_table(
+        rows=1,
+        cols=len(df.columns)
+    )
+
+    hdr = table.rows[0].cells
+
+    for i,col in enumerate(df.columns):
+        hdr[i].text = str(col)
+
+    for _, row in df.iterrows():
+
+        cells = table.add_row().cells
+
+        for i,val in enumerate(row):
+            cells[i].text = str(val)
+
+    doc.save("report.docx")
+
+
+def create_pdf_report(df):
+
+    pdf = SimpleDocTemplate(
+        "report.pdf"
+    )
+
+    styles = getSampleStyleSheet()
+
+    content = []
+
+    content.append(
+        Paragraph(
+            "الهيئة القومية للتأمين الاجتماعى",
+            styles["Title"]
+        )
+    )
+
+    content.append(
+        Paragraph(
+            "الإدارة القانونية منطقة البحيرة",
+            styles["Heading2"]
+        )
+    )
+
+    content.append(
+        Spacer(1,12)
+    )
+
+    for _, row in df.iterrows():
+
+        txt = " | ".join(
+            [str(x) for x in row]
+        )
+
+        content.append(
+            Paragraph(
+                txt,
+                styles["BodyText"]
+            )
+        )
+
+    pdf.build(content)
 if page == "cases":
 
     st.header("📂 تسجيل القضايا")
