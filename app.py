@@ -35,10 +35,14 @@ st.markdown("""
     background:#062456;
 }
 
+/* النصوص */
+
 h1,h2,h3,h4,h5,h6,
 label,p,span{
     color:white !important;
 }
+
+/* القوائم المنسدلة */
 
 .stSelectbox div[data-baseweb="select"] > div{
     background:white !important;
@@ -46,8 +50,8 @@ label,p,span{
 }
 
 div[role="option"]{
-    color:black !important;
     background:white !important;
+    color:black !important;
 }
 
 div[role="listbox"] div{
@@ -57,6 +61,8 @@ div[role="listbox"] div{
 [data-baseweb="popover"] *{
     color:black !important;
 }
+
+/* الإدخال */
 
 .stTextInput input{
     color:black !important;
@@ -70,47 +76,62 @@ div[role="listbox"] div{
     color:black !important;
 }
 
+/* اللوجو */
+
 .logo-box{
     text-align:center;
+    color:white;
 }
 
 .logo-icon{
-    font-size:50px;
+    font-size:52px;
     margin-top:15px;
     margin-bottom:10px;
 }
 
 .logo-main{
-    font-size:28px;
-    font-weight:bold;
+    font-size:30px;
+    font-weight:900;
+    color:white;
+    text-shadow:2px 2px 4px black;
     margin-bottom:12px;
 }
 
 .logo-sub{
-    font-size:24px;
-    font-weight:bold;
+    font-size:25px;
+    font-weight:900;
+    color:white;
+    text-shadow:2px 2px 4px black;
     margin-bottom:12px;
 }
 
 .logo-place{
     font-size:22px;
-    font-weight:bold;
+    font-weight:900;
+    color:white;
+    text-shadow:2px 2px 4px black;
     margin-bottom:20px;
 }
 
 .logo-greeting{
     font-size:20px;
+    font-weight:bold;
+    color:white;
     margin-bottom:10px;
 }
 
 .logo-name{
-    font-size:30px;
-    font-weight:bold;
+    font-size:32px;
+    font-weight:900;
+    color:#FFD700;
+    text-shadow:2px 2px 4px black;
     margin-bottom:30px;
 }
 
+/* الأزرار */
+
 div.stButton > button{
-    width:330px;
+    width:340px;
     height:65px;
     border-radius:15px;
     border:none;
@@ -192,6 +213,9 @@ with col2:
 
     if st.button("📂 أرشيف القضايا"):
         st.session_state.page = "archive"
+
+    if st.button("📋 حصر عام القضايا المتداولة"):
+        st.session_state.page = "all_cases"
 
     if st.button("🔍 البحث عن دعوى"):
         st.session_state.page = "search"
