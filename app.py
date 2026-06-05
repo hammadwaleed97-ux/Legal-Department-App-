@@ -590,18 +590,6 @@ conn.commit()
 # =====================================
 
 if st.session_state.page == "all_cases":
-if st.button("🗑️ حذف السجلات الفارغة"):
-
-    cur.execute("""
-        DELETE FROM cases
-        WHERE claimant IS NULL
-           OR claimant = ''
-    """)
-
-    conn.commit()
-
-    st.success("تم حذف السجلات الفارغة")
-    st.rerun()
     st.markdown("""
     <h2 style='text-align:center;color:white'>
     📋 حصر عام القضايا المتداولة
