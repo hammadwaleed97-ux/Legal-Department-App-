@@ -471,3 +471,206 @@ elif page == "archive":
         archive,
         use_container_width=True
                 )
+# =====================
+# البحث
+# =====================
+
+elif page == "search":
+
+    st.header("🔎 البحث عن دعوى")
+
+    search_type = st.selectbox(
+        "طريقة البحث",
+        [
+            "برقم وسنة الدعوى",
+            "بالاسم"
+        ]
+    )
+
+    if search_type == "برقم وسنة الدعوى":
+
+        case_no = st.text_input(
+            "رقم الدعوى"
+        )
+
+        judicial_year = st.text_input(
+            "السنة القضائية"
+        )
+
+        if st.button("بحث"):
+
+            result = pd.read_sql(
+            f"""
+            SELECT *
+            FROM cases
+            WHERE case_no='{case_no}'
+            AND judicial_year='{judicial_year}'
+            """,
+            conn
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+    else:
+
+        name = st.text_input(
+            "اسم الخصم"
+        )
+
+        if st.button("بحث بالاسم"):
+
+            result = pd.read_sql(
+            f"""
+            SELECT *
+            FROM cases
+            WHERE claimant LIKE '%{name}%'
+            OR defendant LIKE '%{name}%'
+            """,
+            conn
+            )
+
+            st.dataframe(
+                result,
+                use_container_width=True
+            )
+
+
+# =====================
+# التقارير
+# =====================
+
+elif page == "reports":
+
+    st.header("📊 التقارير")
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "تقرير بالدعاوى المتداولة",
+            "تقرير بالأحكام الصادرة"
+        ]
+    )
+
+    start_date = st.date_input(
+        "من تاريخ"
+    )
+
+    end_date = st.date_input(
+        "إلى تاريخ"
+    )
+
+    if report_type == "تقرير بالدعاوى المتداولة":
+
+        if st.button("عرض التقرير"):
+
+            report = pd.read_sql(
+            f"""
+            SELECT
+
+            case_no AS 'رقم الدعوى',
+            judicial_year AS 'السنة القضائية',
+            circuit AS 'الدائرة',
+            case_type AS 'النوع',
+            claimant AS 'اسم المدعى',
+            defendant AS 'اسم المدعى عليه',
+            subject AS 'موضوع الدعوى',
+            judgment_result AS 'آخر إجراء'
+
+            FROM cases
+
+            WHERE session_date
+            BETWEEN '{start_date}'
+            AND '{end_date}'
+            """,
+            conn
+            )
+
+            st.markdown("""
+            ### الهيئة القومية للتأمين الاجتماعى
+
+            #### الإدارة القانونية منطقة البحيرة
+
+            ### بيان بالدعاوى المتداولة
+            """)
+
+            st.dataframe(
+                report,
+                use_container_width=True
+            )
+
+            csv = report.to_csv(
+                index=False
+            ).encode("utf-8-sig")
+
+            st.download_button(
+                "تحميل Excel",
+                csv,
+                "الدعاوى_المتداولة.csv",
+                "text/csv"
+            )
+
+    else:
+
+        result_filter = st.selectbox(
+            "نتيجة الحكم",
+            [
+                "لصالح الهيئة",
+                "ضد الهيئة",
+                "الكل"
+            ]
+        )
+
+        if st.button("عرض تقرير الأحكام"):
+
+            query = """
+            SELECT
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            claimant,
+            defendant,
+            subject,
+            decision_date,
+            judgment_result
+            FROM cases
+            """
+
+            if result_filter != "الكل":
+
+                query += f"""
+                WHERE judgment_result=
+                '{result_filter}'
+                """
+
+            report = pd.read_sql(
+                query,
+                conn
+            )
+
+            st.markdown("""
+            ### الهيئة القومية للتأمين الاجتماعى
+
+            #### الإدارة القانونية منطقة البحيرة
+
+            ### بيان الأحكام الصادرة
+            """)
+
+            st.dataframe(
+                report,
+                use_container_width=True
+            )
+
+            csv = report.to_csv(
+                index=False
+            ).encode("utf-8-sig")
+
+            st.download_button(
+                "تحميل Excel",
+                csv,
+                "الأحكام_الصادرة.csv",
+                "text/csv"
+            )
