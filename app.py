@@ -1286,3 +1286,92 @@ if st.session_state.page == "archive":
         st.info(
             "لا توجد قضايا مؤرشفة"
         )
+# =====================================
+# التقارير
+# =====================================
+
+if st.session_state.page == "reports":
+
+    st.markdown("""
+    <h2 style='text-align:center'>
+    📊 التقارير
+    </h2>
+    """, unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+
+        "اختر التقرير",
+
+        [
+
+            "تقرير الدعاوى المتداولة",
+
+            "تقرير الأحكام الصادرة"
+
+        ]
+
+    )
+
+    # =================================
+    # تقرير الدعاوى المتداولة
+    # =================================
+
+    if report_type == "تقرير الدعاوى المتداولة":
+
+        from_date = st.date_input(
+            "من تاريخ",
+            key="from_cases"
+        )
+
+        to_date = st.date_input(
+            "إلى تاريخ",
+            key="to_cases"
+        )
+
+        officer_name = st.text_input(
+            "طرف الأستاذ /"
+        )
+
+        if st.button("عرض التقرير"):
+
+            report_df = pd.read_sql_query(
+                "SELECT * FROM cases",
+                conn
+            )
+
+            if not report_df.empty:
+
+                report_df = report_df[
+                    (
+                        pd.to_datetime(
+                            report_df["session_date"]
+                        )
+                        >= pd.to_datetime(from_date)
+                    )
+                    &
+                    (
+                        pd.to_datetime(
+                            report_df["session_date"]
+                        )
+                        <= pd.to_datetime(to_date)
+                    )
+                ]
+
+                st.markdown(f"""
+
+                ### الهيئة القومية للتأمين الاجتماعى
+
+                ### الإدارة القانونية منطقة البحيرة
+
+                **بيان بالدعاوى المتداولة**
+
+                خلال الفترة من
+                {from_date}
+
+                حتى
+                {to_date}
+
+                طرف الأستاذ /
+                {officer_name}
+
+                """)
