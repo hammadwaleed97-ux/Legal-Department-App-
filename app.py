@@ -183,3 +183,368 @@ with col2:
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
+# =====================================
+# إنشاء جدول القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+litigation_type TEXT,
+
+claimant_type TEXT,
+claimant TEXT,
+
+defendant_type TEXT,
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_type TEXT,
+
+court TEXT,
+
+court_name TEXT,
+
+subject TEXT,
+
+session_date TEXT,
+session_action TEXT,
+
+decision_date TEXT,
+decision_action TEXT,
+
+reason TEXT,
+
+notes TEXT,
+
+judgment_result TEXT,
+
+mobile TEXT,
+
+status TEXT DEFAULT 'متداولة'
+
+)
+
+""")
+
+conn.commit()
+
+# =====================================
+# تسجيل القضايا
+# =====================================
+
+if st.session_state.page == "cases":
+
+    st.markdown("---")
+
+    st.markdown(
+        """
+        <h2 style='text-align:center;color:white'>
+        ⚖️ تسجيل القضايا
+        </h2>
+        """,
+        unsafe_allow_html=True
+    )
+
+    litigation_type = st.selectbox(
+        "نوع الإجراء",
+        ["دعوى", "استئناف", "نقض"],
+        key="litigation_type"
+    )
+
+    claimant_type = st.selectbox(
+        "صفة الخصم الأول",
+        ["المدعى", "المستأنف", "الطاعن"],
+        key="claimant_type"
+    )
+
+    claimant = st.text_input(
+        "اسم الخصم الأول",
+        key="claimant"
+    )
+
+    defendant_type = st.selectbox(
+        "صفة الخصم الثاني",
+        ["المدعى عليه", "المستأنف ضده", "المطعون ضده"],
+        key="defendant_type"
+    )
+
+    defendant = st.text_input(
+        "اسم الخصم الثاني",
+        key="defendant"
+    )
+
+    case_no = st.text_input(
+        "رقم الدعوى",
+        key="case_no"
+    )
+
+    judicial_year = st.text_input(
+        "السنة القضائية",
+        key="judicial_year"
+    )
+
+    circuit = st.text_input(
+        "الدائرة",
+        key="circuit"
+    )
+
+    case_type = st.text_input(
+        "النوع",
+        key="case_type"
+    )
+
+    court = st.selectbox(
+        "المحكمة",
+        [
+            "الابتدائية",
+            "الاستئناف",
+            "النقض",
+            "إدارية",
+            "قضاء إدارى",
+            "إدارية عليا"
+        ],
+        key="court"
+    )
+
+    court_name = st.text_input(
+        "اسم المحكمة",
+        key="court_name"
+    )
+
+    subject = st.text_area(
+        "موضوع الدعوى",
+        key="subject"
+    )
+
+    session_date = st.date_input(
+        "تاريخ الجلسة",
+        key="session_date"
+    )
+
+    session_action = st.text_area(
+        "الإجراء المطلوب بالجلسة",
+        key="session_action"
+    )
+
+    decision_date = st.date_input(
+        "تاريخ القرار",
+        key="decision_date"
+    )
+
+    decision_action = st.text_area(
+        "الإجراء المطلوب بعد القرار",
+        key="decision_action"
+    )
+
+    reason = st.text_area(
+        "السبب",
+        key="reason"
+    )
+
+    notes = st.text_area(
+        "ملاحظات",
+        key="notes"
+    )
+
+    judgment_result = st.selectbox(
+        "نتيجة الدعوى",
+        [
+            "متداولة",
+            "لصالح الهيئة",
+            "ضد الهيئة"
+        ],
+        key="judgment_result"
+    )
+
+    mobile = st.text_input(
+        "رقم الموبايل لإرسال التنبيهات",
+        key="mobile"
+    )
+
+    if st.button(
+        "💾 حفظ القضية",
+        key="save_case"
+    ):
+
+        cur.execute("""
+
+        INSERT INTO cases(
+
+        litigation_type,
+
+        claimant_type,
+        claimant,
+
+        defendant_type,
+        defendant,
+
+        case_no,
+
+        judicial_year,
+
+        circuit,
+
+        case_type,
+
+        court,
+
+        court_name,
+
+        subject,
+
+        session_date,
+        session_action,
+
+        decision_date,
+        decision_action,
+
+        reason,
+
+        notes,
+
+        judgment_result,
+
+        mobile
+
+        )
+
+        VALUES(
+
+        ?,?,?,?,?,?,
+        ?,?,?,?,?,?,
+        ?,?,?,?,?,?,
+        ?,?,?,?
+
+        )
+
+        """,
+
+        (
+
+        litigation_type,
+
+        claimant_type,
+        claimant,
+
+        defendant_type,
+        defendant,
+
+        case_no,
+
+        judicial_year,
+
+        circuit,
+
+        case_type,
+
+        court,
+
+        court_name,
+
+        subject,
+
+        str(session_date),
+        session_action,
+
+        str(decision_date),
+        decision_action,
+
+        reason,
+
+        notes,
+
+        judgment_result,
+
+        mobile
+
+        )
+
+        )
+
+        conn.commit()
+
+        st.success("تم حفظ القضية بنجاح")
+
+    st.markdown("---")
+
+    st.subheader("📅 سجل القضايا حسب تاريخ الجلسات")
+
+    cases_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        ORDER BY session_date ASC
+        """,
+        conn
+    )
+
+    if not cases_df.empty:
+
+        for _, row in cases_df.iterrows():
+
+            with st.expander(
+                f"{row['session_date']} | {row['case_no']}"
+            ):
+
+                st.write(
+                    f"المدعى : {row['claimant']}"
+                )
+
+                st.write(
+                    f"المدعى عليه : {row['defendant']}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"الإجراء المطلوب بالجلسة : {row['session_action']}"
+                )
+
+                new_decision = st.text_area(
+                    "إضافة قرار جديد",
+                    key=f"new_decision_{row['id']}"
+                )
+
+                if st.button(
+                    "حفظ القرار الجديد",
+                    key=f"save_decision_{row['id']}"
+                ):
+
+                    old_notes = row["notes"] if row["notes"] else ""
+
+                    notes_text = (
+                        old_notes +
+                        "\n" +
+                        new_decision
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE cases
+                        SET notes=?
+                        WHERE id=?
+                        """,
+                        (
+                            notes_text,
+                            row["id"]
+                        )
+                    )
+
+                    conn.commit()
+
+                    st.success(
+                        "تم حفظ القرار الجديد"
+                    )
+
+                    st.rerun()
