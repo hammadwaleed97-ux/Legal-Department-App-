@@ -571,3 +571,28 @@ if st.session_state.page == "cases":
             st.error(f"خطأ أثناء الحفظ: {e}")
             
 from datetime import datetime
+# =====================================
+# جدول متابعات القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS case_updates(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+update_date TEXT,
+
+adjournment_reason TEXT,
+
+next_session_date TEXT,
+
+status_reason TEXT
+
+)
+
+""")
+
+conn.commit()
