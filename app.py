@@ -571,3 +571,267 @@ if st.session_state.page == "cases":
             st.error(f"خطأ أثناء الحفظ: {e}")
             
 from datetime import datetime
+# =====================================
+# جدول متابعات القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS case_updates(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+update_date TEXT,
+
+adjournment_reason TEXT,
+
+next_session_date TEXT,
+
+case_status TEXT,
+
+status_reason TEXT
+
+)
+
+""")
+
+conn.commit()
+
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📋 حصر عام القضايا المتداولة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    cases_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        ORDER BY session_date ASC
+        """,
+        conn
+    )
+
+    if cases_df.empty:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        for _, row in cases_df.iterrows():
+
+            title = (
+                f"الدعوى رقم {row['case_no']} "
+                f"لسنة {row['judicial_year']} "
+                f"- جلسة {row['session_date']}"
+            )
+
+            with st.expander(title):
+
+                st.markdown("### 📄 بيانات القضية")
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"السنة القضائية : {row['judicial_year']}"
+                )
+
+                st.write(
+                    f"نوع الإجراء : {row['litigation_type']}"
+                )
+
+                st.write(
+                    f"نوع الدعوى : {row['case_type']}"
+                )
+
+                st.write(
+                    f"الدائرة : {row['circuit']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"اسم المحكمة : {row['court_name']}"
+                )
+
+                st.write(
+                    f"{row['claimant_type']} : {row['claimant']}"
+                )
+
+                st.write(
+                    f"{row['defendant_type']} : {row['defendant']}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"الإجراء المطلوب بالجلسة : {row['session_action']}"
+                )
+
+                st.write(
+                    f"الحالة الحالية : {row['status']}"
+                )
+
+                st.markdown("---")
+
+                st.subheader("⚖️ متابعة القضية")
+
+                adjournment_reason = st.text_area(
+                    "سبب التأجيل",
+                    key=f"adjournment_{row['id']}"
+                )
+
+                next_session_date = st.date_input(
+                    "تاريخ الجلسة القادمة",
+                    key=f"next_session_{row['id']}"
+                )
+
+                case_status = st.selectbox(
+                    "حالة الدعوى",
+                    [
+                        "متداولة",
+                        "محفوظة",
+                        "لصالح الهيئة",
+                        "ضد الهيئة",
+                        "تم الطعن"
+                    ],
+                    key=f"status_{row['id']}"
+                )
+
+                status_reason = st.text_area(
+                    "سبب الحفظ أو سبب التداول",
+                    key=f"status_reason_{row['id']}"
+                )
+
+                if st.button(
+                    "💾 حفظ المتابعة",
+                    key=f"save_update_{row['id']}"
+                ):
+
+                    cur.execute(
+                        """
+                        INSERT INTO case_updates(
+
+                        case_id,
+
+                        update_date,
+
+                        adjournment_reason,
+
+                        next_session_date,
+
+                        case_status,
+
+                        status_reason
+
+                        )
+
+                        VALUES(?,?,?,?,?,?)
+
+                        """,
+                        (
+                            row["id"],
+
+                            str(datetime.now()),
+
+                            adjournment_reason,
+
+                            str(next_session_date),
+
+                            case_status,
+
+                            status_reason
+                        )
+                    )
+
+                    cur.execute(
+                        """
+                        UPDATE cases
+                        SET
+                        session_date=?,
+                        status=?
+                        WHERE id=?
+                        """,
+                        (
+                            str(next_session_date),
+                            case_status,
+                            row["id"]
+                        )
+                    )
+
+                    conn.commit()
+
+                    st.success(
+                        "تم حفظ المتابعة بنجاح"
+                    )
+
+                    st.rerun()
+
+                st.markdown("---")
+
+                st.subheader("📜 السجل التاريخي للقضية")
+
+                try:
+
+                    history_df = pd.read_sql_query(
+                        """
+                        SELECT *
+                        FROM case_updates
+                        WHERE case_id=?
+                        ORDER BY id ASC
+                        """,
+                        conn,
+                        params=(row["id"],)
+                    )
+
+                    if history_df.empty:
+
+                        st.info(
+                            "لا توجد متابعات مسجلة"
+                        )
+
+                    else:
+
+                        for _, h in history_df.iterrows():
+
+                            st.write(
+                                f"تاريخ المتابعة : {h['update_date']}"
+                            )
+
+                            st.write(
+                                f"سبب التأجيل : {h['adjournment_reason']}"
+                            )
+
+                            st.write(
+                                f"الجلسة القادمة : {h['next_session_date']}"
+                            )
+
+                            st.write(
+                                f"الحالة : {h['case_status']}"
+                            )
+
+                            st.write(
+                                f"السبب : {h['status_reason']}"
+                            )
+
+                            st.markdown("---")
+
+                except:
+
+                    st.info(
+                        "لا يوجد سجل متابعات حتى الآن"
+                    )
