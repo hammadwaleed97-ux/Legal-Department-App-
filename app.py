@@ -1,3 +1,14 @@
+from docx import Document
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer
+)
+
+from reportlab.lib.styles import (
+    getSampleStyleSheet
+)
 import streamlit as st
 import sqlite3
 import pandas as pd
