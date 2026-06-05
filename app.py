@@ -1,4 +1,12 @@
 import streamlit as st
+import sqlite3
+import pandas as pd
+
+from datetime import datetime, timedelta
+
+# =====================================
+# إعداد الصفحة
+# =====================================
 
 st.set_page_config(
     page_title="إدارة القضايا",
@@ -6,9 +14,20 @@ st.set_page_config(
     layout="wide"
 )
 
-# =========================
+# =====================================
+# قاعدة البيانات
+# =====================================
+
+conn = sqlite3.connect(
+    "cases.db",
+    check_same_thread=False
+)
+
+cur = conn.cursor()
+
+# =====================================
 # CSS
-# =========================
+# =====================================
 
 st.markdown("""
 <style>
@@ -21,54 +40,68 @@ st.markdown("""
     padding-top:5px;
 }
 
+label,
+p,
+span,
+div,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6{
+    color:white !important;
+    opacity:1 !important;
+}
+
 .logo-box{
     text-align:center;
     color:white;
 }
 
 .logo-icon{
-    font-size:60px;
-    margin-top:25px;
-    margin-bottom:10px;
+    font-size:52px;
+    margin-top:15px;
+    margin-bottom:8px;
 }
 
 .logo-main{
-    font-size:30px;
+    font-size:28px;
     font-weight:bold;
     white-space:nowrap;
-    margin-bottom:20px;
-}
-
-.logo-sub{
-    font-size:24px;
-    font-weight:bold;
-    white-space:nowrap;
-    margin-bottom:45px;
-}
-
-.prepare{
-    font-size:20px;
-    margin-bottom:10px;
-}
-
-.name{
-    font-size:32px;
-    font-weight:bold;
     margin-bottom:15px;
 }
 
-.place{
-    font-size:24px;
+.logo-sub{
+    font-size:22px;
     font-weight:bold;
+    white-space:nowrap;
     margin-bottom:35px;
 }
 
+.prepare{
+    font-size:18px;
+    margin-bottom:8px;
+}
+
+.name{
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.place{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:30px;
+}
+
 div.stButton > button{
-    width:280px;
-    height:70px;
+    width:320px;
+    height:65px;
     border-radius:18px;
     border:none;
-    font-size:21px;
+    font-size:20px;
     font-weight:bold;
     margin:auto;
     display:block;
@@ -84,9 +117,9 @@ div.stButton > button:hover{
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
+# =====================================
 # اللوجو
-# =========================
+# =====================================
 
 st.markdown("""
 <div class="logo-box">
@@ -118,22 +151,35 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
+# =====================================
+# الصفحات
+# =====================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "home"
+
+# =====================================
 # القائمة الرئيسية
-# =========================
+# =====================================
 
 col1, col2, col3 = st.columns([1,2,1])
 
 with col2:
 
-    st.button("⚖️ تسجيل القضايا")
+    if st.button("⚖️ تسجيل القضايا"):
+        st.session_state.page = "cases"
 
-    st.button("🔔 التنبيهات")
+    if st.button("🔔 التنبيهات"):
+        st.session_state.page = "alerts"
 
-    st.button("📊 التقارير")
+    if st.button("📊 التقارير"):
+        st.session_state.page = "reports"
 
-    st.button("📂 أرشيف القضايا")
+    if st.button("📂 أرشيف القضايا"):
+        st.session_state.page = "archive"
 
-    st.button("🔍 البحث عن دعوى")
+    if st.button("🔍 البحث عن دعوى"):
+        st.session_state.page = "search"
 
-    st.button("❌ القضايا المحذوفة")
+    if st.button("❌ القضايا المحذوفة"):
+        st.session_state.page = "deleted"
