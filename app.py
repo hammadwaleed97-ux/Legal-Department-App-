@@ -934,3 +934,355 @@ if st.session_state.page == "alerts":
         st.success(
             "لا توجد مواعيد طعن قريبة"
         )
+# =====================================
+# جدول الأرشيف
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS archive_cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+litigation_type TEXT,
+
+claimant_type TEXT,
+claimant TEXT,
+
+defendant_type TEXT,
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_type TEXT,
+
+court TEXT,
+
+court_name TEXT,
+
+subject TEXT,
+
+session_date TEXT,
+
+decision_date TEXT,
+
+reason TEXT,
+
+notes TEXT,
+
+judgment_result TEXT,
+
+mobile TEXT,
+
+archive_date TEXT
+
+)
+""")
+
+conn.commit()
+
+# =====================================
+# نقل قضية للأرشيف
+# =====================================
+
+def archive_case(row):
+
+    cur.execute("""
+
+    INSERT INTO archive_cases(
+
+    litigation_type,
+
+    claimant_type,
+    claimant,
+
+    defendant_type,
+    defendant,
+
+    case_no,
+
+    judicial_year,
+
+    circuit,
+
+    case_type,
+
+    court,
+
+    court_name,
+
+    subject,
+
+    session_date,
+
+    decision_date,
+
+    reason,
+
+    notes,
+
+    judgment_result,
+
+    mobile,
+
+    archive_date
+
+    )
+
+    VALUES(
+
+    ?,?,?,?,?,?,
+    ?,?,?,?,?,?,
+    ?,?,?,?,?,?,
+    ?,?
+
+    )
+
+    """,
+
+    (
+
+    row["litigation_type"],
+
+    row["claimant_type"],
+    row["claimant"],
+
+    row["defendant_type"],
+    row["defendant"],
+
+    row["case_no"],
+
+    row["judicial_year"],
+
+    row["circuit"],
+
+    row["case_type"],
+
+    row["court"],
+
+    row["court_name"],
+
+    row["subject"],
+
+    row["session_date"],
+
+    row["decision_date"],
+
+    row["reason"],
+
+    row["notes"],
+
+    row["judgment_result"],
+
+    row["mobile"],
+
+    str(datetime.now())
+
+    )
+
+    )
+
+    cur.execute(
+        "DELETE FROM cases WHERE id=?",
+        (row["id"],)
+    )
+
+    conn.commit()
+
+# =====================================
+# البحث عن دعوى
+# =====================================
+
+if st.session_state.page == "search":
+
+    st.markdown("""
+    <h2 style='text-align:center'>
+    🔍 البحث عن دعوى
+    </h2>
+    """, unsafe_allow_html=True)
+
+    search_type = st.radio(
+
+        "طريقة البحث",
+
+        [
+
+            "برقم وسنة الدعوى",
+
+            "بالاسم"
+
+        ]
+
+    )
+
+    result_df = pd.DataFrame()
+
+    if search_type == "برقم وسنة الدعوى":
+
+        case_no_search = st.text_input(
+            "رقم الدعوى"
+        )
+
+        year_search = st.text_input(
+            "السنة القضائية"
+        )
+
+        if st.button("بحث"):
+
+            result_df = pd.read_sql_query(
+
+                f"""
+
+                SELECT *
+
+                FROM cases
+
+                WHERE case_no='{case_no_search}'
+
+                AND judicial_year='{year_search}'
+
+                """,
+
+                conn
+
+            )
+
+    else:
+
+        name_search = st.text_input(
+            "اسم الخصم"
+        )
+
+        if st.button("بحث بالاسم"):
+
+            result_df = pd.read_sql_query(
+
+                f"""
+
+                SELECT *
+
+                FROM cases
+
+                WHERE claimant LIKE '%{name_search}%'
+
+                OR defendant LIKE '%{name_search}%'
+
+                """,
+
+                conn
+
+            )
+
+    if not result_df.empty:
+
+        st.success(
+            f"تم العثور على {len(result_df)} نتيجة"
+        )
+
+        st.dataframe(
+            result_df,
+            use_container_width=True
+        )
+
+    elif (
+        "بحث" in st.session_state
+        or len(result_df)==0
+    ):
+        pass
+
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.markdown("""
+    <h2 style='text-align:center'>
+    📂 أرشيف القضايا
+    </h2>
+    """, unsafe_allow_html=True)
+
+    active_cases = pd.read_sql_query(
+        "SELECT * FROM cases",
+        conn
+    )
+
+    if not active_cases.empty:
+
+        st.subheader(
+            "القضايا المتاحة للأرشفة"
+        )
+
+        for _, row in active_cases.iterrows():
+
+            with st.expander(
+
+                f"{row['case_no']} / {row['judicial_year']}"
+
+            ):
+
+                st.write(
+                    row["subject"]
+                )
+
+                st.write(
+                    row["claimant"]
+                )
+
+                st.write(
+                    row["defendant"]
+                )
+
+                if st.button(
+
+                    f"📦 أرشفة القضية {row['id']}",
+
+                    key=f"archive_{row['id']}"
+
+                ):
+
+                    archive_case(row)
+
+                    st.success(
+                        "تمت الأرشفة بنجاح"
+                    )
+
+                    st.rerun()
+
+    st.markdown("---")
+
+    st.subheader(
+        "القضايا المؤرشفة"
+    )
+
+    archive_df = pd.read_sql_query(
+
+        """
+
+        SELECT *
+
+        FROM archive_cases
+
+        ORDER BY id DESC
+
+        """,
+
+        conn
+
+    )
+
+    if not archive_df.empty:
+
+        st.dataframe(
+            archive_df,
+            use_container_width=True
+        )
+
+    else:
+
+        st.info(
+            "لا توجد قضايا مؤرشفة"
+        )
