@@ -9,57 +9,64 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-.main{
-    background-color:#031d4a;
-}
-
 [data-testid="stAppViewContainer"]{
-    background-color:#031d4a;
+    background:#031d4a;
 }
 
-h1,h2,h3,p{
+.main{
+    background:#031d4a;
+}
+
+.title{
     color:white;
     text-align:center;
+    font-size:52px;
+    font-weight:bold;
 }
 
-.stButton > button{
+.subtitle{
+    color:white;
+    text-align:center;
+    font-size:40px;
+    font-weight:bold;
+}
+
+.text{
+    color:white;
+    text-align:center;
+    font-size:34px;
+    font-weight:bold;
+}
+
+.stButton>button{
     width:100%;
-    height:120px;
-    border-radius:20px;
-    font-size:22px;
+    height:70px;
+    border-radius:15px;
+    font-size:20px;
     font-weight:bold;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# =====================
+# ==========================
 # اللوجو
-# =====================
+# ==========================
 
 st.markdown(
 """
-<h1 style='font-size:120px;text-align:center'>
+<div style="text-align:center;font-size:120px;">
 ⚖️
-</h1>
+</div>
 """,
 unsafe_allow_html=True
 )
 
 st.markdown(
 """
-<h1>
+<div class="title">
 الهيئة القومية للتأمين الاجتماعى
-</h1>
-""",
-unsafe_allow_html=True
-)
-
-st.markdown(
-"""
-<h2>
-الإدارة العامة للشؤون القانونية
-</h2>
+</div>
 """,
 unsafe_allow_html=True
 )
@@ -68,69 +75,64 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 st.markdown(
 """
-<h2>
-إعداد
-</h2>
-
-<h1>
-وليد شعبان حماد
-</h1>
-
-<h2>
-ديوان عام منطقة البحيرة
-</h2>
+<div class="subtitle">
+الإدارة العامة للشؤون القانونية
+</div>
 """,
 unsafe_allow_html=True
 )
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-# =====================
+st.markdown(
+"""
+<div class="text">
+إعداد
+</div>
+
+<br>
+
+<div class="text">
+وليد شعبان حماد
+</div>
+
+<br>
+
+<div class="text">
+ديوان عام منطقة البحيرة
+</div>
+""",
+unsafe_allow_html=True
+)
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# ==========================
 # الصف الأول
-# =====================
+# ==========================
 
-col1,col2,col3 = st.columns(3)
+c1,c2,c3 = st.columns(3)
 
-with col1:
-    btn1 = st.button(
-        "📁\nتسجيل القضايا",
-        use_container_width=True
-    )
+with c1:
+    st.button("تسجيل القضايا")
 
-with col2:
-    btn2 = st.button(
-        "🔔\nالتنبيهات",
-        use_container_width=True
-    )
+with c2:
+    st.button("التنبيهات")
 
-with col3:
-    btn3 = st.button(
-        "📊\nالتقارير",
-        use_container_width=True
-    )
+with c3:
+    st.button("التقارير")
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-# =====================
+# ==========================
 # الصف الثاني
-# =====================
+# ==========================
 
-col4,col5,col6 = st.columns(3)
+c4,c5,c6 = st.columns(3)
 
-with col4:
-    btn4 = st.button(
-        "🗂️\nأرشيف القضايا",
-        use_container_width=True
-    )
+with c4:
+    st.button("أرشيف القضايا")
 
-with col5:
-    btn5 = st.button(
-        "🔎\nالبحث عن دعوى",
-        use_container_width=True
-    )
+with c5:
+    st.button("البحث عن دعوى")
 
-with col6:
-    btn6 = st.button(
-        "🗑️\nالقضايا المحذوفة",
-        use_container_width=True
-    )
+with c6:
+    st.button("القضايا المحذوفة")
