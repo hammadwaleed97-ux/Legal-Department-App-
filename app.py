@@ -6,9 +6,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# ======================
-# تنسيق الصفحة
-# ======================
+# =========================
+# CSS
+# =========================
 
 st.markdown("""
 <style>
@@ -18,105 +18,121 @@ st.markdown("""
 }
 
 .block-container{
-    padding-top:1rem;
+    padding-top:10px;
 }
 
-.logo-title{
+.logo-box{
     text-align:center;
     color:white;
 }
 
-.logo-title h1{
-    font-size:55px;
+.logo-icon{
+    font-size:90px;
+    margin-bottom:10px;
+}
+
+.logo-main{
+    font-size:34px;
+    font-weight:bold;
+    white-space:nowrap;
+    margin-bottom:25px;
+}
+
+.logo-sub{
+    font-size:28px;
+    font-weight:bold;
+    white-space:nowrap;
+    margin-bottom:60px;
+}
+
+.prepare{
+    font-size:24px;
+    margin-bottom:15px;
+}
+
+.name{
+    font-size:38px;
+    font-weight:bold;
     margin-bottom:20px;
 }
 
-.logo-title h2{
-    font-size:38px;
-    margin-bottom:40px;
-}
-
-.logo-title h3{
+.place{
     font-size:28px;
-    margin-top:20px;
-}
-
-.main-btn{
-    width:280px;
-    height:85px;
-    border:none;
-    border-radius:20px;
-    background:#2f55d4;
-    color:white;
-    font-size:26px;
     font-weight:bold;
-    margin:10px auto;
-    display:block;
+    margin-bottom:50px;
 }
 
 div.stButton > button{
-    width:280px;
-    height:85px;
+    width:320px;
+    height:80px;
     border-radius:20px;
+    border:none;
     font-size:24px;
     font-weight:bold;
-    display:block;
     margin:auto;
+    display:block;
+    background-color:#2f55d4;
+    color:white;
+}
+
+div.stButton > button:hover{
+    background-color:#4368e0;
+    color:white;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ======================
+# =========================
 # اللوجو
-# ======================
+# =========================
 
 st.markdown("""
-<div class="logo-title">
+<div class="logo-box">
 
-<h1>⚖️</h1>
+<div class="logo-icon">
+⚖️
+</div>
 
-<h2>
+<div class="logo-main">
 الهيئة القومية للتأمين الاجتماعى
-</h2>
+</div>
 
-<h3>
+<div class="logo-sub">
 الإدارة العامة للشؤون القانونية
-</h3>
+</div>
 
-<br>
+<div class="prepare">
+إعداد
+</div>
 
-<h3>إعداد</h3>
-
-<h2>
+<div class="name">
 وليد شعبان حماد
-</h2>
+</div>
 
-<h3>
+<div class="place">
 ديوان عام منطقة البحيرة
-</h3>
+</div>
 
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-# ======================
-# الأيقونات بالمنتصف
-# ======================
+# =========================
+# القائمة الرئيسية
+# =========================
 
 col1,col2,col3 = st.columns([1,2,1])
 
 with col2:
 
-    تسجيل_القضايا = st.button("تسجيل القضايا")
+    st.button("⚖️ تسجيل القضايا")
 
-    التنبيهات = st.button("التنبيهات")
+    st.button("🔔 التنبيهات")
 
-    التقارير = st.button("التقارير")
+    st.button("📊 التقارير")
 
-    أرشيف_القضايا = st.button("أرشيف القضايا")
+    st.button("📂 أرشيف القضايا")
 
-    البحث_عن_دعوى = st.button("البحث عن دعوى")
+    st.button("🔍 البحث عن دعوى")
 
-    القضايا_المحذوفة = st.button("القضايا المحذوفة")
+    st.button("❌ القضايا المحذوفة")
