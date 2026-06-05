@@ -18,7 +18,7 @@ st.markdown("""
 }
 
 .block-container{
-    padding-top:15px;
+    padding-top:5px;
 }
 
 .logo-box{
@@ -28,6 +28,7 @@ st.markdown("""
 
 .logo-icon{
     font-size:60px;
+    margin-top:25px;
     margin-bottom:10px;
 }
 
