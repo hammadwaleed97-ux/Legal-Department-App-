@@ -24,7 +24,7 @@ st.markdown("""
 
 .stButton button{
     width:100%;
-    height:70px;
+    height:75px;
     background:#2450d3;
     color:white;
     border:none;
@@ -60,13 +60,16 @@ id INTEGER PRIMARY KEY AUTOINCREMENT
 conn.commit()
 
 # =====================================
-# اللوجو
+# اللوجو الرئيسي
 # =====================================
 
 st.markdown("""
 <div style="text-align:center">
 
-<div style="font-size:120px">
+<div style="
+font-size:120px;
+margin-top:20px;
+">
 ⚖️
 </div>
 
@@ -74,7 +77,7 @@ st.markdown("""
 font-size:26px;
 font-weight:bold;
 color:white;
-margin-top:10px;
+margin-top:15px;
 ">
 الهيئة القومية للتأمين الاجتماعى
 </div>
@@ -137,7 +140,7 @@ if "page" not in st.session_state:
 col1,col2,col3 = st.columns(3)
 
 with col1:
-    if st.button("إدارة القضايا"):
+    if st.button("تسجيل القضايا"):
         st.session_state.page = "cases"
 
 with col2:
