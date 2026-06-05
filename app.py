@@ -680,3 +680,110 @@ if st.session_state.page == "cases":
         st.info(
             "لا توجد قضايا مسجلة حالياً"
         )
+# =====================================
+# القضايا المحذوفة
+# =====================================
+
+if st.session_state.page == "deleted":
+
+    st.markdown("""
+    <h2 style='text-align:center'>
+    ❌ القضايا المحذوفة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    search_deleted = st.text_input(
+        "البحث داخل القضايا المحذوفة"
+    )
+
+    deleted_df = pd.read_sql_query(
+        "SELECT * FROM deleted_cases ORDER BY id DESC",
+        conn
+    )
+
+    if search_deleted:
+
+        deleted_df = deleted_df[
+            deleted_df.astype(str)
+            .apply(
+                lambda row:
+                row.str.contains(
+                    search_deleted,
+                    case=False,
+                    na=False
+                ).any(),
+                axis=1
+            )
+        ]
+
+    if not deleted_df.empty:
+
+        for _, row in deleted_df.iterrows():
+
+            with st.expander(
+
+                f"{row['case_no']} / {row['judicial_year']}"
+
+            ):
+
+                st.write(
+                    f"نوع الإجراء : {row['litigation_type']}"
+                )
+
+                st.write(
+                    f"{row['claimant_type']} : {row['claimant']}"
+                )
+
+                st.write(
+                    f"{row['defendant_type']} : {row['defendant']}"
+                )
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"السنة القضائية : {row['judicial_year']}"
+                )
+
+                st.write(
+                    f"الدائرة : {row['circuit']}"
+                )
+
+                st.write(
+                    f"النوع : {row['case_type']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"اسم المحكمة : {row['court_name']}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"تاريخ الجلسة : {row['session_date']}"
+                )
+
+                st.write(
+                    f"القرار : {row['judgment_result']}"
+                )
+
+                st.write(
+                    f"سبب الحذف : {row['delete_reason']}"
+                )
+
+                st.write(
+                    f"تاريخ الحذف : {row['delete_date']}"
+                )
+
+    else:
+
+        st.info(
+            "لا توجد قضايا محذوفة"
+        )
