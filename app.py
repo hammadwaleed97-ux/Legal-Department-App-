@@ -15,7 +15,7 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 # =====================================
-# CSS - الكود النهائي المضمون لظهور النصوص
+# CSS - الكود النهائي لضمان وضوح النصوص في القوائم
 # =====================================
 st.markdown("""
 <style>
@@ -24,33 +24,28 @@ st.markdown("""
 /* النصوص العامة */
 label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; }
 
-/* إصلاح جذري للقوائم المنسدلة */
+/* تنسيق القوائم المنسدلة لضمان ظهور النص بالأسود */
 div[data-baseweb="select"] { 
     background-color: white !important; 
     border: 1px solid #ccc !important;
 }
 
-/* النص داخل الصندوق */
 div[data-baseweb="select"] div, div[data-baseweb="select"] span { 
     color: black !important; 
     -webkit-text-fill-color: black !important;
 }
 
-/* القائمة المنبثقة عند الضغط */
 div[role="listbox"] {
     background-color: white !important;
 }
 
-/* الخيارات داخل القائمة */
 div[role="option"] {
     color: black !important;
     background-color: white !important;
 }
 
-/* حقول الإدخال */
 input, textarea { color: black !important; background-color: white !important; }
 
-/* اللوجو والأزرار */
 .logo-box{ text-align:center; }
 div.stButton > button{ 
     width:320px; height:65px; border-radius:15px; border:none; 
@@ -87,7 +82,7 @@ with col2:
     if st.button("❌ القضايا المحذوفة", key="b6"): st.session_state.page = "deleted"
 
 # =====================================
-# قاعدة البيانات
+# جدول قاعدة البيانات
 # =====================================
 cur.execute("""
 CREATE TABLE IF NOT EXISTS cases(
@@ -129,8 +124,13 @@ if st.session_state.page == "cases":
     mobile = st.text_input("رقم الموبايل", key="t11")
 
     if st.button("💾 حفظ القضية", key="save"):
-        cur.execute("INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, subject, session_date, decision_date, reason, notes, judgment_result, mobile) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, subject, str(session_date), str(decision_date), reason, notes, judgment_result, mobile))
+        cur.execute("""INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, 
+        case_no, judicial_year, circuit, case_type, court, court_name, subject, 
+        session_date, decision_date, reason, notes, judgment_result, mobile) 
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, 
+         circuit, case_type, court, court_name, subject, str(session_date), str(decision_date), 
+         reason, notes, judgment_result, mobile))
         conn.commit()
         st.success("تم حفظ القضية بنجاح")
 
