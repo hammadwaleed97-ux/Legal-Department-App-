@@ -664,7 +664,6 @@ if st.session_state.page == "all_cases":
                 st.write(
                     f"اسم المحكمة : {row['court_name']}"
                 )
-
                 st.write(
                     f"موضوع الدعوى : {row['subject']}"
                 )
