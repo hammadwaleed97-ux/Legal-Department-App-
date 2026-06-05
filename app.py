@@ -344,17 +344,6 @@ elif st.session_state.page == "archive":
     """, unsafe_allow_html=True)
 
     st.info("سيتم إضافة الأرشيف فى الجزء القادم")
-
-elif st.session_state.page == "all_cases":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    📋 حصر عام القضايا المتداولة
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة الحصر العام فى الجزء القادم")
-
 elif st.session_state.page == "search":
 
     st.markdown("""
