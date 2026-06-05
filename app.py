@@ -1,41 +1,138 @@
 import streamlit as st
+import sqlite3
 import pandas as pd
+from datetime import datetime, timedelta
 
-st.set_page_config(page_title="المستشار القانوني", layout="wide")
+st.set_page_config(
+    page_title="إدارة القضايا",
+    page_icon="⚖️",
+    layout="wide"
+)
 
-# مسح أي بيانات سابقة من الذاكرة فوراً لتجنب أي تعارض
-if st.button("اضغط هنا لبدء النظام من جديد (Reset)"):
-    st.session_state.cases = pd.DataFrame(columns=["رقم الدعوى", "الطرف الأول", "الطرف الثاني", "تاريخ الجلسة", "القرار", "المحامي", "الموبايل", "الحالة"])
-    st.experimental_rerun()
+# =====================
+# التصميم
+# =====================
 
-# تهيئة جدول البيانات (كل شيء كنص فقط)
-if 'cases' not in st.session_state:
-    st.session_state.cases = pd.DataFrame(columns=["رقم الدعوى", "الطرف الأول", "الطرف الثاني", "تاريخ الجلسة", "القرار", "المحامي", "الموبايل", "الحالة"])
+st.markdown("""
+<style>
 
-st.title("نظام إدارة القضايا - منطقة البحيرة")
+.stApp{
+background:#0b1f3a;
+direction:rtl;
+}
 
-tab1, tab2, tab3 = st.tabs(["تسجيل قضية", "عرض القضايا (التنبيهات)", "بحث"])
+h1,h2,h3,h4,h5,h6,p,label,div{
+color:white !important;
+}
 
-with tab1:
-    with st.form("new_case"):
-        no = st.text_input("رقم الدعوى")
-        p1 = st.text_input("الطرف الأول")
-        p2 = st.text_input("الطرف الثاني")
-        date = st.text_input("تاريخ الجلسة (مثال: 2026-06-05)")
-        decision = st.text_area("القرار")
-        lawyer = st.text_input("المحامي")
-        phone = st.text_input("الموبايل")
-        status = st.selectbox("الحالة", ["متداولة", "منتهية"])
-        
-        if st.form_submit_button("حفظ"):
-            new_row = {"رقم الدعوى": no, "الطرف الأول": p1, "الطرف الثاني": p2, "تاريخ الجلسة": date, "القرار": decision, "المحامي": lawyer, "الموبايل": phone, "الحالة": status}
-            st.session_state.cases = pd.concat([st.session_state.cases, pd.DataFrame([new_row])], ignore_index=True)
-            st.success("تم الحفظ!")
+.stButton button{
+background:#163d7a;
+color:white;
+border-radius:10px;
+font-weight:bold;
+}
 
-with tab2:
-    st.dataframe(st.session_state.cases)
+div[data-baseweb="select"]{
+color:black;
+}
 
-with tab3:
-    query = st.text_input("بحث")
-    if query:
-        st.dataframe(st.session_state.cases[st.session_state.cases.apply(lambda row: query in str(row.values), axis=1)])
+</style>
+""", unsafe_allow_html=True)
+
+# =====================
+# قاعدة البيانات
+# =====================
+
+conn = sqlite3.connect(
+    "cases.db",
+    check_same_thread=False
+)
+
+cur = conn.cursor()
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+claimant_type TEXT,
+claimant TEXT,
+
+defendant_type TEXT,
+defendant TEXT,
+
+case_no TEXT,
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_type TEXT,
+
+court TEXT,
+
+subject TEXT,
+
+session_date TEXT,
+
+decision_date TEXT,
+
+reason TEXT,
+
+notes TEXT,
+
+judgment_result TEXT,
+
+mobile TEXT,
+
+status TEXT DEFAULT 'متداولة'
+)
+""")
+
+conn.commit()
+
+# =====================
+# رأس الصفحة
+# =====================
+
+st.markdown("""
+# ⚖️ الهيئة القومية للتأمين الاجتماعى
+
+## الإدارة العامة للشؤون القانونية
+
+### إعداد
+
+### وليد شعبان حماد
+
+### ديوان عام منطقة البحيرة
+""")
+
+# =====================
+# القائمة الرئيسية
+# =====================
+
+c1,c2,c3,c4,c5 = st.columns(5)
+
+if "page" not in st.session_state:
+    st.session_state.page="cases"
+
+with c1:
+    if st.button("إدارة القضايا"):
+        st.session_state.page="cases"
+
+with c2:
+    if st.button("التنبيهات"):
+        st.session_state.page="alerts"
+
+with c3:
+    if st.button("التقارير"):
+        st.session_state.page="reports"
+
+with c4:
+    if st.button("أرشيف القضايا"):
+        st.session_state.page="archive"
+
+with c5:
+    if st.button("البحث عن دعوى"):
+        st.session_state.page="search"
+
+page = st.session_state.page
