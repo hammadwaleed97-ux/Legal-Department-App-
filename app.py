@@ -18,7 +18,7 @@ st.markdown("""
 }
 
 .block-container{
-    padding-top:10px;
+    padding-top:5px;
 }
 
 .logo-box{
@@ -27,47 +27,47 @@ st.markdown("""
 }
 
 .logo-icon{
-    font-size:90px;
-    margin-bottom:10px;
+    font-size:75px;
+    margin-bottom:5px;
 }
 
 .logo-main{
-    font-size:34px;
+    font-size:30px;
     font-weight:bold;
     white-space:nowrap;
-    margin-bottom:25px;
-}
-
-.logo-sub{
-    font-size:28px;
-    font-weight:bold;
-    white-space:nowrap;
-    margin-bottom:60px;
-}
-
-.prepare{
-    font-size:24px;
-    margin-bottom:15px;
-}
-
-.name{
-    font-size:38px;
-    font-weight:bold;
     margin-bottom:20px;
 }
 
-.place{
-    font-size:28px;
+.logo-sub{
+    font-size:24px;
     font-weight:bold;
-    margin-bottom:50px;
+    white-space:nowrap;
+    margin-bottom:45px;
+}
+
+.prepare{
+    font-size:20px;
+    margin-bottom:10px;
+}
+
+.name{
+    font-size:32px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.place{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:35px;
 }
 
 div.stButton > button{
-    width:320px;
-    height:80px;
-    border-radius:20px;
+    width:280px;
+    height:70px;
+    border-radius:18px;
     border:none;
-    font-size:24px;
+    font-size:21px;
     font-weight:bold;
     margin:auto;
     display:block;
@@ -121,7 +121,7 @@ st.markdown("""
 # القائمة الرئيسية
 # =========================
 
-col1,col2,col3 = st.columns([1,2,1])
+col1, col2, col3 = st.columns([1,2,1])
 
 with col2:
 
