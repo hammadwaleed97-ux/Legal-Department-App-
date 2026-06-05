@@ -336,3 +336,138 @@ if page == "cases":
         df,
         use_container_width=True
     )
+# =====================
+# التنبيهات
+# =====================
+
+elif page == "alerts":
+
+    st.header("🔔 التنبيهات")
+
+    df = pd.read_sql(
+        "SELECT * FROM cases",
+        conn
+    )
+
+    today = datetime.now().date()
+
+    st.subheader("📅 الجلسات خلال أسبوع")
+
+    found = False
+
+    for _, row in df.iterrows():
+
+        try:
+
+            session_date = datetime.strptime(
+                row["session_date"],
+                "%Y-%m-%d"
+            ).date()
+
+            days_left = (
+                session_date - today
+            ).days
+
+            if 0 <= days_left <= 7:
+
+                found = True
+
+                st.error(
+                    f"⬅️ هاااام عندك جلسة يوم {session_date} "
+                    f"رقم الدعوى {row['case_no']} "
+                    f"باقي {days_left} يوم"
+                )
+
+        except:
+            pass
+
+    if not found:
+        st.success(
+            "لا توجد جلسات خلال الأسبوع القادم"
+        )
+
+    st.divider()
+
+    st.subheader(
+        "⚠️ الأحكام الصادرة ضد الهيئة وقرب انتهاء الطعن"
+    )
+
+    found = False
+
+    for _, row in df.iterrows():
+
+        try:
+
+            if row["judgment_result"] == "ضد الهيئة":
+
+                decision_date = datetime.strptime(
+                    row["decision_date"],
+                    "%Y-%m-%d"
+                ).date()
+
+                appeal_date = (
+                    decision_date +
+                    timedelta(days=40)
+                )
+
+                remaining = (
+                    appeal_date - today
+                ).days
+
+                if 0 <= remaining <= 15:
+
+                    found = True
+
+                    st.error(
+                        f"⬅️ هاااام آخر ميعاد للطعن "
+                        f"{appeal_date} "
+                        f"دعوى رقم {row['case_no']} "
+                        f"متبقي {remaining} يوم"
+                    )
+
+        except:
+            pass
+
+    if not found:
+
+        st.success(
+            "لا توجد مواعيد طعن قريبة"
+        )
+
+
+# =====================
+# أرشيف القضايا
+# =====================
+
+elif page == "archive":
+
+    st.header(
+        "📁 أرشيف القضايا المنتهية"
+    )
+
+    cur.execute("""
+    UPDATE cases
+    SET status='منتهية'
+    WHERE judgment_result
+    IN (
+    'لصالح الهيئة',
+    'ضد الهيئة'
+    )
+    """)
+
+    conn.commit()
+
+    archive = pd.read_sql(
+        """
+        SELECT *
+        FROM cases
+        WHERE status='منتهية'
+        ORDER BY id DESC
+        """,
+        conn
+    )
+
+    st.dataframe(
+        archive,
+        use_container_width=True
+                )
