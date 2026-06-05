@@ -590,7 +590,6 @@ conn.commit()
 
 if st.session_state.page == "all_cases":
     if st.button("🗑️ حذف السجلات الفارغة"):
-
     cur.execute("""
         DELETE FROM cases
         WHERE claimant IS NULL
