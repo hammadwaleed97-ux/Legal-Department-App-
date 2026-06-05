@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =====================================
-# التنسيق
+# التصميم
 # =====================================
 
 st.markdown("""
@@ -24,17 +24,17 @@ st.markdown("""
 
 .stButton button{
     width:100%;
-    background:#1d4ed8;
+    height:70px;
+    background:#2450d3;
     color:white;
     border:none;
-    border-radius:12px;
-    padding:15px;
+    border-radius:15px;
     font-size:18px;
     font-weight:bold;
 }
 
 .stButton button:hover{
-    background:#2563eb;
+    background:#3564ef;
 }
 
 </style>
@@ -64,20 +64,17 @@ conn.commit()
 # =====================================
 
 st.markdown("""
-<div style="text-align:center;">
+<div style="text-align:center">
 
-<div style="
-font-size:90px;
-margin-bottom:10px;
-">
+<div style="font-size:120px">
 ⚖️
 </div>
 
 <div style="
-font-size:24px;
+font-size:26px;
 font-weight:bold;
 color:white;
-white-space:nowrap;
+margin-top:10px;
 ">
 الهيئة القومية للتأمين الاجتماعى
 </div>
@@ -88,7 +85,6 @@ white-space:nowrap;
 font-size:22px;
 font-weight:bold;
 color:white;
-white-space:nowrap;
 ">
 الإدارة العامة للشؤون القانونية
 </div>
@@ -138,33 +134,35 @@ if "page" not in st.session_state:
 
 # الصف الأول
 
-c1,c2,c3 = st.columns(3)
+col1,col2,col3 = st.columns(3)
 
-with c1:
+with col1:
     if st.button("إدارة القضايا"):
         st.session_state.page = "cases"
 
-with c2:
+with col2:
     if st.button("التنبيهات"):
         st.session_state.page = "alerts"
 
-with c3:
+with col3:
     if st.button("التقارير"):
         st.session_state.page = "reports"
 
+st.write("")
+
 # الصف الثاني
 
-c4,c5,c6 = st.columns(3)
+col4,col5,col6 = st.columns(3)
 
-with c4:
+with col4:
     if st.button("أرشيف القضايا"):
         st.session_state.page = "archive"
 
-with c5:
+with col5:
     if st.button("البحث عن دعوى"):
         st.session_state.page = "search"
 
-with c6:
+with col6:
     if st.button("القضايا المحذوفة"):
         st.session_state.page = "deleted"
 
