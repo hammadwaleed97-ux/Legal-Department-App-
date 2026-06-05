@@ -137,3 +137,4 @@ with col2:
     st.button("🔍 البحث عن دعوى")
 
     st.button("❌ القضايا المحذوفة")
+if st.session_state.page == "cases":
