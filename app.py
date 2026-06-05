@@ -787,3 +787,150 @@ if st.session_state.page == "deleted":
         st.info(
             "لا توجد قضايا محذوفة"
         )
+# =====================================
+# التنبيهات
+# =====================================
+
+if st.session_state.page == "alerts":
+
+    st.markdown("""
+    <h2 style='text-align:center'>
+    🔔 التنبيهات
+    </h2>
+    """, unsafe_allow_html=True)
+
+    today = datetime.now().date()
+
+    cases_df = pd.read_sql_query(
+        "SELECT * FROM cases",
+        conn
+    )
+
+    session_alerts = []
+    appeal_alerts = []
+
+    if not cases_df.empty:
+
+        for _, row in cases_df.iterrows():
+
+            # =====================
+            # تنبيه الجلسات
+            # =====================
+
+            try:
+
+                session_date = datetime.strptime(
+                    row["session_date"],
+                    "%Y-%m-%d"
+                ).date()
+
+                days_left = (
+                    session_date - today
+                ).days
+
+                if 0 <= days_left <= 7:
+
+                    session_alerts.append(row)
+
+            except:
+                pass
+
+            # =====================
+            # تنبيه الطعن
+            # =====================
+
+            try:
+
+                if row["judgment_result"] == "ضد الهيئة":
+
+                    decision_date = datetime.strptime(
+                        row["decision_date"],
+                        "%Y-%m-%d"
+                    ).date()
+
+                    appeal_deadline = (
+                        decision_date +
+                        timedelta(days=40)
+                    )
+
+                    remaining = (
+                        appeal_deadline - today
+                    ).days
+
+                    if 0 <= remaining <= 15:
+
+                        appeal_alerts.append(row)
+
+            except:
+                pass
+
+    total_alerts = (
+        len(session_alerts)
+        +
+        len(appeal_alerts)
+    )
+
+    st.error(
+        f"عدد التنبيهات الحالية : {total_alerts}"
+    )
+
+    st.markdown("---")
+
+    st.subheader(
+        "🔴 القضايا التي يتبقى على جلساتها أسبوع أو أقل"
+    )
+
+    if session_alerts:
+
+        for row in session_alerts:
+
+            st.warning(
+
+                f"""⬅️ جلسة بتاريخ
+                {row['session_date']}
+
+                | رقم الدعوى:
+                {row['case_no']}
+
+                | {row['claimant']}
+                ضد
+                {row['defendant']}
+                """
+
+            )
+
+    else:
+
+        st.success(
+            "لا توجد جلسات خلال الأسبوع القادم"
+        )
+
+    st.markdown("---")
+
+    st.subheader(
+        "🔴 أحكام ضد الهيئة وقرب انتهاء ميعاد الطعن"
+    )
+
+    if appeal_alerts:
+
+        for row in appeal_alerts:
+
+            st.error(
+
+                f"""⬅️ آخر ميعاد للطعن يقترب
+
+                رقم الدعوى:
+                {row['case_no']}
+
+                {row['claimant']}
+                ضد
+                {row['defendant']}
+                """
+
+            )
+
+    else:
+
+        st.success(
+            "لا توجد مواعيد طعن قريبة"
+        )
