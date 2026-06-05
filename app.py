@@ -90,15 +90,16 @@ div[role="listbox"] div{
 }
 
 .logo-main{
-    font-size:30px;
+    font-size:26px;
     font-weight:900;
     color:white;
     text-shadow:2px 2px 4px black;
     margin-bottom:12px;
+    white-space:nowrap;
 }
 
 .logo-sub{
-    font-size:25px;
+    font-size:24px;
     font-weight:900;
     color:white;
     text-shadow:2px 2px 4px black;
