@@ -6,113 +6,117 @@ st.set_page_config(
     layout="wide"
 )
 
+# ======================
+# تنسيق الصفحة
+# ======================
+
 st.markdown("""
 <style>
 
-[data-testid="stAppViewContainer"]{
-    background-color:#031d4a;
+.stApp{
+    background-color:#062456;
 }
 
 .block-container{
-    padding-top:20px;
+    padding-top:1rem;
 }
 
-.title{
+.logo-title{
     text-align:center;
     color:white;
-    font-size:42px;
-    font-weight:bold;
 }
 
-.sub{
-    text-align:center;
-    color:white;
-    font-size:32px;
-    font-weight:bold;
+.logo-title h1{
+    font-size:55px;
+    margin-bottom:20px;
 }
 
-.name{
-    text-align:center;
-    color:white;
+.logo-title h2{
+    font-size:38px;
+    margin-bottom:40px;
+}
+
+.logo-title h3{
     font-size:28px;
-    font-weight:bold;
+    margin-top:20px;
 }
 
-.stButton button{
-    width:100%;
-    height:80px;
-    font-size:18px;
+.main-btn{
+    width:280px;
+    height:85px;
+    border:none;
+    border-radius:20px;
+    background:#2f55d4;
+    color:white;
+    font-size:26px;
     font-weight:bold;
-    border-radius:15px;
+    margin:10px auto;
+    display:block;
+}
+
+div.stButton > button{
+    width:280px;
+    height:85px;
+    border-radius:20px;
+    font-size:24px;
+    font-weight:bold;
+    display:block;
+    margin:auto;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
+# ======================
 # اللوجو
-st.markdown(
-"""
-<div style="text-align:center;font-size:90px;">
-⚖️
+# ======================
+
+st.markdown("""
+<div class="logo-title">
+
+<h1>⚖️</h1>
+
+<h2>
+الهيئة القومية للتأمين الاجتماعى
+</h2>
+
+<h3>
+الإدارة العامة للشؤون القانونية
+</h3>
+
+<br>
+
+<h3>إعداد</h3>
+
+<h2>
+وليد شعبان حماد
+</h2>
+
+<h3>
+ديوان عام منطقة البحيرة
+</h3>
+
 </div>
-""",
-unsafe_allow_html=True
-)
-
-# العناوين
-st.markdown(
-'<div class="title">الهيئة القومية للتأمين الاجتماعى</div>',
-unsafe_allow_html=True
-)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-st.markdown(
-'<div class="sub">الإدارة العامة للشؤون القانونية</div>',
-unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
 
-st.markdown(
-'<div class="name">إعداد</div>',
-unsafe_allow_html=True
-)
+# ======================
+# الأيقونات بالمنتصف
+# ======================
 
-st.markdown(
-'<div class="name">وليد شعبان حماد</div>',
-unsafe_allow_html=True
-)
+col1,col2,col3 = st.columns([1,2,1])
 
-st.markdown(
-'<div class="name">ديوان عام منطقة البحيرة</div>',
-unsafe_allow_html=True
-)
+with col2:
 
-st.markdown("<br><br>", unsafe_allow_html=True)
+    تسجيل_القضايا = st.button("تسجيل القضايا")
 
-# الصف الأول
-c1, c2, c3 = st.columns(3)
+    التنبيهات = st.button("التنبيهات")
 
-with c1:
-    st.button("📁 تسجيل القضايا")
+    التقارير = st.button("التقارير")
 
-with c2:
-    st.button("🔔 التنبيهات")
+    أرشيف_القضايا = st.button("أرشيف القضايا")
 
-with c3:
-    st.button("📊 التقارير")
+    البحث_عن_دعوى = st.button("البحث عن دعوى")
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-# الصف الثاني
-c4, c5, c6 = st.columns(3)
-
-with c4:
-    st.button("🗂️ أرشيف القضايا")
-
-with c5:
-    st.button("🔎 البحث عن دعوى")
-
-with c6:
-    st.button("🗑️ القضايا المحذوفة")
+    القضايا_المحذوفة = st.button("القضايا المحذوفة")
