@@ -15,17 +15,38 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 # =====================================
-# CSS - مع تعديل ألوان القوائم المنسدلة لتظهر النصوص بوضوح
+# CSS - تم تعديل استهداف القوائم لضمان ظهور النص
 # =====================================
 st.markdown("""
 <style>
 .stApp { background:#062456; }
 label, p, span, div, h1, h2, h3, h4, h5, h6 { color:white !important; }
 
-/* إصلاح ظهور النصوص في القوائم المنسدلة */
-div[data-baseweb="select"] { background-color: white !important; }
-div[data-baseweb="select"] div, div[data-baseweb="select"] span { color: black !important; }
-div[role="listbox"] div { color: black !important; background-color: white !important; }
+/* تنسيق حاوية القائمة المنسدلة */
+[data-baseweb="select"] {
+    background-color: white !important;
+}
+
+/* تنسيق النص داخل القائمة المنسدلة */
+[data-baseweb="select"] div, [data-baseweb="select"] span {
+    color: black !important;
+    -webkit-text-fill-color: black !important;
+}
+
+/* تنسيق قائمة الخيارات المنبثقة عند الضغط */
+div[role="listbox"] {
+    background-color: white !important;
+}
+
+div[role="option"] {
+    color: black !important;
+    background-color: white !important;
+}
+
+/* ضمان ظهور النص في الخيارات */
+div[role="option"] span {
+    color: black !important;
+}
 
 input, textarea { color: black !important; background-color: white !important; }
 
@@ -46,9 +67,6 @@ st.markdown("""
 <div style="font-size:50px">⚖️</div>
 <div style="font-size:28px; font-weight:bold">الهيئة القومية للتأمين الاجتماعى</div>
 <div style="font-size:22px; font-weight:bold">الإدارة العامة للشؤون القانونية</div>
-<div style="font-size:18px; margin-top:20px">إعداد</div>
-<div style="font-size:28px; font-weight:bold">وليد شعبان حماد</div>
-<div style="font-size:22px; font-weight:bold">ديوان عام منطقة البحيرة</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -68,7 +86,7 @@ with col2:
     if st.button("❌ القضايا المحذوفة", key="b6"): st.session_state.page = "deleted"
 
 # =====================================
-# جدول قاعدة البيانات
+# قاعدة البيانات
 # =====================================
 cur.execute("""
 CREATE TABLE IF NOT EXISTS cases(
@@ -115,13 +133,8 @@ if st.session_state.page == "cases":
         conn.commit()
         st.success("تم حفظ القضية بنجاح")
 
-elif st.session_state.page == "alerts":
-    st.header("🔔 التنبيهات")
-elif st.session_state.page == "reports":
-    st.header("📊 التقارير")
-elif st.session_state.page == "archive":
-    st.header("📂 أرشيف القضايا")
-elif st.session_state.page == "search":
-    st.header("🔍 البحث عن دعوى")
-elif st.session_state.page == "deleted":
-    st.header("❌ القضايا المحذوفة")
+elif st.session_state.page == "alerts": st.header("🔔 التنبيهات")
+elif st.session_state.page == "reports": st.header("📊 التقارير")
+elif st.session_state.page == "archive": st.header("📂 أرشيف القضايا")
+elif st.session_state.page == "search": st.header("🔍 البحث عن دعوى")
+elif st.session_state.page == "deleted": st.header("❌ القضايا المحذوفة")
