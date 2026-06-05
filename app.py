@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # =========================
-# تهيئة قاعدة البيانات (حل مشكلة NameError)
+# تهيئة قاعدة البيانات
 # =========================
 if "conn" not in st.session_state:
     st.session_state.conn = sqlite3.connect("legal_cases.db", check_same_thread=False)
@@ -86,7 +86,7 @@ with col2:
     if st.button("❌ القضايا المحذوفة"): st.session_state.page = "deleted"
 
 # =====================================
-# تسجيل القضايا
+# تسجيل القضايا (تم تصحيح السطر الذي ظهر فيه الخطأ)
 # =====================================
 if st.session_state.page == "cases":
     st.markdown("<h2 style='color:white;text-align:center'>⚖️ تسجيل القضايا</h2>", unsafe_allow_html=True)
@@ -103,4 +103,24 @@ if st.session_state.page == "cases":
     court = st.selectbox("المحكمة", ["الابتدائية", "الاستئناف", "النقض", "إدارية", "قضاء إدارى", "إدارية عليا"])
     court_name = st.text_input("اسم المحكمة")
     subject = st.text_area("موضوع الدعوى")
-    session_date = st.
+    
+    # تم تصحيح هذا السطر:
+    session_date = st.date_input("تاريخ الجلسة")
+    decision_date = st.date_input("تاريخ القرار")
+    
+    reason = st.text_area("السبب")
+    notes = st.text_area("ملاحظات")
+    judgment_result = st.selectbox("نتيجة الدعوى", ["متداولة", "لصالح الهيئة", "ضد الهيئة"])
+    mobile = st.text_input("رقم الموبايل لإرسال التنبيهات")
+
+    if st.button("💾 حفظ القضية"):
+        cur.execute("""
+        INSERT INTO cases(litigation_type, claimant_type, claimant, defendant_type, defendant, 
+        case_no, judicial_year, circuit, case_type, court, court_name, subject, 
+        session_date, decision_date, reason, notes, judgment_result, mobile)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (litigation_type, claimant_type, claimant, defendant_type, defendant, 
+              case_no, judicial_year, circuit, case_type, court, court_name, subject, 
+              str(session_date), str(decision_date), reason, notes, judgment_result, mobile))
+        conn.commit()
+        st.success("تم حفظ القضية بنجاح")
