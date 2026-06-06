@@ -427,6 +427,61 @@ elif st.session_state.page == "search":
                         f"الحالة : {row['judgment_result']}"
                     )    
 
+elif st.session_state.page == "deleted":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    ❌ القضايا المحذوفة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    deleted_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM deleted_cases
+        ORDER BY deleted_at DESC
+        """,
+        conn
+    )
+
+    if deleted_df.empty:
+
+        st.warning("لا توجد قضايا محذوفة")
+
+    else:
+
+        for _, row in deleted_df.iterrows():
+
+            title = (
+                f"{row['claimant']} ضد {row['defendant']} | "
+                f"دعوى {row['case_no']}"
+            )
+
+            with st.expander(title):
+
+                st.write(
+                    f"الخصوم : {row['claimant']} ضد {row['defendant']}"
+                )
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"السنة القضائية : {row['judicial_year']}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"سبب الحذف : {row['delete_reason']}"
+                )
+
+                st.write(
+                    f"تاريخ الحذف : {row['deleted_at']}"
+                )
 # ==
 # =====================================
 # تسجيل القضايا
