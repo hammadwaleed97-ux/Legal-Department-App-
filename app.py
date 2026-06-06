@@ -427,15 +427,6 @@ elif st.session_state.page == "search":
                         f"الحالة : {row['judgment_result']}"
                     )    
 
-elif st.session_state.page == "deleted":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    ❌ القضايا المحذوفة
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة سجل المحذوفات فى الجزء القادم")
 # ==
 # =====================================
 # تسجيل القضايا
