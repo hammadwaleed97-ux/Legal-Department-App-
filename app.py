@@ -344,15 +344,6 @@ elif st.session_state.page == "archive":
     """, unsafe_allow_html=True)
 
     st.info("سيتم إضافة الأرشيف فى الجزء القادم")
-elif st.session_state.page == "search":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    🔍 البحث عن دعوى
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة البحث فى الجزء القادم")
 
 elif st.session_state.page == "deleted":
 
