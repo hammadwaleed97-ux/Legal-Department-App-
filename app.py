@@ -625,9 +625,10 @@ if st.session_state.page == "all_cases":
 
     else:
         for _, row in cases_df.iterrows():
+
     update = cur.execute(
         """
-        SELECT status_reason
+        SELECT adjournment_reason
         FROM case_updates
         WHERE case_id = ?
         ORDER BY id DESC
@@ -635,9 +636,12 @@ if st.session_state.page == "all_cases":
         """,
         (row["id"],)
     ).fetchone()
+
     last_action = ""
+
     if update and update[0]:
         last_action = update[0]
+
     title = (
         f"{row['claimant']} ضد {row['defendant']}\n"
         f"دعوى {row['case_no']} لسنة {row['judicial_year']} | "
@@ -647,98 +651,95 @@ if st.session_state.page == "all_cases":
         f"جلسة {row['session_date']} | "
         f"{last_action}"
     )
+
     with st.expander(title):
 
-                st.write(
-                    f"الخصوم : {row['claimant']} ضد {row['defendant']}"
+        st.write(
+            f"الخصوم : {row['claimant']} ضد {row['defendant']}"
+        )
+
+        st.write(
+            f"رقم الدعوى : {row['case_no']}"
+        )
+
+        st.write(
+            f"السنة القضائية : {row['judicial_year']}"
+        )
+
+        st.write(
+            f"الدائرة : {row['circuit']}"
+        )
+
+        st.write(
+            f"نوع الإجراء : {row['litigation_type']}"
+        )
+
+        st.write(
+            f"نوع الدعوى : {row['case_type']}"
+        )
+
+        st.write(
+            f"المحكمة : {row['court']}"
+        )
+
+        st.write(
+            f"اسم المحكمة : {row['court_name']}"
+        )
+
+        st.write(
+            f"موضوع الدعوى : {row['subject']}"
+        )
+
+        st.write(
+            f"تاريخ الجلسة الحالية : {row['session_date']}"
+        )
+
+        st.markdown("---")
+
+        st.subheader("متابعة القضية")
+
+        adjournment_reason = st.text_area(
+            "سبب التأجيل",
+            key=f"adj_{row['id']}"
+        )
+
+        next_session_date = st.date_input(
+            "الجلسة القادمة",
+            key=f"next_{row['id']}"
+        )
+
+        status_reason = st.text_area(
+            "القرار أو الإجراء الجديد",
+            key=f"status_{row['id']}"
+        )
+
+        if st.button(
+            "💾 حفظ المتابعة",
+            key=f"save_{row['id']}"
+        ):
+
+            cur.execute(
+                """
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
                 )
-
-                st.write(
-                    f"رقم الدعوى : {row['case_no']}"
+                VALUES(?,?,?,?,?)
+                """,
+                (
+                    row["id"],
+                    str(datetime.now()),
+                    adjournment_reason,
+                    str(next_session_date),
+                    status_reason
                 )
+            )
 
-                st.write(
-                    f"السنة القضائية : {row['judicial_year']}"
-                )
+            conn.commit()
 
-                st.write(
-                    f"الدائرة : {row['circuit']}"
-                )
-
-                st.write(
-                    f"نوع الإجراء : {row['litigation_type']}"
-                )
-
-                st.write(
-                    f"نوع الدعوى : {row['case_type']}"
-                )
-
-                st.write(
-                    f"المحكمة : {row['court']}"
-                )
-
-                st.write(
-                    f"اسم المحكمة : {row['court_name']}"
-                )
-                st.write(
-                    f"موضوع الدعوى : {row['subject']}"
-                )
-
-                st.write(
-                    f"تاريخ الجلسة الحالية : {row['session_date']}"
-                )
-
-                st.markdown("---")
-                st.write(
-                    f"تاريخ الجلسة الحالية : {row['session_date']}"
-                )
-
-                st.markdown("---")
-
-                st.subheader("متابعة القضية")
-
-                adjournment_reason = st.text_area(
-                    "سبب التأجيل",
-                    key=f"adj_{row['id']}"
-                )
-
-                next_session_date = st.date_input(
-                    "الجلسة القادمة",
-                    key=f"next_{row['id']}"
-                )
-
-                status_reason = st.text_area(
-                    "القرار أو الإجراء الجديد",
-                    key=f"status_{row['id']}"
-                )
-
-                if st.button(
-                    "💾 حفظ المتابعة",
-                    key=f"save_{row['id']}"
-                ):
-
-                    cur.execute(
-                        """
-                        INSERT INTO case_updates
-                        (
-                            case_id,
-                            update_date,
-                            adjournment_reason,
-                            next_session_date,
-                            status_reason
-                        )
-                        VALUES(?,?,?,?,?)
-                        """,
-                        (
-                            row["id"],
-                            str(datetime.now()),
-                            adjournment_reason,
-                            str(next_session_date),
-                            status_reason
-                        )
-                    )
-
-                    conn.commit()
-
-                    st.success("تم حفظ المتابعة")
-                    st.rerun()
+            st.success("تم حفظ المتابعة")
+            st.rerun()
