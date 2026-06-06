@@ -626,13 +626,31 @@ if st.session_state.page == "all_cases":
     else:
 
         for _, row in cases_df.iterrows():
+            update = cur.execute(
+    """
+    SELECT status_reason
+    FROM case_updates
+    WHERE case_id = ?
+    ORDER BY id DESC
+    LIMIT 1
+    """,
+    (row["id"],)
+).fetchone()
 
-            title = (
-                f"{row['claimant']} ضد {row['defendant']} | "
-                f"الدعوى رقم {row['case_no']} لسنة {row['judicial_year']} | "
-                f"جلسة {row['session_date']}"
-            )
+last_action = ""
 
+if update and update[0]:
+    last_action = update[0]
+
+title = (
+    f"{row['claimant']} ضد {row['defendant']}\n"
+    f"دعوى {row['case_no']} لسنة {row['judicial_year']} | "
+    f"الدائرة {row['circuit']} | "
+    f"{row['court']} {row['court_name']} | "
+    f"{row['subject']} | "
+    f"جلسة {row['session_date']} | "
+    f"{last_action}"
+)
             with st.expander(title):
 
                 st.write(
