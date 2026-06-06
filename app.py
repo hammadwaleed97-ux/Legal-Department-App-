@@ -618,7 +618,6 @@ if st.session_state.page == "all_cases":
         """,
         conn
     )
-
 if cases_df.empty:
 
     st.warning("لا توجد قضايا مسجلة")
