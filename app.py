@@ -651,9 +651,6 @@ if st.session_state.page == "all_cases":
         f"{row['subject']} | "
         f"جلسة {row['session_date']} | "
         f"{last_action}"
-    )
-
-    with st.expander(title):
             with st.expander(title):
 
                 st.write(
