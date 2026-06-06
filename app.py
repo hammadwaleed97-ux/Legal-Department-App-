@@ -325,6 +325,164 @@ if st.session_state.page == "alerts":
 
     st.info("سيتم إضافة التنبيهات فى الجزء القادم")
 
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📊 التقارير والإحصائيات
+    </h2>
+    """, unsafe_allow_html=True)
+
+    total_cases = cur.execute(
+        "SELECT COUNT(*) FROM cases"
+    ).fetchone()[0]
+
+    won_cases = cur.execute(
+        """
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='لصالح الهيئة'
+        """
+    ).fetchone()[0]
+
+    lost_cases = cur.execute(
+        """
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='ضد الهيئة'
+        """
+    ).fetchone()[0]
+
+    active_cases = cur.execute(
+        """
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='متداولة'
+        """
+    ).fetchone()[0]
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("إجمالي القضايا", total_cases)
+        st.metric("القضايا المتداولة", active_cases)
+
+    with col2:
+        st.metric("القضايا لصالح الهيئة", won_cases)
+        st.metric("القضايا ضد الهيئة", lost_cases)
+
+    st.markdown("---")
+
+    st.subheader("📄 تقرير القضايا خلال فترة")
+
+    date_from = st.date_input(
+        "من تاريخ",
+        key="report_from"
+    )
+
+    date_to = st.date_input(
+        "إلى تاريخ",
+        key="report_to"
+    )
+
+    if st.button("عرض تقرير القضايا"):
+
+        report_df = pd.read_sql_query(
+            """
+            SELECT *
+            FROM cases
+            WHERE session_date BETWEEN ? AND ?
+            ORDER BY session_date
+            """,
+            conn,
+            params=(
+                str(date_from),
+                str(date_to)
+            )
+        )
+
+        if report_df.empty:
+
+            st.warning("لا توجد قضايا خلال هذه الفترة")
+
+        else:
+
+            st.success(
+                f"عدد القضايا : {len(report_df)}"
+            )
+
+            st.dataframe(
+                report_df,
+                use_container_width=True
+            )
+
+    st.markdown("---")
+
+    st.subheader("⚖️ تقرير الأحكام خلال فترة")
+
+    judgment_from = st.date_input(
+        "من تاريخ الحكم",
+        key="judgment_from"
+    )
+
+    judgment_to = st.date_input(
+        "إلى تاريخ الحكم",
+        key="judgment_to"
+    )
+
+    if st.button("عرض تقرير الأحكام"):
+
+        judgment_df = pd.read_sql_query(
+            """
+            SELECT *
+            FROM cases
+            WHERE decision_date BETWEEN ? AND ?
+            AND judgment_result <> 'متداولة'
+            ORDER BY decision_date
+            """,
+            conn,
+            params=(
+                str(judgment_from),
+                str(judgment_to)
+            )
+        )
+
+        if judgment_df.empty:
+
+            st.warning("لا توجد أحكام خلال هذه الفترة")
+
+        else:
+
+            st.success(
+                f"عدد الأحكام : {len(judgment_df)}"
+            )
+
+            st.dataframe(
+                judgment_df,
+                use_container_width=True
+            )
+
+    st.markdown("---")
+
+    st.subheader("توزيع القضايا حسب المحكمة")
+
+    court_df = pd.read_sql_query(
+        """
+        SELECT court,
+               COUNT(*) as count_cases
+        FROM cases
+        GROUP BY court
+        ORDER BY count_cases DESC
+        """,
+        conn
+    )
+
+    if not court_df.empty:
+
+        st.dataframe(
+            court_df,
+            use_container_width=True
+        )
 elif st.session_state.page == "archive":
 
     st.markdown("""
