@@ -625,7 +625,6 @@ if st.session_state.page == "all_cases":
 
     else:
         for _, row in cases_df.iterrows():
-
     update = cur.execute(
         """
         SELECT adjournment_reason
