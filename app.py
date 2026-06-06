@@ -623,18 +623,7 @@ if st.session_state.page == "all_cases":
 
         st.warning("لا توجد قضايا مسجلة")
 
-    else:
-        for _, row in cases_df.iterrows():
-    update = cur.execute(
-        """
-        SELECT adjournment_reason
-        FROM case_updates
-        WHERE case_id = ?
-        ORDER BY id DESC
-        LIMIT 1
-        """,
-        (row["id"],)
-    ).fetchone()
+    
 
     last_action = ""
 
