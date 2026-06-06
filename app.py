@@ -624,9 +624,7 @@ if st.session_state.page == "all_cases":
         st.warning("لا توجد قضايا مسجلة")
 
     else:
-
         for _, row in cases_df.iterrows():
-
     update = cur.execute(
         """
         SELECT status_reason
@@ -637,12 +635,9 @@ if st.session_state.page == "all_cases":
         """,
         (row["id"],)
     ).fetchone()
-
     last_action = ""
-
     if update and update[0]:
         last_action = update[0]
-
     title = (
         f"{row['claimant']} ضد {row['defendant']}\n"
         f"دعوى {row['case_no']} لسنة {row['judicial_year']} | "
@@ -652,7 +647,6 @@ if st.session_state.page == "all_cases":
         f"جلسة {row['session_date']} | "
         f"{last_action}"
     )
-
     with st.expander(title):
 
                 st.write(
