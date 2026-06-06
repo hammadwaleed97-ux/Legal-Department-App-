@@ -325,15 +325,6 @@ if st.session_state.page == "alerts":
 
     st.info("سيتم إضافة التنبيهات فى الجزء القادم")
 
-elif st.session_state.page == "reports":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    📊 التقارير
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة التقارير فى الجزء القادم")
 
 elif st.session_state.page == "archive":
 
