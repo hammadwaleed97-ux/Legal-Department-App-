@@ -25,6 +25,129 @@ conn = sqlite3.connect(
 cur = conn.cursor()
 
 # =====================================
+# جدول القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+litigation_type TEXT,
+
+claimant_type TEXT,
+claimant TEXT,
+
+defendant_type TEXT,
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_type TEXT,
+
+court TEXT,
+
+court_name TEXT,
+
+appeal_office TEXT,
+
+subject TEXT,
+
+session_date TEXT,
+
+reason TEXT,
+
+notes TEXT,
+
+judgment_result TEXT,
+
+mobile TEXT,
+
+status TEXT DEFAULT 'متداولة',
+
+created_at TEXT
+
+)
+
+""")
+
+# =====================================
+# جدول متابعات القضايا
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS case_updates(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+update_date TEXT,
+
+adjournment_reason TEXT,
+
+next_session_date TEXT,
+
+status_reason TEXT
+
+)
+
+""")
+
+# =====================================
+# جدول القضايا المحذوفة
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS deleted_cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+original_case_id INTEGER,
+
+litigation_type TEXT,
+
+claimant TEXT,
+
+defendant TEXT,
+
+case_no TEXT,
+
+judicial_year TEXT,
+
+subject TEXT,
+
+delete_reason TEXT,
+
+deleted_at TEXT
+
+)
+
+""")
+
+conn.commit()
+
+# =====================================
+# ترقية قواعد البيانات القديمة
+# =====================================
+
+try:
+    cur.execute(
+        "ALTER TABLE cases ADD COLUMN appeal_office TEXT"
+    )
+except:
+    pass
+
+conn.commit()
+
+# =====================================
 # CSS
 # =====================================
 
@@ -35,14 +158,10 @@ st.markdown("""
     background:#062456;
 }
 
-/* النصوص */
-
 h1,h2,h3,h4,h5,h6,
 label,p,span{
     color:white !important;
 }
-
-/* القوائم المنسدلة */
 
 .stSelectbox div[data-baseweb="select"] > div{
     background:white !important;
@@ -62,8 +181,6 @@ div[role="listbox"] div{
     color:black !important;
 }
 
-/* الإدخال */
-
 .stTextInput input{
     color:black !important;
 }
@@ -75,8 +192,6 @@ div[role="listbox"] div{
 .stDateInput input{
     color:black !important;
 }
-
-/* اللوجو */
 
 .logo-box{
     text-align:center;
@@ -93,43 +208,31 @@ div[role="listbox"] div{
     font-size:26px;
     font-weight:900;
     color:white;
-    text-shadow:2px 2px 4px black;
-    margin-bottom:12px;
-    white-space:nowrap;
 }
 
 .logo-sub{
     font-size:24px;
     font-weight:900;
     color:white;
-    text-shadow:2px 2px 4px black;
-    margin-bottom:12px;
 }
 
 .logo-place{
     font-size:22px;
     font-weight:900;
     color:white;
-    text-shadow:2px 2px 4px black;
-    margin-bottom:20px;
 }
 
 .logo-greeting{
     font-size:20px;
     font-weight:bold;
     color:white;
-    margin-bottom:10px;
 }
 
 .logo-name{
     font-size:32px;
     font-weight:900;
     color:#FFD700;
-    text-shadow:2px 2px 4px black;
-    margin-bottom:30px;
 }
-
-/* الأزرار */
 
 div.stButton > button{
     width:340px;
@@ -142,11 +245,6 @@ div.stButton > button{
     font-weight:bold;
     display:block;
     margin:auto;
-}
-
-div.stButton > button:hover{
-    background:#4b6df0;
-    color:white;
 }
 
 </style>
@@ -169,7 +267,7 @@ st.markdown("""
 </div>
 
 <div class="logo-sub">
-الإدارة العامة للشؤون القانونية
+الإدارة العامة للشئون القانونية
 </div>
 
 <div class="logo-place">
@@ -215,822 +313,11 @@ with col2:
     if st.button("📂 أرشيف القضايا"):
         st.session_state.page = "archive"
 
-    if st.button("📋 حصر عام القضايا المتداولة"):
+    if st.button("📋 حصر عام القضايا"):
         st.session_state.page = "all_cases"
 
-    if st.button("🔍 البحث عن دعوى"):
+    if st.button("🔍 البحث"):
         st.session_state.page = "search"
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
-# =====================================
-# إنشاء جدول القضايا
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS cases(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-litigation_type TEXT,
-
-claimant_type TEXT,
-claimant TEXT,
-
-defendant_type TEXT,
-defendant TEXT,
-
-case_no TEXT,
-
-judicial_year TEXT,
-
-circuit TEXT,
-
-case_type TEXT,
-
-court TEXT,
-
-court_name TEXT,
-
-subject TEXT,
-
-session_date TEXT,
-session_action TEXT,
-
-decision_date TEXT,
-decision_action TEXT,
-
-reason TEXT,
-
-notes TEXT,
-
-judgment_result TEXT,
-
-mobile TEXT,
-
-status TEXT DEFAULT 'متداولة',
-
-created_at TEXT
-
-)
-
-""")
-
-# =====================================
-# جدول القضايا المحذوفة
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS deleted_cases(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-original_case_id INTEGER,
-
-litigation_type TEXT,
-
-claimant TEXT,
-
-defendant TEXT,
-
-case_no TEXT,
-
-judicial_year TEXT,
-
-subject TEXT,
-
-delete_reason TEXT,
-
-deleted_at TEXT
-
-)
-
-""")
-
-conn.commit()
-
-# =====================================
-# تعريف الصفحات
-# =====================================
-
-if st.session_state.page == "alerts":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    🔔 التنبيهات
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة التنبيهات فى الجزء القادم")
-
-elif st.session_state.page == "reports":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    📊 التقارير والإحصائيات
-    </h2>
-    """, unsafe_allow_html=True)
-
-    total_cases = cur.execute(
-        "SELECT COUNT(*) FROM cases"
-    ).fetchone()[0]
-
-    won_cases = cur.execute(
-        """
-        SELECT COUNT(*)
-        FROM cases
-        WHERE judgment_result='لصالح الهيئة'
-        """
-    ).fetchone()[0]
-
-    lost_cases = cur.execute(
-        """
-        SELECT COUNT(*)
-        FROM cases
-        WHERE judgment_result='ضد الهيئة'
-        """
-    ).fetchone()[0]
-
-    active_cases = cur.execute(
-        """
-        SELECT COUNT(*)
-        FROM cases
-        WHERE judgment_result='متداولة'
-        """
-    ).fetchone()[0]
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.metric("إجمالي القضايا", total_cases)
-        st.metric("القضايا المتداولة", active_cases)
-
-    with col2:
-        st.metric("القضايا لصالح الهيئة", won_cases)
-        st.metric("القضايا ضد الهيئة", lost_cases)
-
-    st.markdown("---")
-
-    st.subheader("📄 تقرير القضايا خلال فترة")
-
-    date_from = st.date_input(
-        "من تاريخ",
-        key="report_from"
-    )
-
-    date_to = st.date_input(
-        "إلى تاريخ",
-        key="report_to"
-    )
-
-    if st.button("عرض تقرير القضايا"):
-
-        report_df = pd.read_sql_query(
-            """
-            SELECT *
-            FROM cases
-            WHERE session_date BETWEEN ? AND ?
-            ORDER BY session_date
-            """,
-            conn,
-            params=(
-                str(date_from),
-                str(date_to)
-            )
-        )
-
-        if report_df.empty:
-
-            st.warning("لا توجد قضايا خلال هذه الفترة")
-
-        else:
-
-            st.success(
-                f"عدد القضايا : {len(report_df)}"
-            )
-
-            st.dataframe(
-                report_df,
-                use_container_width=True
-            )
-
-    st.markdown("---")
-
-    st.subheader("⚖️ تقرير الأحكام خلال فترة")
-
-    judgment_from = st.date_input(
-        "من تاريخ الحكم",
-        key="judgment_from"
-    )
-
-    judgment_to = st.date_input(
-        "إلى تاريخ الحكم",
-        key="judgment_to"
-    )
-
-    if st.button("عرض تقرير الأحكام"):
-
-        judgment_df = pd.read_sql_query(
-            """
-            SELECT *
-            FROM cases
-            WHERE decision_date BETWEEN ? AND ?
-            AND judgment_result <> 'متداولة'
-            ORDER BY decision_date
-            """,
-            conn,
-            params=(
-                str(judgment_from),
-                str(judgment_to)
-            )
-        )
-
-        if judgment_df.empty:
-
-            st.warning("لا توجد أحكام خلال هذه الفترة")
-
-        else:
-
-            st.success(
-                f"عدد الأحكام : {len(judgment_df)}"
-            )
-
-            st.dataframe(
-                judgment_df,
-                use_container_width=True
-            )
-
-    st.markdown("---")
-
-    st.subheader("توزيع القضايا حسب المحكمة")
-
-    court_df = pd.read_sql_query(
-        """
-        SELECT court,
-               COUNT(*) as count_cases
-        FROM cases
-        GROUP BY court
-        ORDER BY count_cases DESC
-        """,
-        conn
-    )
-
-    if not court_df.empty:
-
-        st.dataframe(
-            court_df,
-            use_container_width=True
-        )
-elif st.session_state.page == "archive":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    📂 أرشيف القضايا
-    </h2>
-    """, unsafe_allow_html=True)
-
-    st.info("سيتم إضافة الأرشيف فى الجزء القادم")
-elif st.session_state.page == "search":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    🔍 البحث عن دعوى
-    </h2>
-    """, unsafe_allow_html=True)
-
-    search_text = st.text_input(
-        "اكتب رقم الدعوى أو اسم أحد الخصوم"
-    )
-
-    if search_text:
-
-        result = pd.read_sql_query(
-            """
-            SELECT *
-            FROM cases
-            WHERE
-                claimant LIKE ?
-                OR defendant LIKE ?
-                OR case_no LIKE ?
-                OR subject LIKE ?
-            ORDER BY session_date ASC
-            """,
-            conn,
-            params=(
-                f"%{search_text}%",
-                f"%{search_text}%",
-                f"%{search_text}%",
-                f"%{search_text}%"
-            )
-        )
-
-        if result.empty:
-
-            st.warning("لا توجد نتائج")
-
-        else:
-
-            st.success(f"تم العثور على {len(result)} قضية")
-
-            for _, row in result.iterrows():
-
-                title = (
-                    f"{row['claimant']} ضد {row['defendant']} | "
-                    f"دعوى {row['case_no']} لسنة {row['judicial_year']}"
-                )
-
-                with st.expander(title):
-
-                    st.write(
-                        f"الخصوم : {row['claimant']} ضد {row['defendant']}"
-                    )
-
-                    st.write(
-                        f"رقم الدعوى : {row['case_no']}"
-                    )
-
-                    st.write(
-                        f"السنة القضائية : {row['judicial_year']}"
-                    )
-
-                    st.write(
-                        f"المحكمة : {row['court']}"
-                    )
-
-                    st.write(
-                        f"اسم المحكمة : {row['court_name']}"
-                    )
-
-                    st.write(
-                        f"موضوع الدعوى : {row['subject']}"
-                    )
-
-                    st.write(
-                        f"تاريخ الجلسة : {row['session_date']}"
-                    )
-
-                    st.write(
-                        f"الحالة : {row['judgment_result']}"
-                    )    
-
-elif st.session_state.page == "deleted":
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    ❌ القضايا المحذوفة
-    </h2>
-    """, unsafe_allow_html=True)
-
-    deleted_df = pd.read_sql_query(
-        """
-        SELECT *
-        FROM deleted_cases
-        ORDER BY deleted_at DESC
-        """,
-        conn
-    )
-
-    if deleted_df.empty:
-
-        st.warning("لا توجد قضايا محذوفة")
-
-    else:
-
-        for _, row in deleted_df.iterrows():
-
-            title = (
-                f"{row['claimant']} ضد {row['defendant']} | "
-                f"دعوى {row['case_no']}"
-            )
-
-            with st.expander(title):
-
-                st.write(
-                    f"الخصوم : {row['claimant']} ضد {row['defendant']}"
-                )
-
-                st.write(
-                    f"رقم الدعوى : {row['case_no']}"
-                )
-
-                st.write(
-                    f"السنة القضائية : {row['judicial_year']}"
-                )
-
-                st.write(
-                    f"موضوع الدعوى : {row['subject']}"
-                )
-
-                st.write(
-                    f"سبب الحذف : {row['delete_reason']}"
-                )
-
-                st.write(
-                    f"تاريخ الحذف : {row['deleted_at']}"
-                )
-# ==
-# =====================================
-# تسجيل القضايا
-# =====================================
-
-if st.session_state.page == "cases":
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    ⚖️ تسجيل القضايا
-    </h2>
-    """, unsafe_allow_html=True)
-
-    litigation_type = st.selectbox(
-        "نوع الإجراء",
-        ["دعوى", "استئناف", "نقض"],
-        key="litigation_type"
-    )
-
-    claimant_type = st.selectbox(
-        "صفة الخصم الأول",
-        ["المدعى", "المستأنف", "الطاعن"],
-        key="claimant_type"
-    )
-
-    claimant = st.text_input(
-        "اسم الخصم الأول",
-        key="claimant"
-    )
-
-    defendant_type = st.selectbox(
-        "صفة الخصم الثاني",
-        ["المدعى عليه", "المستأنف ضده", "المطعون ضده"],
-        key="defendant_type"
-    )
-
-    defendant = st.text_input(
-        "اسم الخصم الثاني",
-        key="defendant"
-    )
-
-    case_no = st.text_input(
-        "رقم الدعوى",
-        key="case_no"
-    )
-
-    judicial_year = st.text_input(
-        "السنة القضائية",
-        key="judicial_year"
-    )
-
-    circuit = st.text_input(
-        "الدائرة",
-        key="circuit"
-    )
-
-    case_type = st.text_input(
-        "النوع",
-        key="case_type"
-    )
-
-    court = st.selectbox(
-        "المحكمة",
-        [
-            "الابتدائية",
-            "الاستئناف",
-            "النقض",
-            "إدارية",
-            "قضاء إداري",
-            "إدارية عليا"
-        ],
-        key="court"
-    )
-
-    court_name = st.text_input(
-        "اسم المحكمة",
-        key="court_name"
-    )
-
-    subject = st.text_area(
-        "موضوع الدعوى",
-        key="subject"
-    )
-
-    session_date = st.date_input(
-        "تاريخ الجلسة",
-        key="session_date"
-    )
-
-    session_action = st.text_area(
-        "الإجراء المطلوب بالجلسة",
-        key="session_action"
-    )
-
-    decision_date = st.date_input(
-        "تاريخ القرار",
-        key="decision_date"
-    )
-
-    decision_action = st.text_area(
-        "الإجراء المطلوب بعد القرار",
-        key="decision_action"
-    )
-
-    reason = st.text_area(
-        "السبب",
-        key="reason"
-    )
-
-    notes = st.text_area(
-        "ملاحظات",
-        key="notes"
-    )
-
-    judgment_result = st.selectbox(
-        "نتيجة الدعوى",
-        [
-            "متداولة",
-            "لصالح الهيئة",
-            "ضد الهيئة"
-        ],
-        key="judgment_result"
-    )
-
-    mobile = st.text_input(
-        "رقم الموبايل لإرسال التنبيهات",
-        key="mobile"
-    )
-
-    if st.button("💾 حفظ القضية", key="save_case"):
-
-        try:
-
-            cur.execute("""
-            INSERT INTO cases
-            (
-                litigation_type,
-                claimant_type,
-                claimant,
-                defendant_type,
-                defendant,
-                case_no,
-                judicial_year,
-                circuit,
-                case_type,
-                court,
-                court_name,
-                subject,
-                session_date,
-                session_action,
-                decision_date,
-                decision_action,
-                reason,
-                notes,
-                judgment_result,
-                mobile
-            )
-            VALUES
-            (
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?
-            )
-            """,
-            (
-                litigation_type,
-                claimant_type,
-                claimant,
-                defendant_type,
-                defendant,
-                case_no,
-                judicial_year,
-                circuit,
-                case_type,
-                court,
-                court_name,
-                subject,
-                str(session_date),
-                session_action,
-                str(decision_date),
-                decision_action,
-                reason,
-                notes,
-                judgment_result,
-                mobile
-            ))
-
-            conn.commit()
-
-            st.success("تم حفظ القضية بنجاح")
-
-        except Exception as e:
-
-            st.error(f"خطأ أثناء الحفظ: {e}")
-            
-from datetime import datetime
-# =====================================
-# جدول متابعات القضايا
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS case_updates(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-case_id INTEGER,
-
-update_date TEXT,
-
-adjournment_reason TEXT,
-
-next_session_date TEXT,
-
-status_reason TEXT
-
-)
-
-""")
-
-conn.commit()
-# =====================================
-# الحصر العام للقضايا
-# =====================================
-
-if st.session_state.page == "all_cases":
-
-    if st.button("🗑️ حذف القضايا الفارغة"):
-
-        cur.execute("""
-        DELETE FROM cases
-        WHERE
-        (claimant IS NULL OR claimant = '')
-        AND
-        (defendant IS NULL OR defendant = '')
-        """)
-
-        conn.commit()
-
-        st.success("تم حذف القضايا الفارغة")
-        st.rerun()
-
-    st.markdown("""
-    <h2 style='text-align:center;color:white'>
-    📋 حصر عام القضايا المتداولة
-    </h2>
-    """, unsafe_allow_html=True)
-
-    cases_df = pd.read_sql_query(
-        """
-        SELECT *
-        FROM cases
-        ORDER BY session_date ASC
-        """,
-        conn
-    )
-
-    if cases_df.empty:
-
-        st.warning("لا توجد قضايا مسجلة")
-
-    else:
-
-        for _, row in cases_df.iterrows():
-
-            update = cur.execute(
-                """
-                SELECT adjournment_reason
-                FROM case_updates
-                WHERE case_id = ?
-                ORDER BY id DESC
-                LIMIT 1
-                """,
-                (row["id"],)
-            ).fetchone()
-
-            last_action = ""
-
-            if update and update[0]:
-                last_action = update[0]
-
-            title = (
-                f"{row['claimant']} ضد {row['defendant']} | "
-                f"دعوى {row['case_no']} لسنة {row['judicial_year']} | "
-                f"جلسة {row['session_date']} | "
-                f"{last_action}"
-            )
-
-            with st.expander(title):
-
-                st.write(f"الخصوم : {row['claimant']} ضد {row['defendant']}")
-                st.write(f"رقم الدعوى : {row['case_no']}")
-                st.write(f"السنة القضائية : {row['judicial_year']}")
-                st.write(f"الدائرة : {row['circuit']}")
-                st.write(f"نوع الإجراء : {row['litigation_type']}")
-                st.write(f"نوع الدعوى : {row['case_type']}")
-                st.write(f"المحكمة : {row['court']}")
-                st.write(f"اسم المحكمة : {row['court_name']}")
-                st.write(f"موضوع الدعوى : {row['subject']}")
-                st.write(f"تاريخ الجلسة الحالية : {row['session_date']}")
-
-                st.markdown("---")
-
-                delete_reason = st.text_input(
-                    "سبب الحذف",
-                    key=f"del_reason_{row['id']}"
-                )
-
-                if st.button(
-                    "❌ حذف القضية",
-                    key=f"delete_{row['id']}"
-                ):
-
-                    cur.execute(
-                        """
-                        INSERT INTO deleted_cases
-                        (
-                            original_case_id,
-                            litigation_type,
-                            claimant,
-                            defendant,
-                            case_no,
-                            judicial_year,
-                            subject,
-                            delete_reason,
-                            deleted_at
-                        )
-                        VALUES (?,?,?,?,?,?,?,?,?)
-                        """,
-                        (
-                            row["id"],
-                            row["litigation_type"],
-                            row["claimant"],
-                            row["defendant"],
-                            row["case_no"],
-                            row["judicial_year"],
-                            row["subject"],
-                            delete_reason,
-                            str(datetime.now())
-                        )
-                    )
-
-                    cur.execute(
-                        """
-                        DELETE FROM cases
-                        WHERE id = ?
-                        """,
-                        (row["id"],)
-                    )
-
-                    conn.commit()
-
-                    st.success("تم حذف القضية ونقلها لسجل المحذوفات")
-                    st.rerun()
-
-                st.markdown("---")
-
-                st.subheader("متابعة القضية")
-
-                adjournment_reason = st.text_area(
-                    "سبب التأجيل",
-                    key=f"adj_{row['id']}"
-                )
-
-                next_session_date = st.date_input(
-                    "الجلسة القادمة",
-                    key=f"next_{row['id']}"
-                )
-
-                status_reason = st.text_area(
-                    "القرار أو الإجراء الجديد",
-                    key=f"status_{row['id']}"
-                )
-
-                if st.button(
-                    "💾 حفظ المتابعة",
-                    key=f"save_{row['id']}"
-                ):
-
-                    cur.execute(
-                        """
-                        INSERT INTO case_updates
-                        (
-                            case_id,
-                            update_date,
-                            adjournment_reason,
-                            next_session_date,
-                            status_reason
-                        )
-                        VALUES (?,?,?,?,?)
-                        """,
-                        (
-                            row["id"],
-                            str(datetime.now()),
-                            adjournment_reason,
-                            str(next_session_date),
-                            status_reason
-                        )
-                    )
-
-                    conn.commit()
-
-                    st.success("تم حفظ المتابعة")
-                    st.rerun()
