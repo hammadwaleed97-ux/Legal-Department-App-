@@ -714,3 +714,137 @@ elif st.session_state.page == "all_cases":
                     st.success("تم حفظ المتابعة")
 
                     st.rerun()
+# =====================================
+# البحث عن دعوى
+# =====================================
+
+elif st.session_state.page == "search":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    🔍 البحث عن دعوى
+    </h2>
+    """, unsafe_allow_html=True)
+
+    search_text = st.text_input(
+        "اكتب رقم الدعوى أو اسم أحد الخصوم أو موضوع الدعوى"
+    )
+
+    if search_text:
+
+        result = pd.read_sql_query(
+            """
+            SELECT *
+            FROM cases
+            WHERE
+            claimant LIKE ?
+            OR defendant LIKE ?
+            OR case_no LIKE ?
+            OR subject LIKE ?
+            ORDER BY session_date ASC
+            """,
+            conn,
+            params=(
+                f"%{search_text}%",
+                f"%{search_text}%",
+                f"%{search_text}%",
+                f"%{search_text}%"
+            )
+        )
+
+        if result.empty:
+
+            st.warning("لا توجد نتائج")
+
+        else:
+
+            st.success(
+                f"تم العثور على {len(result)} قضية"
+            )
+
+            for _, row in result.iterrows():
+
+                last_update = cur.execute(
+                    """
+                    SELECT
+                    next_session_date,
+                    adjournment_reason
+                    FROM case_updates
+                    WHERE case_id = ?
+                    ORDER BY id DESC
+                    LIMIT 1
+                    """,
+                    (row["id"],)
+                ).fetchone()
+
+                last_session = row["session_date"]
+                last_reason = ""
+
+                if last_update:
+
+                    if last_update[0]:
+                        last_session = last_update[0]
+
+                    if last_update[1]:
+                        last_reason = last_update[1]
+
+                title = (
+                    f"{row['claimant']} ضد "
+                    f"{row['defendant']} | "
+                    f"{row['litigation_type']} "
+                    f"{row['case_no']}"
+                )
+
+                with st.expander(title):
+
+                    st.write(
+                        f"{row['claimant_type']} : {row['claimant']}"
+                    )
+
+                    st.write(
+                        f"{row['defendant_type']} : {row['defendant']}"
+                    )
+
+                    st.write(
+                        f"رقم الدعوى : {row['case_no']}"
+                    )
+
+                    st.write(
+                        f"السنة القضائية : {row['judicial_year']}"
+                    )
+
+                    st.write(
+                        f"الدائرة : {row['circuit']}"
+                    )
+
+                    st.write(
+                        f"المحكمة : {row['court']}"
+                    )
+
+                    st.write(
+                        f"اسم المحكمة : {row['court_name']}"
+                    )
+
+                    if row["appeal_office"]:
+
+                        st.write(
+                            f"مأمورية الاستئناف : "
+                            f"{row['appeal_office']}"
+                        )
+
+                    st.write(
+                        f"موضوع الدعوى : {row['subject']}"
+                    )
+
+                    st.write(
+                        f"آخر جلسة : {last_session}"
+                    )
+
+                    st.write(
+                        f"آخر إجراء : {last_reason}"
+                    )
+
+                    st.write(
+                        f"الحالة : "
+                        f"{row['judgment_result']}"
+                    )
