@@ -321,3 +321,167 @@ with col2:
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
+# =====================================
+# تسجيل القضايا
+# =====================================
+
+if st.session_state.page == "cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    ⚖️ تسجيل القضايا
+    </h2>
+    """, unsafe_allow_html=True)
+
+    litigation_type = st.selectbox(
+        "نوع الإجراء",
+        ["دعوى", "استئناف", "نقض"]
+    )
+
+    claimant_type = st.selectbox(
+        "صفة الخصم الأول",
+        ["المدعى", "المستأنف", "الطاعن"]
+    )
+
+    claimant = st.text_input(
+        "اسم الخصم الأول"
+    )
+
+    defendant_type = st.selectbox(
+        "صفة الخصم الثاني",
+        ["المدعى عليه", "المستأنف ضده", "المطعون ضده"]
+    )
+
+    defendant = st.text_input(
+        "اسم الخصم الثاني"
+    )
+
+    case_no = st.text_input(
+        "رقم الدعوى / الاستئناف / الطعن"
+    )
+
+    judicial_year = st.text_input(
+        "السنة القضائية"
+    )
+
+    circuit = st.text_input(
+        "الدائرة"
+    )
+
+    case_type = st.text_input(
+        "نوع الدعوى"
+    )
+
+    court = st.selectbox(
+        "المحكمة",
+        [
+            "الابتدائية",
+            "الاستئناف",
+            "النقض",
+            "إدارية",
+            "قضاء إداري",
+            "إدارية عليا"
+        ]
+    )
+
+    court_name = st.text_input(
+        "اسم المحكمة"
+    )
+
+    appeal_office = ""
+
+    if litigation_type == "استئناف":
+
+        appeal_office = st.text_input(
+            "مأمورية الاستئناف"
+        )
+
+    subject = st.text_area(
+        "موضوع الدعوى"
+    )
+
+    session_date = st.date_input(
+        "تاريخ الجلسة"
+    )
+
+    reason = st.text_area(
+        "السبب والإجراء المطلوب"
+    )
+
+    notes = st.text_area(
+        "ملاحظات"
+    )
+
+    judgment_result = st.selectbox(
+        "حالة الدعوى",
+        [
+            "متداولة",
+            "لصالح الهيئة",
+            "ضد الهيئة"
+        ]
+    )
+
+    mobile = st.text_input(
+        "رقم الهاتف"
+    )
+
+    if st.button("💾 حفظ القضية"):
+
+        cur.execute(
+            """
+            INSERT INTO cases
+            (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                session_date,
+                reason,
+                notes,
+                judgment_result,
+                mobile,
+                created_at
+            )
+            VALUES
+            (
+                ?,?,?,?,?,?,
+                ?,?,?,?,?,?,
+                ?,?,?,?,?,?,
+                ?,?
+            )
+            """,
+            (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                str(session_date),
+                reason,
+                notes,
+                judgment_result,
+                mobile,
+                str(datetime.now())
+            )
+        )
+
+        conn.commit()
+
+        st.success("تم حفظ القضية بنجاح")
