@@ -848,3 +848,146 @@ elif st.session_state.page == "search":
                         f"الحالة : "
                         f"{row['judgment_result']}"
                     )
+# =====================================
+# التنبيهات
+# =====================================
+
+elif st.session_state.page == "alerts":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    🔔 التنبيهات
+    </h2>
+    """, unsafe_allow_html=True)
+
+    today = datetime.today().date()
+
+    st.subheader("📅 جلسات خلال 7 أيام")
+
+    found_sessions = False
+
+    cases_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        WHERE judgment_result='متداولة'
+        """,
+        conn
+    )
+
+    for _, row in cases_df.iterrows():
+
+        try:
+
+            session_date = datetime.strptime(
+                row["session_date"],
+                "%Y-%m-%d"
+            ).date()
+
+            days_left = (
+                session_date - today
+            ).days
+
+            if 0 <= days_left <= 7:
+
+                found_sessions = True
+
+                st.warning(
+                    f"متبقى {days_left} يوم على جلسة القضية رقم {row['case_no']}"
+                )
+
+                st.write(
+                    f"{row['claimant']} ضد {row['defendant']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"اسم المحكمة : {row['court_name']}"
+                )
+
+                st.write(
+                    f"الجلسة : {row['session_date']}"
+                )
+
+                st.markdown("---")
+
+        except:
+            pass
+
+    if not found_sessions:
+
+        st.success(
+            "لا توجد جلسات خلال 7 أيام"
+        )
+
+    st.markdown("---")
+
+    st.subheader(
+        "⚖️ مواعيد طعن خلال 15 يوم"
+    )
+
+    found_appeals = False
+
+    judgments_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        WHERE judgment_result <> 'متداولة'
+        """,
+        conn
+    )
+
+    for _, row in judgments_df.iterrows():
+
+        try:
+
+            judgment_date = datetime.strptime(
+                row["created_at"][:10],
+                "%Y-%m-%d"
+            ).date()
+
+            deadline = (
+                judgment_date + timedelta(days=40)
+            )
+
+            remaining = (
+                deadline - today
+            ).days
+
+            if 0 <= remaining <= 15:
+
+                found_appeals = True
+
+                st.error(
+                    f"متبقى {remaining} يوم على انتهاء ميعاد الطعن"
+                )
+
+                st.write(
+                    f"{row['claimant']} ضد {row['defendant']}"
+                )
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"الحكم : {row['judgment_result']}"
+                )
+
+                st.markdown("---")
+
+        except:
+            pass
+
+    if not found_appeals:
+
+        st.success(
+            "لا توجد مواعيد طعن خلال 15 يوم"
+        )
