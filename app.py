@@ -991,3 +991,235 @@ elif st.session_state.page == "alerts":
         st.success(
             "لا توجد مواعيد طعن خلال 15 يوم"
         )
+# =====================================
+# التقارير
+# =====================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📊 التقارير
+    </h2>
+    """, unsafe_allow_html=True)
+
+    region_name = st.text_input(
+        "اسم المنطقة"
+    )
+
+    lawyer_name = st.text_input(
+        "اسم الأستاذ"
+    )
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "كشف بالدعاوى",
+            "كشف بالأحكام"
+        ]
+    )
+
+    if report_type == "كشف بالدعاوى":
+
+        cases_option = st.selectbox(
+            "نوع القضايا",
+            [
+                "المتداولة فقط",
+                "الجميع"
+            ]
+        )
+
+    date_from = st.date_input(
+        "من تاريخ",
+        key="rep_from"
+    )
+
+    date_to = st.date_input(
+        "إلى تاريخ",
+        key="rep_to"
+    )
+
+    if st.button("عرض التقرير"):
+
+        if report_type == "كشف بالدعاوى":
+
+            query = """
+            SELECT *
+            FROM cases
+            WHERE session_date
+            BETWEEN ? AND ?
+            """
+
+            params = [
+                str(date_from),
+                str(date_to)
+            ]
+
+            if cases_option == "المتداولة فقط":
+
+                query += """
+                AND judgment_result='متداولة'
+                """
+
+            report_df = pd.read_sql_query(
+                query,
+                conn,
+                params=params
+            )
+
+            title_text = (
+                "كشف بالدعاوى المتداولة"
+                if cases_option == "المتداولة فقط"
+                else
+                "كشف بالدعاوى"
+            )
+
+        else:
+
+            query = """
+            SELECT *
+            FROM cases
+            WHERE judgment_result<>'متداولة'
+            AND session_date
+            BETWEEN ? AND ?
+            """
+
+            report_df = pd.read_sql_query(
+                query,
+                conn,
+                params=(
+                    str(date_from),
+                    str(date_to)
+                )
+            )
+
+            title_text = "كشف بالأحكام الصادرة"
+
+        st.markdown("---")
+
+        st.markdown(
+            f"""
+            <div style='text-align:center;color:white;font-size:22px;font-weight:bold'>
+            الهيئة القومية للتأمين الاجتماعى
+            <br>
+            الإدارة العامة للشئون القانونية
+            <br>
+            ديوان عام منطقة {region_name}
+            <br><br>
+            {title_text}
+            خلال الفترة من
+            {date_from}
+            حتى
+            {date_to}
+            <br><br>
+            طرف الأستاذ / {lawyer_name}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        report_rows = []
+
+        for _, row in report_df.iterrows():
+
+            update = cur.execute(
+                """
+                SELECT
+                next_session_date,
+                adjournment_reason
+                FROM case_updates
+                WHERE case_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (row["id"],)
+            ).fetchone()
+
+            last_session = row["session_date"]
+            last_reason = ""
+
+            if update:
+
+                if update[0]:
+                    last_session = update[0]
+
+                if update[1]:
+                    last_reason = update[1]
+
+            defendant_name = row["defendant"]
+
+            if "الهيئة القومية للتأمين" in defendant_name:
+
+                defendant_name = "الهيئة"
+
+            report_rows.append({
+
+                "رقم الدعوى":
+                row["case_no"],
+
+                "السنة القضائية":
+                row["judicial_year"],
+
+                "الدائرة":
+                row["circuit"],
+
+                "المحكمة":
+                row["court"],
+
+                "الخصوم":
+                f"{row['claimant']} ضد {defendant_name}",
+
+                "موضوع الدعوى":
+                row["subject"],
+
+                "آخر إجراء":
+                f"جلسة {last_session} - {last_reason}"
+
+            })
+
+        final_df = pd.DataFrame(
+            report_rows
+        )
+
+        if final_df.empty:
+
+            st.warning(
+                "لا توجد بيانات خلال الفترة المحددة"
+            )
+
+        else:
+
+            st.dataframe(
+                final_df,
+                use_container_width=True
+            )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.markdown(
+            """
+            <div style='text-align:center;color:white;font-size:20px'>
+            وتفضلوا سيادتكم بقبول وافر الاحترام والتقدير ،،،
+            <br><br>
+            عضو الإدارة &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            مدير الإدارة
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.button(
+                "📄 فتح Word",
+                key="word_btn"
+            )
+
+        with col2:
+
+            st.button(
+                "📕 حفظ PDF",
+                key="pdf_btn"
+            )
