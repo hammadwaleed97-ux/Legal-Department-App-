@@ -1229,3 +1229,132 @@ elif st.session_state.page == "reports":
                 "📕 حفظ PDF",
                 key="pdf_report"
             )
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+elif st.session_state.page == "archive":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📂 أرشيف القضايا
+    </h2>
+    """, unsafe_allow_html=True)
+
+    archive_df = pd.read_sql_query(
+        """
+        SELECT *
+        FROM cases
+        WHERE judgment_result <> 'متداولة'
+        ORDER BY session_date DESC
+        """,
+        conn
+    )
+
+    if archive_df.empty:
+
+        st.warning(
+            "لا توجد قضايا مؤرشفة"
+        )
+
+    else:
+
+        st.success(
+            f"عدد القضايا المؤرشفة : {len(archive_df)}"
+        )
+
+        for _, row in archive_df.iterrows():
+
+            update = cur.execute(
+                """
+                SELECT
+                next_session_date,
+                adjournment_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                (row["id"],)
+            ).fetchone()
+
+            last_session = row["session_date"]
+            last_reason = ""
+
+            if update:
+
+                if update[0]:
+                    last_session = update[0]
+
+                if update[1]:
+                    last_reason = update[1]
+
+            defendant_name = row["defendant"]
+
+            if "الهيئة القومية للتأمين" in defendant_name:
+                defendant_name = "الهيئة"
+
+            title = f"""
+{row['claimant']} ضد {defendant_name}
+
+{row['litigation_type']} {row['case_no']} لسنة {row['judicial_year']}
+
+الدائرة {row['circuit']}
+
+محكمة {row['court']}
+{row['court_name']}
+
+الحكم : {row['judgment_result']}
+"""
+
+            with st.expander(title):
+
+                st.write(
+                    f"{row['claimant_type']} : {row['claimant']}"
+                )
+
+                st.write(
+                    f"{row['defendant_type']} : {row['defendant']}"
+                )
+
+                st.write(
+                    f"رقم الدعوى : {row['case_no']}"
+                )
+
+                st.write(
+                    f"السنة القضائية : {row['judicial_year']}"
+                )
+
+                st.write(
+                    f"الدائرة : {row['circuit']}"
+                )
+
+                st.write(
+                    f"المحكمة : {row['court']}"
+                )
+
+                st.write(
+                    f"اسم المحكمة : {row['court_name']}"
+                )
+
+                if row["appeal_office"]:
+
+                    st.write(
+                        f"مأمورية الاستئناف : {row['appeal_office']}"
+                    )
+
+                st.write(
+                    f"موضوع الدعوى : {row['subject']}"
+                )
+
+                st.write(
+                    f"آخر جلسة : {last_session}"
+                )
+
+                st.write(
+                    f"آخر إجراء : {last_reason}"
+                )
+
+                st.write(
+                    f"نتيجة الحكم : {row['judgment_result']}"
+                )
