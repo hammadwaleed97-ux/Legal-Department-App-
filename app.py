@@ -443,12 +443,6 @@ if st.session_state.page == "cases":
                 created_at
             )
             VALUES
-            (
-                ?,?,?,?,?,?,
-                ?,?,?,?,?,?,
-                ?,?,?,?,?,?,
-                ?,?,?
-            )
             """,
             (
                 litigation_type,
