@@ -450,6 +450,13 @@ if st.session_state.page == "cases":
                 judgment_result,
                 mobile,
                 created_at
+                VALUES
+(
+    ?,?,?,?,?,?,
+    ?,?,?,?,?,?,
+    ?,?,?,?,?,?,
+    ?
+)
                 litigation_type,
                 claimant_type,
                 claimant,
