@@ -414,3 +414,80 @@ if st.session_state.page == "cases":
             st.success(
                 "شاشة التسجيل جاهزة - الحفظ سنضيفه في الجزء التالي"
             )
+if st.button("💾 حفظ القضية"):
+
+    if not (
+        len(mobile) == 11
+        and mobile.startswith(
+            ("010", "011", "012", "015")
+        )
+    ):
+
+        st.error(
+            "رقم الهاتف غير صحيح"
+        )
+
+    else:
+
+        cur.execute(
+            """
+            INSERT INTO cases
+            (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                session_date,
+                reason,
+                notes,
+                judgment_result,
+                mobile,
+                notifications_enabled,
+                created_at
+            )
+            VALUES
+            (
+                ?,?,?,?,?,?,
+                ?,?,?,?,?,?,
+                ?,?,?,?,?,?,
+                ?,?,?
+            )
+            """,
+            (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                str(session_date),
+                reason,
+                notes,
+                judgment_result,
+                mobile,
+                1 if notifications_enabled else 0,
+                str(datetime.now())
+            )
+        )
+
+        conn.commit()
+
+        st.success(
+            "تم حفظ القضية بنجاح"
+        )
