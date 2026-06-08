@@ -133,3 +133,154 @@ CREATE TABLE IF NOT EXISTS notifications(
 """)
 
 conn.commit()
+# =====================================
+# CSS
+# =====================================
+
+st.markdown("""
+<style>
+
+.stApp{
+    background:#062456;
+}
+
+h1,h2,h3,h4,h5,h6,
+label,p,span{
+    color:white !important;
+}
+
+.stTextInput input{
+    color:black !important;
+}
+
+.stTextArea textarea{
+    color:black !important;
+}
+
+.stDateInput input{
+    color:black !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div{
+    color:black !important;
+}
+
+.logo-box{
+    text-align:center;
+    color:white;
+}
+
+.logo-icon{
+    font-size:60px;
+}
+
+.logo-main{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.logo-sub{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.logo-place{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.logo-name{
+    color:#FFD700;
+    font-size:30px;
+    font-weight:bold;
+}
+
+div.stButton > button{
+    width:340px;
+    height:65px;
+    border-radius:15px;
+    border:none;
+    background:#2f55d4;
+    color:white;
+    font-size:20px;
+    font-weight:bold;
+    display:block;
+    margin:auto;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# =====================================
+# اللوجو
+# =====================================
+
+st.markdown("""
+
+<div class="logo-box">
+
+<div class="logo-icon">
+⚖️
+</div>
+
+<div class="logo-main">
+الهيئة القومية للتأمين الاجتماعي
+</div>
+
+<div class="logo-sub">
+الإدارة العامة للشئون القانونية
+</div>
+
+<div class="logo-place">
+ديوان عام منطقة البحيرة
+</div>
+
+<br>
+
+<div>
+مع تحيات
+</div>
+
+<div class="logo-name">
+وليد شعبان حماد
+</div>
+
+</div>
+
+""", unsafe_allow_html=True)
+
+# =====================================
+# الصفحة الحالية
+# =====================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "home"
+
+# =====================================
+# القائمة الرئيسية
+# =====================================
+
+col1, col2, col3 = st.columns([1,2,1])
+
+with col2:
+
+    if st.button("⚖️ تسجيل القضايا"):
+        st.session_state.page = "cases"
+
+    if st.button("🔔 التنبيهات"):
+        st.session_state.page = "alerts"
+
+    if st.button("📊 التقارير"):
+        st.session_state.page = "reports"
+
+    if st.button("📂 أرشيف القضايا"):
+        st.session_state.page = "archive"
+
+    if st.button("📋 حصر عام القضايا"):
+        st.session_state.page = "all_cases"
+
+    if st.button("🔍 البحث"):
+        st.session_state.page = "search"
+
+    if st.button("❌ القضايا المحذوفة"):
+        st.session_state.page = "deleted"
