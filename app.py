@@ -737,3 +737,96 @@ if st.session_state.page == "update_case":
             st.success("تم حفظ الجلسة بنجاح")
 
             st.rerun()
+# =====================================
+# البحث
+# =====================================
+
+if st.session_state.page == "search":
+
+    st.header("🔍 البحث")
+
+    keyword = st.text_input(
+        "رقم القضية أو اسم الخصم"
+    )
+
+    if keyword:
+
+        rows = cur.execute("""
+            SELECT *
+            FROM cases
+            WHERE
+            case_no LIKE ?
+            OR claimant LIKE ?
+            OR defendant LIKE ?
+            ORDER BY id DESC
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%"
+        )).fetchall()
+
+        if rows:
+
+            for row in rows:
+
+                st.markdown("---")
+
+                st.write(
+                    f"رقم القضية: {row[6]}"
+                )
+
+                st.write(
+                    f"{row[2]}: {row[3]}"
+                )
+
+                st.write(
+                    f"{row[4]}: {row[5]}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى: {row[13]}"
+                )
+
+        else:
+
+            st.warning("لا توجد نتائج")
+
+
+# =====================================
+# القضايا المحذوفة
+# =====================================
+
+if st.session_state.page == "deleted":
+
+    st.header("❌ القضايا المحذوفة")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM deleted_cases
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        for row in rows:
+
+            st.markdown("---")
+
+            st.write(
+                f"رقم القضية الأصلي: {row[1]}"
+            )
+
+            st.write(
+                f"سبب الحذف: {row[2]}"
+            )
+
+            st.write(
+                f"تاريخ الحذف: {row[3]}"
+            )
+
+    else:
+
+        st.warning(
+            "لا توجد قضايا محذوفة"
+        )
