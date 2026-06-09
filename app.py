@@ -519,6 +519,87 @@ if st.session_state.page == "archive":
         st.warning("لا توجد قضايا مؤرشفة")
 
 
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        ORDER BY id DESC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        st.markdown("""
+        | رقم القضية | السنة | الدائرة | النوع | المحكمة | الخصوم | الموضوع | آخر جلسة | السبب | فتح |
+        |------------|--------|----------|--------|----------|---------|----------|----------|-------|------|
+        """)
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY id DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            if last_update:
+
+                last_session = last_update[0]
+                last_reason = last_update[1]
+
+            else:
+
+                last_session = row[14]
+                last_reason = row[15]
+
+            c1,c2,c3,c4,c5,c6,c7,c8,c9,c10 = st.columns(
+                [1,1,1,1,2,3,2,2,2,1]
+            )
+
+            c1.write(row[6])
+            c2.write(row[7])
+            c3.write(row[8])
+            c4.write(row[9])
+
+            c5.write(row[11])
+
+            c6.write(
+                f"{row[3]} ضد {row[5]}"
+            )
+
+            c7.write(row[13])
+
+            c8.write(last_session)
+
+            c9.write(last_reason)
+
+            if c10.button(
+                "فتح",
+                key=f"open_{case_id}"
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "update_case"
+                st.rerun()
+
+            st.markdown("---")
 
 # =====================================
 # البحث
