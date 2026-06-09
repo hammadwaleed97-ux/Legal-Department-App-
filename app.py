@@ -523,44 +523,6 @@ if st.session_state.page == "archive":
     else:
 
         st.warning("لا توجد قضايا مسجلة")
-
-# =====================================
-# حصر عام القضايا
-# =====================================
-
-if st.session_state.page == "all_cases":
-
-    st.header("📋 حصر عام القضايا")
-
-    total = cur.execute(
-        "SELECT COUNT(*) FROM cases"
-    ).fetchone()[0]
-
-    st.success(
-        f"إجمالي القضايا: {total}"
-    )
-
-    rows = cur.execute("""
-        SELECT
-            case_no,
-            judicial_year,
-            claimant,
-            defendant,
-            status
-        FROM cases
-        ORDER BY id DESC
-    """).fetchall()
-
-    if rows:
-
-        st.dataframe(
-            rows,
-            use_container_width=True
-        )
-
-    else:
-
-        st.warning("لا توجد بيانات")
         # =====================================
 # تحديث قضية
 # =====================================
