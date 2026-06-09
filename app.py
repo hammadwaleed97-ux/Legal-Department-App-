@@ -706,7 +706,49 @@ if st.session_state.page == "update_case":
             ))
 
             conn.commit()
+# =====================================
+# إنهاء القضية
+# =====================================
 
+st.markdown("---")
+
+st.subheader("إصدار حكم")
+
+judgment_status = st.selectbox(
+    "نتيجة الحكم",
+    [
+        "متداولة",
+        "لصالح الهيئة",
+        "ضد الهيئة"
+    ],
+    key=f"judgment_{case_id}"
+)
+
+if st.button(
+    "⚖️ حفظ الحكم",
+    key=f"save_judgment_{case_id}"
+):
+
+    cur.execute("""
+        UPDATE cases
+        SET
+            status=?,
+            judgment_result=?
+        WHERE id=?
+    """,
+    (
+        judgment_status,
+        judgment_status,
+        case_id
+    ))
+
+    conn.commit()
+
+    st.success("تم حفظ الحكم")
+
+    st.session_state.page = "archive"
+
+    st.rerun()
             st.success("تم حفظ الجلسة بنجاح")
 
             st.rerun()
