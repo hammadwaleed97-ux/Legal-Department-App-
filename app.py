@@ -679,3 +679,58 @@ if st.session_state.page == "update_case":
 
             st.success("تم حفظ التحديث")
 st.success("تم حفظ القضية بنجاح")
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📋 حصر عام القضايا
+    </h2>
+    """, unsafe_allow_html=True)
+
+    cases = cur.execute(
+        """
+        SELECT
+            id,
+            case_no,
+            judicial_year,
+            circuit,
+            court,
+            appeal_office,
+            subject,
+            session_date,
+            reason,
+            judgment_result
+        FROM cases
+        WHERE judgment_result = 'متداولة'
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    if not cases:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in cases:
+
+            st.markdown("---")
+
+            st.write("رقم القضية:", row[1])
+            st.write("السنة القضائية:", row[2])
+            st.write("الدائرة:", row[3])
+            st.write("المحكمة:", row[4])
+            st.write("المأمورية:", row[5])
+            st.write("موضوع الدعوى:", row[6])
+
+            st.write("تاريخ الجلسة:", row[7])
+            st.write("السبب والإجراء المطلوب:", row[8])
+
+            st.button(
+                f"فتح القضية رقم {row[0]}",
+                key=f"open_{row[0]}"
+            )
