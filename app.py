@@ -492,3 +492,193 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.header("📂 أرشيف القضايا")
+
+    rows = cur.execute("""
+        SELECT
+            id,
+            case_no,
+            judicial_year,
+            claimant,
+            defendant,
+            subject,
+            status
+        FROM cases
+        WHERE status <> 'متداولة'
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        for row in rows:
+
+            st.markdown("---")
+
+            st.write("رقم القضية:", row[1])
+            st.write("السنة القضائية:", row[2])
+            st.write("المدعي:", row[3])
+            st.write("المدعى عليه:", row[4])
+            st.write("الموضوع:", row[5])
+            st.write("الحالة:", row[6])
+
+    else:
+
+        st.warning("لا توجد قضايا منتهية")
+
+
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        ORDER BY id DESC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY id DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            if last_update:
+
+                last_session = last_update[0]
+                last_reason = last_update[1]
+
+            else:
+
+                last_session = row[13]
+                last_reason = row[14]
+
+            st.markdown("---")
+
+            st.write("رقم القضية:", row[6])
+            st.write("السنة القضائية:", row[7])
+            st.write("الدائرة:", row[8])
+            st.write("المحكمة:", row[9])
+            st.write("اسم المحكمة:", row[10])
+            st.write("المأمورية:", row[11])
+            st.write("موضوع الدعوى:", row[12])
+
+            st.write("آخر جلسة:", last_session)
+            st.write("سبب آخر جلسة:", last_reason)
+
+            if st.button(
+                f"فتح القضية رقم {case_id}",
+                key=f"open_{case_id}"
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "update_case"
+                st.rerun()
+
+
+# =====================================
+# تحديث قضية
+# =====================================
+
+if "selected_case" not in st.session_state:
+    st.session_state.selected_case = None
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    row = cur.execute("""
+        SELECT
+            case_no,
+            judicial_year,
+            subject
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if row:
+
+        st.header("⚖️ تحديث القضية")
+
+        st.write("رقم القضية:", row[0])
+        st.write("السنة القضائية:", row[1])
+        st.write("موضوع الدعوى:", row[2])
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة القادمة"
+        )
+
+        status_reason = st.text_area(
+            "قرار الجلسة / السبب"
+        )
+
+        case_status = st.selectbox(
+            "حالة القضية",
+            [
+                "متداولة",
+                "لصالح الهيئة",
+                "ضد الهيئة"
+            ]
+        )
+
+        if st.button("💾 حفظ التحديث"):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?,?,?,?,?)
+            """,
+            (
+                case_id,
+                str(datetime.now()),
+                status_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            cur.execute("""
+                UPDATE cases
+                SET status=?,
+                    judgment_result=?
+                WHERE id=?
+            """,
+            (
+                case_status,
+                case_status,
+                case_id
+            ))
+
+            conn.commit()
+
+            st.success("تم حفظ التحديث بنجاح")
