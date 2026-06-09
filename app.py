@@ -487,3 +487,179 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+    # =====================================
+# الحصر العام للقضايا (النسخة النهائية)
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📋 حصر عام القضايا المتداولة
+    </h2>
+    """, unsafe_allow_html=True)
+
+    # =========================
+    # حذف القضايا الفارغة
+    # =========================
+    if st.button("🗑️ حذف القضايا الفارغة"):
+
+        cur.execute("""
+            DELETE FROM cases
+            WHERE
+                (claimant IS NULL OR claimant = '')
+                AND
+                (defendant IS NULL OR defendant = '')
+        """)
+
+        conn.commit()
+        st.success("تم حذف القضايا الفارغة")
+        st.rerun()
+
+    # =========================
+    # جلب البيانات (بدون pandas)
+    # =========================
+    cases = cur.execute("""
+        SELECT *
+        FROM cases
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not cases:
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        def safe(v):
+            return v if v not in (None, "", "NULL") else "-"
+
+        for row in cases:
+
+            case_id = row["id"]
+
+            # آخر متابعة
+            last_update = cur.execute("""
+                SELECT adjournment_reason, next_session_date, status_reason
+                FROM case_updates
+                WHERE case_id = ?
+                ORDER BY id DESC
+                LIMIT 1
+            """, (case_id,)).fetchone()
+
+            last_action = "-"
+
+            if last_update and last_update["adjournment_reason"]:
+                last_action = last_update["adjournment_reason"]
+
+            title = (
+                f"{safe(row['claimant'])} ضد {safe(row['defendant'])} | "
+                f"دعوى {safe(row['case_no'])} لسنة {safe(row['judicial_year'])} | "
+                f"جلسة {safe(row['session_date'])} | "
+                f"{last_action}"
+            )
+
+            with st.expander(title):
+
+                st.write(f"الخصوم : {safe(row['claimant'])} ضد {safe(row['defendant'])}")
+                st.write(f"رقم الدعوى : {safe(row['case_no'])}")
+                st.write(f"السنة القضائية : {safe(row['judicial_year'])}")
+                st.write(f"الدائرة : {safe(row['circuit'])}")
+                st.write(f"نوع الإجراء : {safe(row['litigation_type'])}")
+                st.write(f"نوع الدعوى : {safe(row['case_type'])}")
+                st.write(f"المحكمة : {safe(row['court'])}")
+                st.write(f"اسم المحكمة : {safe(row['court_name'])}")
+                st.write(f"الموضوع : {safe(row['subject'])}")
+                st.write(f"تاريخ الجلسة : {safe(row['session_date'])}")
+
+                st.markdown("---")
+
+                # =========================
+                # حذف القضية
+                # =========================
+                delete_reason = st.text_input(
+                    "سبب الحذف",
+                    key=f"del_reason_{case_id}"
+                )
+
+                if st.button("❌ حذف القضية", key=f"delete_{case_id}"):
+
+                    cur.execute("""
+                        INSERT INTO deleted_cases
+                        (
+                            original_case_id,
+                            litigation_type,
+                            claimant,
+                            defendant,
+                            case_no,
+                            judicial_year,
+                            subject,
+                            delete_reason,
+                            deleted_at
+                        )
+                        VALUES (?,?,?,?,?,?,?,?,?)
+                    """, (
+                        case_id,
+                        row["litigation_type"],
+                        row["claimant"],
+                        row["defendant"],
+                        row["case_no"],
+                        row["judicial_year"],
+                        row["subject"],
+                        delete_reason,
+                        str(datetime.now())
+                    ))
+
+                    cur.execute("""
+                        DELETE FROM cases
+                        WHERE id = ?
+                    """, (case_id,))
+
+                    conn.commit()
+                    st.success("تم حذف القضية ونقلها للمحذوفات")
+                    st.rerun()
+
+                st.markdown("---")
+
+                # =========================
+                # متابعة القضية
+                # =========================
+                st.subheader("متابعة القضية")
+
+                adjournment_reason = st.text_area(
+                    "سبب التأجيل",
+                    key=f"adj_{case_id}"
+                )
+
+                next_session_date = st.date_input(
+                    "الجلسة القادمة",
+                    key=f"next_{case_id}"
+                )
+
+                status_reason = st.text_area(
+                    "القرار أو الإجراء الجديد",
+                    key=f"status_{case_id}"
+                )
+
+                if st.button("💾 حفظ المتابعة", key=f"save_{case_id}"):
+
+                    cur.execute("""
+                        INSERT INTO case_updates
+                        (
+                            case_id,
+                            update_date,
+                            adjournment_reason,
+                            next_session_date,
+                            status_reason
+                        )
+                        VALUES (?,?,?,?,?)
+                    """, (
+                        case_id,
+                        str(datetime.now()),
+                        adjournment_reason,
+                        str(next_session_date),
+                        status_reason
+                    ))
+
+                    conn.commit()
+                    st.success("تم حفظ المتابعة")
+                    st.rerun()
