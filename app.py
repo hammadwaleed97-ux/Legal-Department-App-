@@ -576,13 +576,6 @@ if st.session_state.page == "all_cases":
                 last_session = row[14]
                 last_reason = row[15]
 
-            title = (
-                f"رقم {row[6]} | "
-                f"سنة {row[7]} | "
-                f"دائرة {row[8]} | "
-                f"نوع {row[9]} | "
-                f"جلسة {last_session}"
-            )
 
             if st.button(
                 title,
