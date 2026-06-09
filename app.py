@@ -139,17 +139,6 @@ conn.commit()
 # اختبار التشغيل
 # =====================================
 # =====================================
-rows = cur.execute("""
-SELECT
-case_no,
-subject,
-session_date,
-reason
-FROM cases
-""").fetchall()
-
-st.write(rows)
-# CSS
 # =====================================
 
 st.markdown("""
