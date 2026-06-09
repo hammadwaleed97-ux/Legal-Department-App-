@@ -412,3 +412,83 @@ if st.session_state.page == "cases":
     st.info(
         "تم تجهيز شاشة التسجيل - الحفظ سيتم إضافته في الجزء التالي"
     )
+# =====================================
+# حفظ القضية
+# =====================================
+
+if st.button("💾 حفظ القضية"):
+
+    if notifications_enabled:
+
+        if not (
+            len(whatsapp_number) == 11
+            and whatsapp_number.startswith(
+                ("010", "011", "012", "015")
+            )
+        ):
+
+            st.error("رقم واتساب غير صحيح")
+            st.stop()
+
+    cur.execute(
+        """
+        INSERT INTO cases
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            session_date,
+            reason,
+            notes,
+            judgment_result,
+            notifications_enabled,
+            whatsapp_number,
+            status,
+            created_at
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?
+        )
+        """,
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            str(session_date),
+            reason,
+            notes,
+            judgment_result,
+            1 if notifications_enabled else 0,
+            whatsapp_number,
+            "متداولة",
+            str(datetime.now())
+        )
+    )
+
+    conn.commit()
+
+    st.success("تم حفظ القضية بنجاح")
