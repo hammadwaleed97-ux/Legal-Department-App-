@@ -685,3 +685,4 @@ if st.session_state.page == "update_case":
                 conn.commit()
 
             st.success("تم حفظ التحديث")
+st.success("تم حفظ القضية بنجاح")
