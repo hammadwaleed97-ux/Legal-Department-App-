@@ -577,6 +577,8 @@ if st.session_state.page == "all_cases":
                 last_reason = row[15]
 
             title = (
+                رقم القضية  السنة  الدائرة المدعى  المدعى عليه
+المحكمة  الموضوع  آخر جلسة  سبب التأجيل
 )
             if st.button(
                 title,
