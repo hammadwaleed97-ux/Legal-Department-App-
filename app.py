@@ -520,6 +520,84 @@ if st.session_state.page == "archive":
 
 
 # =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        ORDER BY id DESC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        data = []
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY id DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            if last_update:
+
+                last_session = last_update[0]
+                last_reason = last_update[1]
+
+            else:
+
+                last_session = row[14]
+                last_reason = row[15]
+
+            data.append({
+                "رقم القضية": row[6],
+                "السنة": row[7],
+                "الدائرة": row[8],
+                "النوع": row[9],
+                "المحكمة": row[11],
+                "الخصوم": f"{row[3]} ضد {row[5]}",
+                "الموضوع": row[13],
+                "آخر جلسة": last_session,
+                "سبب التأجيل": last_reason
+            })
+
+        st.dataframe(
+            data,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.markdown("---")
+
+        selected_case = st.selectbox(
+            "اختر القضية لفتحها",
+            rows,
+            format_func=lambda x: f"{x[6]} / {x[7]}"
+        )
+
+        if st.button("📂 فتح القضية"):
+
+            st.session_state.selected_case = selected_case[0]
+            st.session_state.page = "update_case"
+            st.rerun()
+# =====================================
 # البحث
 # =====================================
 
