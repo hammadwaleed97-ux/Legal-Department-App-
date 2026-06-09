@@ -487,13 +487,3 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
-# =====================================
-# أرشيف القضايا
-# ===        FROM cases
-        WHERE status='متداولة'
-        ORDER BY id DESC
-    """).fetchall()
-
-    if not rows:
-
-        st.warning("لا توجد قضايا متداولة")
