@@ -575,7 +575,16 @@ if st.session_state.page == "all_cases":
 
                 last_session = row[14]
                 last_reason = row[15]
-
+title = (
+    f"رقم {row[6]} | "
+    f"سنة {row[7]} | "
+    f"دائرة {row[8]} | "
+    f"المدعى {row[3]} | "
+    f"المدعى عليه {row[5]} | "
+    f"المحكمة {row[10]} | "
+    f"الموضوع {row[13]} | "
+    f"سبب الجلسة {last_reason}"
+)
             if st.button(
                 title,
                 key=f"open_{case_id}"
