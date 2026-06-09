@@ -561,3 +561,84 @@ if st.session_state.page == "all_cases":
     else:
 
         st.warning("لا توجد بيانات")
+        # =====================================
+# تحديث قضية
+# =====================================
+
+if "selected_case" not in st.session_state:
+    st.session_state.selected_case = None
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    row = cur.execute("""
+        SELECT
+            case_no,
+            judicial_year,
+            subject
+        FROM cases
+        WHERE id = ?
+    """, (case_id,)).fetchone()
+
+    if row:
+
+        st.header("تحديث القضية")
+
+        st.write(f"رقم القضية: {row[0]}")
+        st.write(f"السنة القضائية: {row[1]}")
+        st.write(f"الموضوع: {row[2]}")
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة القادمة"
+        )
+
+        status_reason = st.text_area(
+            "قرار الجلسة / سبب التأجيل"
+        )
+
+        if st.button("حفظ التحديث"):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?, ?, ?, ?, ?)
+            """,
+            (
+                case_id,
+                str(datetime.now()),
+                status_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            conn.commit()
+
+            if "حكم لصالح الهيئة" in status_reason:
+
+                cur.execute("""
+                    UPDATE cases
+                    SET status='لصالح الهيئة'
+                    WHERE id=?
+                """,(case_id,))
+
+                conn.commit()
+
+            elif "حكم ضد الهيئة" in status_reason:
+
+                cur.execute("""
+                    UPDATE cases
+                    SET status='ضد الهيئة'
+                    WHERE id=?
+                """,(case_id,))
+
+                conn.commit()
+
+            st.success("تم حفظ التحديث")
