@@ -585,6 +585,7 @@ title = (
     f"الموضوع {row[13]} | "
     f"سبب الجلسة {last_reason}"
 )
+
             if st.button(
                 title,
                 key=f"open_{case_id}"
