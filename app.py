@@ -589,7 +589,8 @@ if st.session_state.page == "all_cases":
             st.write(
                 f"موضوع الدعوى: {row[12]}"
             )
-
+st.write("تاريخ الجلسة:", row[7])
+st.write("السبب والإجراء المطلوب:", row[8])
             if st.button(
                 f"تحديث القضية {case_id}"
             ):
