@@ -492,3 +492,72 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.header("📂 أرشيف القضايا")
+
+    rows = cur.execute("""
+        SELECT
+            id,
+            case_no,
+            judicial_year,
+            claimant,
+            defendant,
+            subject,
+            status
+        FROM cases
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        st.dataframe(
+            rows,
+            use_container_width=True
+        )
+
+    else:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+# =====================================
+# حصر عام القضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    total = cur.execute(
+        "SELECT COUNT(*) FROM cases"
+    ).fetchone()[0]
+
+    st.success(
+        f"إجمالي القضايا: {total}"
+    )
+
+    rows = cur.execute("""
+        SELECT
+            case_no,
+            judicial_year,
+            claimant,
+            defendant,
+            status
+        FROM cases
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        st.dataframe(
+            rows,
+            use_container_width=True
+        )
+
+    else:
+
+        st.warning("لا توجد بيانات")
