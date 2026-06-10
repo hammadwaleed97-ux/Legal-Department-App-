@@ -73,7 +73,36 @@ CREATE TABLE IF NOT EXISTS cases(
     created_at TEXT
 )
 """)
+# =====================================
+# جدول تحديثات القضايا
+# =====================================
 
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_updates(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    roll_no TEXT,
+
+    update_date TEXT,
+
+    adjournment_reason TEXT,
+
+    next_session_date TEXT,
+
+    status_reason TEXT
+)
+""")
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN roll_no TEXT
+    """)
+except:
+    pass
 
 # =====================================
 # جدول التنبيهات
