@@ -671,3 +671,152 @@ CREATE TABLE IF NOT EXISTS case_documents(
 
 conn.commit()
 
+# =====================================
+# جدول المرفقات
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_documents(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    document_name TEXT,
+
+    document_type TEXT,
+
+    document_date TEXT,
+
+    document_notes TEXT,
+
+    file_name TEXT,
+
+    uploaded_at TEXT
+)
+""")
+
+conn.commit()
+
+
+# =====================================
+# فتح القضية
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.markdown(f"""
+        <div style="
+        background:#F5E6C8;
+        color:black;
+        border:5px solid black;
+        border-radius:15px;
+        padding:25px;
+        ">
+
+        <center>
+
+        <h1>⚖️</h1>
+
+        <h2>ملف قضية</h2>
+
+        <h3>الهيئة القومية للتأمين الاجتماعي</h3>
+
+        <h3>الإدارة العامة للشئون القانونية</h3>
+
+        <h3>ديوان عام منطقة البحيرة</h3>
+
+        </center>
+
+        <hr>
+
+        <b>رقم القضية :</b> {case_data[6]}<br>
+
+        <b>السنة القضائية :</b> {case_data[7]}<br>
+
+        <b>الدائرة :</b> {case_data[8]}<br>
+
+        <b>نوع الدعوى :</b> {case_data[9]}<br>
+
+        <b>المحكمة :</b> {case_data[10]}<br>
+
+        <b>اسم المحكمة :</b> {case_data[11]}<br>
+
+        <b>المأمورية :</b> {case_data[12] if case_data[12] else "-"}<br>
+
+        <b>الخصوم :</b>
+        {case_data[3]} ضد {case_data[5]}<br>
+
+        <b>موضوع الدعوى :</b>
+        {case_data[13]}<br>
+
+        <b>الحالة :</b>
+        {case_data[20]}
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("---")
+
+        st.subheader("⚖️ سجل الجلسات")
+
+        with st.container(border=True):
+
+            st.write(
+                f"📅 {case_data[14]}"
+            )
+
+            st.write(
+                f"سبب الجلسة : {case_data[15]}"
+            )
+
+            if case_data[16]:
+
+                st.write(
+                    f"ملاحظات : {case_data[16]}"
+                )
+
+            updates = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason,
+                    adjournment_reason,
+                    update_date
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY next_session_date ASC
+            """,(case_id,)).fetchall()
+
+            if updates:
+
+                for item in updates:
+
+                    st.markdown("---")
+
+                    st.write(
+                        f"📅 {item[0]}"
+                    )
+
+                    st.write(
+                        f"سبب الجلسة : {item[1]}"
+                    )
+
+                    if item[2]:
+
+                        st.write(
+                            f"ملاحظات : {item[2]}"
+                        )
+
+                    st.caption(
+                        f"تم الإضافة بتاريخ {item[3]}"
+                    )
