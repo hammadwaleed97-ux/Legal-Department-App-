@@ -566,6 +566,82 @@ if st.session_state.page == "archive":
                     f"موضوع الدعوى : {row[13]}"
                 )
 
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_session = row[14]
+            last_action = row[15]
+
+            update = cur.execute("""
+                SELECT
+                    roll_no,
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY next_session_date DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            current_roll = ""
+
+            if update:
+
+                current_roll = update[0]
+                last_session = update[1]
+                last_action = update[2]
+
+            claimant_name = row[3]
+            defendant_name = row[5]
+
+            subject = row[13]
+
+            st.markdown(
+                f"""
+### {claimant_name} ضد {defendant_name} - {subject} - جلسة {last_session} - {last_action}
+
+**{row[6]}/{row[7]}** - **{row[8]} {row[9]} {row[11]}**
+                """
+            )
+
+            if current_roll:
+
+                st.write(
+                    f"الرول : {current_roll}"
+                )
+
+            if st.button(
+                "📂 فتح القضية",
+                key=f"open_case_{case_id}"
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "update_case"
+                st.rerun()
+
+            st.markdown("---")
 
 # =====================================
 # متغير القضية المختارة
