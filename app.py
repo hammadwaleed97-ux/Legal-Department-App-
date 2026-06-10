@@ -666,3 +666,188 @@ if st.session_state.page == "all_cases":
 if "selected_case" not in st.session_state:
 
     st.session_state.selected_case = None
+# =====================================
+# جدول المستندات
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_documents(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    document_name TEXT,
+
+    document_type TEXT,
+
+    document_date TEXT,
+
+    document_notes TEXT,
+
+    uploaded_at TEXT
+)
+""")
+
+conn.commit()
+
+# =====================================
+# فتح القضية
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        claimant_type = str(case_data[2])
+
+        if claimant_type in [
+            "المدعى",
+            "المستأنف",
+            "الطاعن"
+        ]:
+
+            cover_color = "#B22222"
+            font_color = "#FFFFFF"
+
+        else:
+
+            cover_color = "#D4A017"
+            font_color = "#111111"
+
+        st.markdown(
+            f"""
+            <div style="
+            background:{cover_color};
+            color:{font_color};
+            padding:25px;
+            border-radius:15px;
+            border:3px solid #000;
+            font-size:15px;
+            line-height:2;
+            ">
+
+            <div style="text-align:center">
+
+            ⚖️
+
+            <h3>ملف قضية</h3>
+
+            </div>
+
+            رقم القضية : {case_data[6]}
+            <br>
+
+            السنة القضائية : {case_data[7]}
+            <br>
+
+            رقم الدائرة : {case_data[8]}
+            <br>
+
+            النوع : {case_data[9]}
+            <br>
+
+            المحكمة : {case_data[10]}
+            <br>
+
+            اسم المحكمة : {case_data[11]}
+            <br>
+            """,
+            unsafe_allow_html=True
+        )
+
+        if case_data[12]:
+
+            st.markdown(
+                f"""
+                المأمورية : {case_data[12]}
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            f"""
+            <hr>
+
+            {case_data[2]} :
+
+            {case_data[3]}
+
+            <br><br>
+
+            ضــــد
+
+            <br><br>
+
+            {case_data[4]} :
+
+            {case_data[5]}
+
+            <hr>
+
+            <b>موضوع الدعوى</b>
+
+            <br>
+
+            {case_data[13]}
+
+            <hr>
+            """,
+            unsafe_allow_html=True
+        )
+
+        st.markdown("### الجلسات")
+
+        session_rows = []
+
+        session_rows.append(
+            [
+                case_data[21] if len(case_data) > 21 else "",
+                case_data[14],
+                case_data[15],
+                case_data[16]
+            ]
+        )
+
+        updates = cur.execute("""
+            SELECT
+                next_session_date,
+                status_reason,
+                adjournment_reason
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY next_session_date ASC
+        """,(case_id,)).fetchall()
+
+        for item in updates:
+
+            session_rows.append(
+                [
+                    "",
+                    item[0],
+                    item[1],
+                    item[2]
+                ]
+            )
+
+        st.markdown(
+            """
+            الرول | الجلسة | الإجراءات | الملاحظات
+            """
+        )
+
+        for row_item in session_rows:
+
+            st.write(
+                f"{row_item[0]} | {row_item[1]} | {row_item[2]} | {row_item[3]}"
+            )
+
+        st.markdown("---")
