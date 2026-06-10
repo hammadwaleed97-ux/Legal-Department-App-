@@ -531,3 +531,47 @@ conn.commit()
 if "selected_case" not in st.session_state:
 
     st.session_state.selected_case = None
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.header("📂 أرشيف القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status <> 'متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا مؤرشفة")
+
+    else:
+
+        for row in rows:
+
+            with st.container(border=True):
+
+                st.write(
+                    f"رقم {row[6]} / {row[7]}"
+                )
+
+                st.write(
+                    f"{row[3]} ضد {row[5]}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row[13]}"
+                )
+
+                st.write(
+                    f"الحالة : {row[20]}"
+                )
