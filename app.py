@@ -575,3 +575,68 @@ if st.session_state.page == "archive":
                 st.write(
                     f"الحالة : {row[20]}"
                 )
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_session = row[14]
+            last_action = row[15]
+
+            update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY next_session_date DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            if update:
+
+                last_session = update[0]
+                last_action = update[1]
+
+            st.markdown(
+                f"""
+### {row[3]} ضد الهيئة - {row[13]} - جلسة {last_session} - {last_action}
+
+**{row[6]}/{row[7]}** - **{row[8]} {row[9]} {row[11]}**
+                """
+            )
+
+            if st.button(
+                "📂 فتح القضية",
+                key=f"open_case_{case_id}"
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "update_case"
+                st.rerun()
+
+            st.markdown("---")
