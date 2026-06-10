@@ -820,3 +820,265 @@ if st.session_state.page == "update_case":
                     st.caption(
                         f"تم الإضافة بتاريخ {item[3]}"
                     )
+# =====================================
+# مرفقات القضية
+# =====================================
+
+        st.markdown("---")
+
+        st.subheader("📎 مرفقات القضية")
+
+        docs = cur.execute("""
+            SELECT *
+            FROM case_documents
+            WHERE case_id=?
+            ORDER BY id DESC
+        """,(case_id,)).fetchall()
+
+        if docs:
+
+            for doc in docs:
+
+                with st.container(border=True):
+
+                    st.write(
+                        f"📄 {doc[2]}"
+                    )
+
+                    st.write(
+                        f"النوع : {doc[3]}"
+                    )
+
+                    st.write(
+                        f"التاريخ : {doc[4]}"
+                    )
+
+                    if doc[5]:
+
+                        st.write(
+                            f"البيانات : {doc[5]}"
+                        )
+
+                    if doc[6]:
+
+                        st.write(
+                            f"اسم الملف : {doc[6]}"
+                        )
+
+        else:
+
+            st.info(
+                "لا توجد مرفقات"
+            )
+
+        st.markdown("---")
+
+        st.subheader("➕ إضافة مستند")
+
+        document_name = st.text_input(
+            "اسم المستند"
+        )
+
+        document_type = st.selectbox(
+            "نوع المستند",
+            [
+                "صحيفة دعوى",
+                "مذكرة",
+                "حافظة مستندات",
+                "حكم",
+                "إعلان",
+                "تقرير خبير",
+                "مستند آخر"
+            ]
+        )
+
+        document_date = st.date_input(
+            "تاريخ المستند"
+        )
+
+        document_notes = st.text_area(
+            "بيانات المستند"
+        )
+
+        uploaded_files = st.file_uploader(
+            "رفع مستند أو أكثر",
+            accept_multiple_files=True
+        )
+
+        if st.button(
+            "💾 حفظ المستند"
+        ):
+
+            if not document_name:
+
+                st.error(
+                    "اكتب اسم المستند"
+                )
+
+            else:
+
+                if uploaded_files:
+
+                    for file in uploaded_files:
+
+                        cur.execute("""
+                            INSERT INTO case_documents
+                            (
+                                case_id,
+                                document_name,
+                                document_type,
+                                document_date,
+                                document_notes,
+                                file_name,
+                                uploaded_at
+                            )
+                            VALUES
+                            (?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            case_id,
+                            document_name,
+                            document_type,
+                            str(document_date),
+                            document_notes,
+                            file.name,
+                            str(datetime.now())
+                        ))
+
+                else:
+
+                    cur.execute("""
+                        INSERT INTO case_documents
+                        (
+                            case_id,
+                            document_name,
+                            document_type,
+                            document_date,
+                            document_notes,
+                            file_name,
+                            uploaded_at
+                        )
+                        VALUES
+                        (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        case_id,
+                        document_name,
+                        document_type,
+                        str(document_date),
+                        document_notes,
+                        "",
+                        str(datetime.now())
+                    ))
+
+                conn.commit()
+
+                st.success(
+                    "تم حفظ المستند"
+                )
+
+                st.rerun()
+
+        st.markdown("---")
+
+        st.subheader("➕ إضافة جلسة جديدة")
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة القادمة"
+        )
+
+        status_reason = st.text_area(
+            "سبب التأجيل"
+        )
+
+        adjournment_reason = st.text_area(
+            "ملاحظات الجلسة"
+        )
+
+        if st.button(
+            "💾 حفظ الجلسة"
+        ):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?, ?, ?, ?, ?)
+            """,
+            (
+                case_id,
+                str(datetime.now()),
+                adjournment_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            conn.commit()
+
+            st.success(
+                "تم حفظ الجلسة"
+            )
+
+            st.rerun()
+
+        st.markdown("---")
+
+        st.subheader("🗑️ حذف القضية")
+
+        delete_reason = st.text_area(
+            "سبب الحذف"
+        )
+
+        if st.button(
+            "🗑️ حذف القضية"
+        ):
+
+            if not delete_reason.strip():
+
+                st.error(
+                    "يجب كتابة سبب الحذف"
+                )
+
+            else:
+
+                cur.execute("""
+                    INSERT INTO deleted_cases
+                    (
+                        original_case_id,
+                        delete_reason,
+                        deleted_at
+                    )
+                    VALUES
+                    (?, ?, ?)
+                """,
+                (
+                    case_id,
+                    delete_reason,
+                    str(datetime.now())
+                ))
+
+                conn.commit()
+
+                st.success(
+                    "تم نقل القضية إلى القضايا المحذوفة"
+                )
+
+                st.session_state.page = "deleted"
+
+                st.rerun()
+
+        st.markdown("---")
+
+        if st.button(
+            "🔙 العودة للحصر العام"
+        ):
+
+            st.session_state.page = "all_cases"
+
+            st.rerun()
