@@ -632,3 +632,169 @@ if st.session_state.page == "all_cases":
 if "selected_case" not in st.session_state:
 
     st.session_state.selected_case = None
+# =====================================
+# فتح القضية وتحديثها
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.header("⚖️ بيانات القضية")
+
+        with st.container(border=True):
+
+            st.write(f"رقم القضية : {case_data[6]}")
+            st.write(f"السنة القضائية : {case_data[7]}")
+            st.write(f"الدائرة : {case_data[8]}")
+            st.write(f"نوع الدعوى : {case_data[9]}")
+
+            st.write(f"المحكمة : {case_data[10]}")
+            st.write(f"اسم المحكمة : {case_data[11]}")
+
+            if case_data[12]:
+                st.write(f"المأمورية : {case_data[12]}")
+
+            st.write(f"{case_data[2]} : {case_data[3]}")
+            st.write(f"{case_data[4]} : {case_data[5]}")
+
+            st.write(f"موضوع الدعوى : {case_data[13]}")
+
+            st.write(f"الحالة : {case_data[20]}")
+
+        st.markdown("---")
+
+        st.subheader("📅 سجل الجلسات")
+
+        updates = cur.execute("""
+            SELECT
+                next_session_date,
+                status_reason,
+                adjournment_reason,
+                update_date
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY id DESC
+        """,(case_id,)).fetchall()
+
+        if updates:
+
+            for item in updates:
+
+                with st.container(border=True):
+
+                    st.write(f"تاريخ الجلسة : {item[0]}")
+                    st.write(f"سبب التأجيل : {item[1]}")
+                    st.write(f"ملاحظات : {item[2]}")
+                    st.write(f"تاريخ الإضافة : {item[3]}")
+
+        else:
+
+            st.info("لا توجد جلسات مسجلة")
+
+        st.markdown("---")
+
+        st.subheader("➕ إضافة جلسة جديدة")
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة القادمة"
+        )
+
+        status_reason = st.text_area(
+            "سبب التأجيل"
+        )
+
+        adjournment_reason = st.text_area(
+            "ملاحظات الجلسة"
+        )
+
+        if st.button(
+            "💾 حفظ الجلسة",
+            key=f"save_session_{case_id}"
+        ):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?, ?, ?, ?, ?)
+            """,
+            (
+                case_id,
+                str(datetime.now()),
+                adjournment_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            conn.commit()
+
+            st.success("تم حفظ الجلسة بنجاح")
+
+            st.rerun()
+
+        st.markdown("---")
+
+        st.subheader("🗑️ حذف القضية")
+
+        delete_reason = st.text_area(
+            "سبب الحذف (إجباري)"
+        )
+
+        if st.button(
+            "🗑️ حذف القضية",
+            key=f"delete_case_{case_id}"
+        ):
+
+            if not delete_reason.strip():
+
+                st.error("يجب كتابة سبب الحذف")
+
+            else:
+
+                cur.execute("""
+                    INSERT INTO deleted_cases
+                    (
+                        original_case_id,
+                        delete_reason,
+                        deleted_at
+                    )
+                    VALUES
+                    (?, ?, ?)
+                """,
+                (
+                    case_id,
+                    delete_reason,
+                    str(datetime.now())
+                ))
+
+                conn.commit()
+
+                st.success("تم نقل القضية إلى القضايا المحذوفة")
+
+                st.session_state.page = "deleted"
+
+                st.rerun()
+
+        st.markdown("---")
+
+        if st.button(
+            "🔙 العودة للحصر العام"
+        ):
+
+            st.session_state.page = "all_cases"
+            st.rerun()
