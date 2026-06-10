@@ -622,3 +622,211 @@ if st.session_state.page == "all_cases":
 if "selected_case" not in st.session_state:
 
     st.session_state.selected_case = None
+# =====================================
+# فتح القضية وتحديثها
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.header("⚖️ بيانات القضية")
+
+        with st.container(border=True):
+
+            st.write(f"رقم القضية : {case_data[6]}")
+            st.write(f"السنة القضائية : {case_data[7]}")
+            st.write(f"الدائرة : {case_data[8]}")
+            st.write(f"نوع الدعوى : {case_data[9]}")
+
+            st.write(f"المحكمة : {case_data[10]}")
+            st.write(f"اسم المحكمة : {case_data[11]}")
+
+            if case_data[12]:
+                st.write(f"المأمورية : {case_data[12]}")
+
+            st.write(f"{case_data[2]} : {case_data[3]}")
+            st.write(f"{case_data[4]} : {case_data[5]}")
+
+            st.write(f"موضوع الدعوى : {case_data[13]}")
+
+            st.write(f"الحالة : {case_data[20]}")
+
+        st.markdown("---")
+
+        st.subheader("📅 سجل الجلسات")
+
+        updates = cur.execute("""
+            SELECT
+                next_session_date,
+                status_reason,
+                adjournment_reason,
+                update_date
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY id DESC
+        """,(case_id,)).fetchall()
+
+        if updates:
+
+            for item in updates:
+
+                with st.container(border=True):
+
+                    st.write(f"تاريخ الجلسة : {item[0]}")
+                    st.write(f"سبب التأجيل : {item[1]}")
+                    st.write(f"ملاحظات : {item[2]}")
+                    st.write(f"تاريخ الإضافة : {item[3]}")
+
+        else:
+
+            st.info("لا توجد جلسات مسجلة")
+
+        st.markdown("---")
+
+        st.subheader("➕ إضافة جلسة جديدة")
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة القادمة"
+        )
+
+        status_reason = st.text_area(
+            "سبب التأجيل"
+        )
+
+        adjournment_reason = st.text_area(
+            "ملاحظات"
+        )
+
+        if st.button("💾 حفظ الجلسة"):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?, ?, ?, ?, ?)
+            """,
+            (
+                case_id,
+                str(datetime.now()),
+                adjournment_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            conn.commit()
+
+            st.success("تم حفظ الجلسة بنجاح")
+
+            st.rerun()
+
+
+# =====================================
+# البحث
+# =====================================
+
+if st.session_state.page == "search":
+
+    st.header("🔍 البحث")
+
+    keyword = st.text_input(
+        "رقم القضية أو اسم الخصم"
+    )
+
+    if keyword:
+
+        rows = cur.execute("""
+            SELECT *
+            FROM cases
+            WHERE
+            case_no LIKE ?
+            OR claimant LIKE ?
+            OR defendant LIKE ?
+            ORDER BY id DESC
+        """,
+        (
+            f"%{keyword}%",
+            f"%{keyword}%",
+            f"%{keyword}%"
+        )).fetchall()
+
+        if rows:
+
+            for row in rows:
+
+                with st.container(border=True):
+
+                    st.write(
+                        f"رقم القضية : {row[6]}"
+                    )
+
+                    st.write(
+                        f"السنة القضائية : {row[7]}"
+                    )
+
+                    st.write(
+                        f"{row[2]} : {row[3]}"
+                    )
+
+                    st.write(
+                        f"{row[4]} : {row[5]}"
+                    )
+
+                    st.write(
+                        f"موضوع الدعوى : {row[13]}"
+                    )
+
+        else:
+
+            st.warning("لا توجد نتائج")
+
+
+# =====================================
+# القضايا المحذوفة
+# =====================================
+
+if st.session_state.page == "deleted":
+
+    st.header("❌ القضايا المحذوفة")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM deleted_cases
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        for row in rows:
+
+            with st.container(border=True):
+
+                st.write(
+                    f"رقم القضية الأصلي : {row[1]}"
+                )
+
+                st.write(
+                    f"سبب الحذف : {row[2]}"
+                )
+
+                st.write(
+                    f"تاريخ الحذف : {row[3]}"
+                )
+
+    else:
+
+        st.warning("لا توجد قضايا محذوفة")
