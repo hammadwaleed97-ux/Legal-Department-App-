@@ -707,3 +707,47 @@ if st.session_state.page == "update_case":
         )
 
         st.markdown("---")
+# =====================================
+# الجلسات
+# =====================================
+
+        st.subheader("📅 الجلسات")
+
+        updates = cur.execute("""
+            SELECT
+                roll_no,
+                next_session_date,
+                status_reason,
+                adjournment_reason
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY next_session_date ASC
+        """,(case_id,)).fetchall()
+
+        if updates:
+
+            for item in updates:
+
+                with st.container(border=True):
+
+                    if item[0]:
+
+                        st.write(
+                            f"الرول : {item[0]}"
+                        )
+
+                    st.write(
+                        f"الجلسة : {item[1]}"
+                    )
+
+                    st.write(
+                        f"الإجراءات : {item[2]}"
+                    )
+
+                    st.write(
+                        f"الملاحظات : {item[3]}"
+                    )
+
+        else:
+
+            st.info("لا توجد جلسات مضافة")
