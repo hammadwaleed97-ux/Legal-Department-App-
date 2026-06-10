@@ -377,6 +377,9 @@ if st.session_state.page == "cases":
         "موضوع الدعوى"
     )
 
+    roll_no = st.text_input(
+    "الرول"
+)
     session_date = st.date_input(
         "تاريخ الجلسة"
     )
