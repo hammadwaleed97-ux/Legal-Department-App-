@@ -487,3 +487,138 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.header("📂 أرشيف القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status <> 'متداولة'
+        ORDER BY id DESC
+    """).fetchall()
+
+    if rows:
+
+        for row in rows:
+
+            with st.container(border=True):
+
+                st.write(f"رقم القضية : {row[6]}")
+                st.write(f"السنة القضائية : {row[7]}")
+                st.write(f"الدائرة : {row[8]}")
+                st.write(f"نوع الدعوى : {row[9]}")
+
+                st.write(f"المحكمة : {row[10]}")
+                st.write(f"اسم المحكمة : {row[11]}")
+
+                if row[12]:
+                    st.write(f"المأمورية : {row[12]}")
+
+                st.write(f"{row[2]} : {row[3]}")
+                st.write(f"{row[4]} : {row[5]}")
+
+                st.write(f"موضوع الدعوى : {row[13]}")
+
+                st.write(f"الحالة : {row[20]}")
+
+    else:
+
+        st.warning("لا توجد قضايا مؤرشفة")
+
+
+# =====================================
+# الحصر العام للقضايا
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE
+        status='متداولة'
+        AND TRIM(IFNULL(case_no,'')) <> ''
+        ORDER BY id DESC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+
+            last_update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY id DESC
+                LIMIT 1
+            """,(case_id,)).fetchone()
+
+            if last_update:
+
+                last_session = last_update[0]
+                last_reason = last_update[1]
+
+            else:
+
+                last_session = row[14]
+                last_reason = row[15]
+
+            if not last_session:
+                last_session = "-"
+
+            if not last_reason:
+                last_reason = "-"
+
+            with st.container(border=True):
+
+                st.write(f"رقم القضية : {row[6]}")
+                st.write(f"السنة القضائية : {row[7]}")
+                st.write(f"الدائرة : {row[8]}")
+                st.write(f"نوع الدعوى : {row[9]}")
+
+                st.write(f"المحكمة : {row[10]}")
+                st.write(f"اسم المحكمة : {row[11]}")
+
+                if row[12]:
+                    st.write(f"المأمورية : {row[12]}")
+
+                st.write(f"{row[2]} : {row[3]}")
+                st.write(f"{row[4]} : {row[5]}")
+
+                st.write(f"موضوع الدعوى : {row[13]}")
+
+                st.write(f"آخر جلسة : {last_session}")
+                st.write(f"سبب التأجيل : {last_reason}")
+
+                if st.button(
+                    "📂 فتح القضية",
+                    key=f"open_{case_id}"
+                ):
+
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "update_case"
+                    st.rerun()
+
+
+# =====================================
+# متغير القضية المختارة
+# =====================================
+
+if "selected_case" not in st.session_state:
+
+    st.session_state.selected_case = None
