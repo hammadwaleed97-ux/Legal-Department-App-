@@ -487,3 +487,182 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+# =====================================
+# إضافة أعمدة مطلوبة إذا لم تكن موجودة
+# =====================================
+
+try:
+    cur.execute("""
+    ALTER TABLE cases
+    ADD COLUMN first_roll TEXT
+    """)
+except:
+    pass
+
+try:
+    cur.execute("""
+    ALTER TABLE case_documents
+    ADD COLUMN file_name TEXT
+    """)
+except:
+    pass
+
+conn.commit()
+
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.header("📂 أرشيف القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status <> 'متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا مؤرشفة")
+
+    else:
+
+        for row in rows:
+
+            with st.container(border=True):
+
+                st.write(
+                    f"{row[6]} • {row[7]} • {row[8]}"
+                )
+
+                st.write(
+                    f"{row[9]} • {row[10]} • {row[11]}"
+                )
+
+                st.write(
+                    f"{row[3]} ضد {row[5]}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row[13]}"
+                )
+
+# =====================================
+# الحصر العام
+# =====================================
+
+if st.session_state.page == "all_cases":
+
+    st.header("📋 حصر عام القضايا")
+
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+        ORDER BY session_date ASC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا متداولة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+
+            claimant_type = str(row[2])
+
+            if claimant_type in [
+                "المدعى",
+                "المستأنف",
+                "الطاعن"
+            ]:
+
+                card_color = "#B22222"
+                text_color = "#FFFFFF"
+
+            else:
+
+                card_color = "#D4A017"
+                text_color = "#111111"
+
+            st.markdown(
+                f"""
+                <div style="
+                background:{card_color};
+                color:{text_color};
+                padding:15px;
+                border-radius:12px;
+                margin-bottom:10px;
+                ">
+
+                ⚖️ ملف قضية
+
+                <br><br>
+
+                رقم القضية : {row[6]}
+
+                <br>
+
+                السنة القضائية : {row[7]}
+
+                <br>
+
+                الدائرة : {row[8]}
+
+                <br>
+
+                النوع : {row[9]}
+
+                <br>
+
+                المحكمة : {row[10]}
+
+                <br>
+
+                اسم المحكمة : {row[11]}
+
+                <br>
+
+                الخصوم :
+
+                {row[3]}
+
+                ضد
+
+                {row[5]}
+
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            if st.button(
+                "📂 فتح القضية",
+                key=f"open_case_{case_id}"
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "update_case"
+                st.rerun()
+
+# =====================================
+# متغير القضية المختارة
+# =====================================
+
+if "selected_case" not in st.session_state:
+
+    st.session_state.selected_case = None
