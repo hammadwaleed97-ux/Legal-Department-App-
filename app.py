@@ -851,3 +851,268 @@ if st.session_state.page == "update_case":
             )
 
         st.markdown("---")
+# =====================================
+# إضافة جلسة جديدة
+# =====================================
+
+st.markdown("---")
+
+st.subheader("➕ إضافة جلسة جديدة")
+
+new_roll = st.text_input(
+    "الرول"
+)
+
+next_session_date = st.date_input(
+    "تاريخ الجلسة"
+)
+
+status_reason = st.text_area(
+    "الإجراءات"
+)
+
+adjournment_reason = st.text_area(
+    "ملاحظات الجلسة"
+)
+
+if st.button(
+    "💾 حفظ الجلسة الجديدة"
+):
+
+    cur.execute("""
+        INSERT INTO case_updates
+        (
+            case_id,
+            update_date,
+            adjournment_reason,
+            next_session_date,
+            status_reason
+        )
+        VALUES
+        (?, ?, ?, ?, ?)
+    """,
+    (
+        case_id,
+        str(datetime.now()),
+        adjournment_reason,
+        str(next_session_date),
+        status_reason
+    ))
+
+    conn.commit()
+
+    st.success("تم حفظ الجلسة")
+
+    st.rerun()
+
+# =====================================
+# تعديل بيانات القضية
+# =====================================
+
+st.markdown("---")
+
+st.subheader("✏️ تعديل بيانات القضية")
+
+edit_subject = st.text_area(
+    "موضوع الدعوى",
+    value=case_data[13]
+)
+
+edit_notes = st.text_area(
+    "ملاحظات القضية",
+    value=case_data[16]
+)
+
+edit_status = st.selectbox(
+    "الحالة",
+    [
+        "متداولة",
+        "لصالح الهيئة",
+        "ضد الهيئة"
+    ],
+    index=[
+        "متداولة",
+        "لصالح الهيئة",
+        "ضد الهيئة"
+    ].index(case_data[17])
+)
+
+if st.button("💾 حفظ التعديلات"):
+
+    cur.execute("""
+        UPDATE cases
+        SET
+        subject=?,
+        notes=?,
+        judgment_result=?
+        WHERE id=?
+    """,
+    (
+        edit_subject,
+        edit_notes,
+        edit_status,
+        case_id
+    ))
+
+    conn.commit()
+
+    st.success("تم حفظ التعديلات")
+
+    st.rerun()
+
+# =====================================
+# مستندات القضية
+# =====================================
+
+st.markdown("---")
+
+st.subheader("📎 مستندات القضية")
+
+document_name = st.text_input(
+    "اسم المستند"
+)
+
+document_type = st.selectbox(
+    "نوع المستند",
+    [
+        "صحيفة دعوى",
+        "مذكرة",
+        "حافظة مستندات",
+        "حكم",
+        "إعلان",
+        "مستند آخر"
+    ]
+)
+
+document_date = st.date_input(
+    "تاريخ المستند"
+)
+
+document_notes = st.text_area(
+    "بيانات المستند"
+)
+
+if st.button(
+    "💾 إضافة المستند"
+):
+
+    cur.execute("""
+        INSERT INTO case_documents
+        (
+            case_id,
+            document_name,
+            document_type,
+            document_date,
+            document_notes,
+            uploaded_at
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?)
+    """,
+    (
+        case_id,
+        document_name,
+        document_type,
+        str(document_date),
+        document_notes,
+        str(datetime.now())
+    ))
+
+    conn.commit()
+
+    st.success("تم إضافة المستند")
+
+    st.rerun()
+
+docs = cur.execute("""
+    SELECT *
+    FROM case_documents
+    WHERE case_id=?
+    ORDER BY id DESC
+""",(case_id,)).fetchall()
+
+if docs:
+
+    for d in docs:
+
+        with st.container(border=True):
+
+            st.write(
+                f"اسم المستند : {d[2]}"
+            )
+
+            st.write(
+                f"النوع : {d[3]}"
+            )
+
+            st.write(
+                f"التاريخ : {d[4]}"
+            )
+
+            st.write(
+                f"البيانات : {d[5]}"
+            )
+
+# =====================================
+# حذف القضية
+# =====================================
+
+st.markdown("---")
+
+st.subheader("🗑️ حذف القضية")
+
+delete_reason = st.text_area(
+    "سبب الحذف"
+)
+
+if st.button(
+    "🗑️ نقل إلى القضايا المحذوفة"
+):
+
+    if not delete_reason.strip():
+
+        st.error(
+            "يجب كتابة سبب الحذف"
+        )
+
+    else:
+
+        cur.execute("""
+            INSERT INTO deleted_cases
+            (
+                original_case_id,
+                delete_reason,
+                deleted_at
+            )
+            VALUES
+            (?, ?, ?)
+        """,
+        (
+            case_id,
+            delete_reason,
+            str(datetime.now())
+        ))
+
+        conn.commit()
+
+        st.success(
+            "تم نقل القضية إلى القضايا المحذوفة"
+        )
+
+        st.session_state.page = "deleted"
+
+        st.rerun()
+
+# =====================================
+# رجوع
+# =====================================
+
+st.markdown("---")
+
+if st.button(
+    "🔙 العودة للحصر العام"
+):
+
+    st.session_state.page = "all_cases"
+
+    st.rerun()
