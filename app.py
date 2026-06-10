@@ -816,53 +816,6 @@ if st.session_state.page == "update_case":
             unsafe_allow_html=True
         )
 
-        st.markdown("### الجلسات")
-
-        session_rows = []
-
-        session_rows.append(
-            [
-                case_data[21] if len(case_data) > 21 else "",
-                case_data[14],
-                case_data[15],
-                case_data[16]
-            ]
-        )
-
-        updates = cur.execute("""
-            SELECT
-                next_session_date,
-                status_reason,
-                adjournment_reason
-            FROM case_updates
-            WHERE case_id=?
-            ORDER BY next_session_date ASC
-        """,(case_id,)).fetchall()
-
-        for item in updates:
-
-            session_rows.append(
-                [
-                    "",
-                    item[0],
-                    item[1],
-                    item[2]
-                ]
-            )
-
-        st.markdown(
-            """
-            الرول | الجلسة | الإجراءات | الملاحظات
-            """
-        )
-
-        for row_item in session_rows:
-
-            st.write(
-                f"{row_item[0]} | {row_item[1]} | {row_item[2]} | {row_item[3]}"
-            )
-
-        st.markdown("---")
         # =====================================
 # إضافة جلسة جديدة
 # =====================================
