@@ -640,3 +640,70 @@ if st.session_state.page == "all_cases":
                 st.rerun()
 
             st.markdown("---")
+# =====================================
+# فتح القضية
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.header("⚖️ ملف القضية")
+
+        st.write(
+            f"رقم القضية : {case_data[6]}"
+        )
+
+        st.write(
+            f"السنة القضائية : {case_data[7]}"
+        )
+
+        st.write(
+            f"الدائرة : {case_data[8]}"
+        )
+
+        st.write(
+            f"النوع : {case_data[9]}"
+        )
+
+        st.write(
+            f"المحكمة : {case_data[10]}"
+        )
+
+        st.write(
+            f"اسم المحكمة : {case_data[11]}"
+        )
+
+        if case_data[12]:
+
+            st.write(
+                f"المأمورية : {case_data[12]}"
+            )
+
+        st.markdown("---")
+
+        st.write(
+            f"{case_data[3]} ({case_data[2]})"
+        )
+
+        st.write("ضــــد")
+
+        st.write(
+            f"{case_data[5]} ({case_data[4]})"
+        )
+
+        st.markdown("---")
+
+        st.write(
+            f"موضوع الدعوى : {case_data[13]}"
+        )
+
+        st.markdown("---")
