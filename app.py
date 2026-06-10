@@ -855,6 +855,41 @@ for item in updates:
         ]
     )
 
+st.markdown("""
+<table style="
+width:100%;
+border-collapse:collapse;
+background:white;
+color:black;
+font-size:14px;
+text-align:center;
+">
+<tr style="background:#d9d9d9;font-weight:bold;">
+<th style="border:1px solid black;">الرول</th>
+<th style="border:1px solid black;">الجلسة</th>
+<th style="border:1px solid black;">الإجراءات</th>
+<th style="border:1px solid black;">الملاحظات</th>
+</tr>
+""", unsafe_allow_html=True)
+
+for row_item in session_rows:
+
+    st.markdown(
+        f"""
+        <tr>
+        <td style="border:1px solid black;">{row_item[0]}</td>
+        <td style="border:1px solid black;">{row_item[1]}</td>
+        <td style="border:1px solid black;">{row_item[2]}</td>
+        <td style="border:1px solid black;">{row_item[3]}</td>
+        </tr>
+        """,
+        unsafe_allow_html=True
+    )
+
+st.markdown(
+    "</table>",
+    unsafe_allow_html=True
+)
         # =====================================
 # إضافة جلسة جديدة
 # =====================================
