@@ -855,19 +855,6 @@ for item in updates:
         ]
     )
 
-st.markdown(
-    """
-    ### الرول | الجلسة | الإجراءات | الملاحظات
-    """
-)
-
-for row_item in session_rows:
-
-    st.write(
-        f"{row_item[0]} | {row_item[1]} | {row_item[2]} | {row_item[3]}"
-    )
-
-st.markdown("---")
         # =====================================
 # إضافة جلسة جديدة
 # =====================================
