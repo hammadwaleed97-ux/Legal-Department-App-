@@ -499,3 +499,35 @@ if st.button("💾 حفظ القضية"):
     conn.commit()
 
     st.success("تم حفظ القضية بنجاح")
+# =====================================
+# جدول المستندات
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_documents(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    document_name TEXT,
+
+    document_type TEXT,
+
+    document_date TEXT,
+
+    document_notes TEXT,
+
+    uploaded_at TEXT
+)
+""")
+
+conn.commit()
+
+# =====================================
+# متغير القضية المختارة
+# =====================================
+
+if "selected_case" not in st.session_state:
+
+    st.session_state.selected_case = None
