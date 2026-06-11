@@ -1034,6 +1034,188 @@ if st.session_state.page == "deleted":
                 st.write(
                     f"تاريخ الحذف : {row[3]}"
                 )
+     # =====================================
+# التقارير والإحصائيات
+# =====================================
+
+if st.session_state.page == "reports":
+
+    st.header("📊 التقارير والإحصائيات")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        from_date = st.date_input(
+            "من تاريخ",
+            key="report_from"
+        )
+
+    with col2:
+        to_date = st.date_input(
+            "إلى تاريخ",
+            key="report_to"
+        )
+
+    st.markdown("---")
+
+    total_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    active_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    positive_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='لصالح الهيئة'
+    """).fetchone()[0]
+
+    negative_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='ضد الهيئة'
+    """).fetchone()[0]
+
+    total_judgments = (
+        positive_judgments +
+        negative_judgments
+    )
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    c1.metric("إجمالي القضايا", total_cases)
+    c2.metric("القضايا المتداولة", active_cases)
+    c3.metric("إجمالي الأحكام الصادرة", total_judgments)
+    c4.metric("الأحكام الصادرة لصالح", positive_judgments)
+    c5.metric("الأحكام الصادرة ضد", negative_judgments)
+
+    st.markdown("---")
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "جميع القضايا المتداولة",
+            "القضايا المتداولة خلال الفترة",
+            "جميع الأحكام الصادرة (لصالح / ضد)",
+            "الأحكام الصادرة لصالح",
+            "الأحكام الصادرة ضد"
+        ]
+    )
+
+    if st.button("📄 استخراج التقرير"):
+
+        rows = []
+
+        if report_type == "جميع القضايا المتداولة":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+            """).fetchall()
+
+        elif report_type == "القضايا المتداولة خلال الفترة":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+                AND session_date BETWEEN ? AND ?
+            """,
+            (
+                str(from_date),
+                str(to_date)
+            )).fetchall()
+
+        elif report_type == "جميع الأحكام الصادرة (لصالح / ضد)":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result IN
+                ('لصالح الهيئة','ضد الهيئة')
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة لصالح":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result='لصالح الهيئة'
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة ضد":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result='ضد الهيئة'
+            """).fetchall()
+
+        if rows:
+
+            st.markdown(
+                f"### التقرير خلال الفترة من {from_date} حتى {to_date}"
+            )
+
+            for row in rows:
+
+                update = cur.execute("""
+                    SELECT
+                        next_session_date,
+                        status_reason
+                    FROM case_updates
+                    WHERE case_id=?
+                    ORDER BY id DESC
+                    LIMIT 1
+                """,(row[0],)).fetchone()
+
+                if update:
+
+                    last_action = (
+                        f"{update[0]} - {update[1]}"
+                    )
+
+                else:
+
+                    last_action = (
+                        f"{row[14]} - {row[15]}"
+                    )
+
+                st.markdown(
+                    f"""
+**رقم القضية:** {row[6]}/{row[7]}
+
+**الخصوم:** {row[3]} ضد {row[5]}
+
+**المحكمة:** {row[11]}
+
+**الموضوع:** {row[13]}
+
+**آخر إجراء / منطوق الحكم:** {last_action}
+
+---
+                    """
+                )
+
+        else:
+
+            st.warning(
+                "لا توجد بيانات للفترة المحددة"
+            )           
 # =====================================
 # البحث
 # =====================================
