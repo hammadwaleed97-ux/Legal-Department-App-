@@ -1040,7 +1040,9 @@ if st.button(
 # مستندات القضية
 # =====================================
 
-        
+        st.markdown("---")
+
+st.subheader("📎 مستندات القضية")
         document_name = st.text_input(
             "اسم المستند"
         )
