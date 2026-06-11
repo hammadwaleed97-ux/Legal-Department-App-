@@ -723,14 +723,14 @@ if st.session_state.page == "update_case":
 </div>
 """, unsafe_allow_html=True)
 
-        st.markdown(f"""
+        if case_data[1] == "استئناف":
+
+    st.markdown(f"""
 <div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:10px;margin-bottom:8px;text-align:center;border-radius:8px;">
 <b>مأمورية استئناف</b><br>
 {case_data[12] if case_data[12] else "ــــــ"}
 </div>
 """, unsafe_allow_html=True)
-
-        st.markdown(f"""
 <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
 
 <div style="flex:1;border:2px solid #198754;background:#f8fff8;color:black;padding:15px;text-align:center;border-radius:8px;">
