@@ -491,6 +491,35 @@ if st.session_state.page == "cases":
                 str(datetime.now())
             )
         )
+        conn.commit()
+
+new_case_id = cur.lastrowid
+
+cur.execute("""
+    INSERT INTO case_updates
+    (
+        case_id,
+        roll_no,
+        update_date,
+        adjournment_reason,
+        next_session_date,
+        status_reason
+    )
+    VALUES
+    (?, ?, ?, ?, ?, ?)
+""",
+(
+    new_case_id,
+    "",
+    str(datetime.now()),
+    notes,
+    str(session_date),
+    reason
+))
+
+conn.commit()
+
+st.success("تم حفظ القضية بنجاح")
 # =====================================
 # جدول المستندات
 # =====================================
