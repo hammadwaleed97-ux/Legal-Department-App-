@@ -1241,6 +1241,141 @@ if st.session_state.page == "reports":
 طرف الأستاذ / وليد شعبان حماد
             """
         )
+if rows:
+
+            st.markdown("""
+<table style="
+width:100%;
+border-collapse:collapse;
+background:white;
+color:black;
+font-size:14px;
+text-align:center;
+">
+
+<tr style="
+background:#d9d9d9;
+font-weight:bold;
+">
+
+<th style="border:1px solid black;">
+م
+</th>
+
+<th style="border:1px solid black;">
+رقم الدعوى
+</th>
+
+<th style="border:1px solid black;">
+السنة القضائية
+</th>
+
+<th style="border:1px solid black;">
+الدائرة
+</th>
+
+<th style="border:1px solid black;">
+المحكمة
+</th>
+
+<th style="border:1px solid black;">
+الخصوم
+</th>
+
+<th style="border:1px solid black;">
+موضوع الدعوى
+</th>
+
+<th style="border:1px solid black;">
+آخر إجراء / منطوق الحكم
+</th>
+
+</tr>
+""", unsafe_allow_html=True)
+
+            counter = 1
+
+            for row in rows:
+
+                last_action = ""
+
+                update = cur.execute("""
+                    SELECT
+                        next_session_date,
+                        status_reason
+                    FROM case_updates
+                    WHERE case_id=?
+                    ORDER BY id DESC
+                    LIMIT 1
+                """,(row[0],)).fetchone()
+
+                if update:
+
+                    last_action = (
+                        f"{update[0]} - "
+                        f"{update[1]}"
+                    )
+
+                else:
+
+                    last_action = (
+                        f"{row[14]} - "
+                        f"{row[15]}"
+                    )
+
+                st.markdown(
+                    f"""
+<tr>
+
+<td style="border:1px solid black;">
+{counter}
+</td>
+
+<td style="border:1px solid black;">
+{row[6]}
+</td>
+
+<td style="border:1px solid black;">
+{row[7]}
+</td>
+
+<td style="border:1px solid black;">
+{row[8]}
+</td>
+
+<td style="border:1px solid black;">
+{row[11]}
+</td>
+
+<td style="border:1px solid black;">
+{row[3]} ضد {row[5]}
+</td>
+
+<td style="border:1px solid black;">
+{row[13]}
+</td>
+
+<td style="border:1px solid black;">
+{last_action}
+</td>
+
+</tr>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                counter += 1
+
+            st.markdown(
+                "</table>",
+                unsafe_allow_html=True
+            )
+
+        else:
+
+            st.warning(
+                "لا توجد بيانات للفترة المحددة"
+            )        
             
 # =====================================
 # البحث
