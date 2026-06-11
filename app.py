@@ -978,3 +978,59 @@ if st.session_state.page == "update_case":
             st.session_state.page = "all_cases"
 
             st.rerun()
+# =====================================
+# القضايا المحذوفة
+# =====================================
+
+if st.session_state.page == "deleted":
+
+    st.header("❌ القضايا المحذوفة")
+
+    rows = cur.execute("""
+        SELECT
+            d.id,
+            d.original_case_id,
+            d.delete_reason,
+            d.deleted_at,
+            c.case_no,
+            c.judicial_year,
+            c.claimant,
+            c.defendant,
+            c.subject
+        FROM deleted_cases d
+        LEFT JOIN cases c
+        ON d.original_case_id = c.id
+        ORDER BY d.deleted_at DESC
+    """).fetchall()
+
+    if not rows:
+
+        st.warning(
+            "لا توجد قضايا محذوفة"
+        )
+
+    else:
+
+        for row in rows:
+
+            with st.container(border=True):
+
+                st.write(
+                    f"رقم القضية : {row[4]} / {row[5]}"
+                )
+
+                st.write(
+                    f"{row[6]} ضد {row[7]}"
+                )
+
+                st.write(
+                    f"موضوع الدعوى : {row[8]}"
+                )
+
+                st.write(
+                    f"سبب الحذف : {row[2]}"
+                )
+
+                st.write(
+                    f"تاريخ الحذف : {row[3]}"
+                )
