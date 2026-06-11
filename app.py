@@ -649,51 +649,6 @@ if st.session_state.page == "all_cases":
                 st.rerun()
 
             st.markdown("---")
-            # =====================================
-# فتح القضية
-# =====================================
-
-if st.session_state.page == "update_case":
-
-    case_id = st.session_state.selected_case
-
-    case_data = cur.execute("""
-        SELECT *
-        FROM cases
-        WHERE id=?
-    """,(case_id,)).fetchone()
-
-    if case_data:
-
-        st.header("⚖️ ملف القضية")
-
-        st.markdown(f"""
-### القضية رقم {case_data[6]} لسنة {case_data[7]}
-
-**الدائرة:** {case_data[8]}
-
-**نوع الدعوى:** {case_data[9]}
-
-**المحكمة:** {case_data[10]} {case_data[11]}
-""")
-
-        if case_data[12]:
-
-            st.markdown(
-                f"**مأمورية الاستئناف:** {case_data[12]}"
-            )
-
-        st.markdown(f"""
-**{case_data[2]}:** {case_data[3]}
-
-**{case_data[4]}:** {case_data[5]}
-
-**موضوع الدعوى / الاستئناف:**
-
-{case_data[13]}
-""")
-
-        st.markdown("---")
 # =====================================
 # الجلسات
 # =====================================
