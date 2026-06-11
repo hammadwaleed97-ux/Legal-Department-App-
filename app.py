@@ -924,6 +924,119 @@ padding:10px;
 
         st.markdown("---")
 # =====================================
+# إضافة جلسة جديدة
+# =====================================
+
+st.markdown("---")
+
+st.subheader("➕ إضافة جلسة جديدة")
+
+new_roll = st.text_input(
+    "الرول"
+)
+
+next_session_date = st.date_input(
+    "تاريخ الجلسة"
+)
+
+status_reason = st.text_area(
+    "الإجراءات"
+)
+
+adjournment_reason = st.text_area(
+    "ملاحظات الجلسة"
+)
+
+reserved_judgment_date = st.date_input(
+    "جلسة الحكم الاحتياطي (إن وجدت)"
+)
+
+judgment_text = st.text_area(
+    "منطوق الحكم"
+)
+
+judgment_result = st.selectbox(
+    "نتيجة الحكم",
+    [
+        "",
+        "لصالح الهيئة",
+        "ضد الهيئة",
+        "إعادة للمرافعة",
+        "إحالة خبير",
+        "إحالة طب شرعي",
+        "تحقيق",
+        "استجواب",
+        "مد أجل للحكم",
+        "أخرى"
+    ]
+)
+
+judgment_action = st.selectbox(
+    "الإجراء بعد الحكم",
+    [
+        "",
+        "تم الطعن",
+        "حفظ"
+    ]
+)
+
+if st.button(
+    "💾 حفظ الجلسة الجديدة"
+):
+
+    cur.execute("""
+        INSERT INTO case_updates
+        (
+            case_id,
+            roll_no,
+            update_date,
+            adjournment_reason,
+            next_session_date,
+            status_reason,
+            reserved_judgment_date,
+            judgment_text,
+            judgment_result,
+            judgment_action
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """,
+    (
+        case_id,
+        new_roll,
+        str(datetime.now()),
+        adjournment_reason,
+        str(next_session_date),
+        status_reason,
+        str(reserved_judgment_date),
+        judgment_text,
+        judgment_result,
+        judgment_action
+    ))
+
+    if judgment_result in [
+        "لصالح الهيئة",
+        "ضد الهيئة"
+    ]:
+
+        cur.execute("""
+            UPDATE cases
+            SET
+                status='محكوم فيها',
+                judgment_result=?
+            WHERE id=?
+        """,
+        (
+            judgment_result,
+            case_id
+        ))
+
+    conn.commit()
+
+    st.success("تم حفظ الجلسة")
+
+    st.rerun()        
+# =====================================
 # مستندات القضية
 # =====================================
 
