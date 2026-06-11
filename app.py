@@ -648,70 +648,7 @@ if st.session_state.page == "all_cases":
                 st.session_state.page = "update_case"
                 st.rerun()
 
-            st.markdown("---")  
- # =====================================
-# فتح القضية
-# =====================================
-
-if st.session_state.page == "update_case":
-
-    case_id = st.session_state.selected_case
-
-    case_data = cur.execute("""
-        SELECT *
-        FROM cases
-        WHERE id=?
-    """,(case_id,)).fetchone()
-
-    if case_data:
-
-        st.header("⚖️ ملف القضية")
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.info(f"رقم القضية\n\n{case_data[6]}")
-
-        with col2:
-            st.info(f"السنة القضائية\n\n{case_data[7]}")
-
-        with col3:
-            st.info(f"الدائرة\n\n{case_data[8]}")
-
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.info(f"نوع الدعوى\n\n{case_data[9]}")
-
-        with col2:
-            st.info(f"المحكمة\n\n{case_data[10]}")
-
-        with col3:
-            st.info(f"اسم المحكمة\n\n{case_data[11]}")
-
-        if case_data[12]:
-
-            st.info(
-                f"مأمورية الاستئناف\n\n{case_data[12]}"
-            )
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.success(
-                f"{case_data[2]}\n\n{case_data[3]}"
-            )
-
-        with col2:
-            st.error(
-                f"{case_data[4]}\n\n{case_data[5]}"
-            )
-
-        st.warning(
-            f"موضوع الدعوى / الاستئناف\n\n{case_data[13]}"
-        )
-
-        st.markdown("---")           
+            st.markdown("---")           
 # =====================================
 # الجلسات
 # =====================================
