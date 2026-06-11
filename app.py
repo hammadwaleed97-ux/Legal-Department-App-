@@ -415,6 +415,88 @@ if st.session_state.page == "cases":
         whatsapp_number = st.text_input(
             "رقم واتساب التنبيهات"
         )
+        # =====================================
+# حفظ القضية
+# =====================================
+
+if st.button("💾 حفظ القضية"):
+    
+    # الحصول على القيم من الـ session_state مباشرة
+    # نستخدم .get لضمان عدم حدوث خطأ إذا لم تكن القيم موجودة
+    is_notif_enabled = st.session_state.get('notifications_enabled', False)
+    whatsapp_num = st.session_state.get('whatsapp_number', '')
+
+    if is_notif_enabled:
+        if not (
+            len(whatsapp_num) == 11
+            and whatsapp_num.startswith(("010", "011", "012", "015"))
+        ):
+            st.error("رقم واتساب غير صحيح")
+            st.stop()
+
+    cur.execute(
+        """
+        INSERT INTO cases
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            session_date,
+            reason,
+            notes,
+            judgment_result,
+            notifications_enabled,
+            whatsapp_number,
+            status,
+            created_at
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?
+        )
+        """,
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            str(session_date),
+            reason,
+            notes,
+            judgment_result,
+            1 if is_notif_enabled else 0,
+            whatsapp_num,
+            "متداولة",
+            str(datetime.now())
+        )
+    )
+
+    conn.commit()
+
+    st.success("تم حفظ القضية بنجاح")
+    
 # =====================================
 # جدول المستندات
 # =====================================
