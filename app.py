@@ -1034,6 +1034,116 @@ if st.session_state.page == "deleted":
                 st.write(
                     f"تاريخ الحذف : {row[3]}"
                 )
+# =====================================
+# التقارير والإحصائيات
+# =====================================
+
+if st.session_state.page == "reports":
+
+    st.header("📊 التقارير والإحصائيات")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        from_date = st.date_input(
+            "من تاريخ",
+            key="report_from"
+        )
+
+    with col2:
+        to_date = st.date_input(
+            "إلى تاريخ",
+            key="report_to"
+        )
+
+    st.markdown("---")
+
+    total_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    active_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    positive_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='لصالح الهيئة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    negative_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='ضد الهيئة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    total_judgments = (
+        positive_judgments +
+        negative_judgments
+    )
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    c1.metric(
+        "إجمالي القضايا",
+        total_cases
+    )
+
+    c2.metric(
+        "القضايا المتداولة",
+        active_cases
+    )
+
+    c3.metric(
+        "إجمالي الأحكام الصادرة",
+        total_judgments
+    )
+
+    c4.metric(
+        "الأحكام الصادرة لصالح",
+        positive_judgments
+    )
+
+    c5.metric(
+        "الأحكام الصادرة ضد",
+        negative_judgments
+    )
+
+    st.markdown("---")
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "جميع القضايا المتداولة",
+            "القضايا المتداولة خلال الفترة",
+            "جميع الأحكام الصادرة (لصالح / ضد)",
+            "الأحكام الصادرة لصالح",
+            "الأحكام الصادرة ضد",
+            "جميع صور الأحكام",
+            "صور الأحكام الصادرة لصالح",
+            "صور الأحكام الصادرة ضد"
+        ]
+    )                
             
 # =====================================
 # البحث
