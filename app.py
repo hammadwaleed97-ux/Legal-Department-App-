@@ -1143,7 +1143,104 @@ if st.session_state.page == "reports":
             "صور الأحكام الصادرة لصالح",
             "صور الأحكام الصادرة ضد"
         ]
-    )                
+    )    
+    if st.button("📄 استخراج التقرير"):
+
+        rows = []
+
+        report_title = ""
+
+        if report_type == "جميع القضايا المتداولة":
+
+            report_title = "كشف بجميع الدعاوى المتداولة"
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+                ORDER BY session_date ASC
+            """).fetchall()
+
+        elif report_type == "القضايا المتداولة خلال الفترة":
+
+            report_title = "كشف بالدعاوى المتداولة"
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+                AND session_date BETWEEN ? AND ?
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+                ORDER BY session_date ASC
+            """,
+            (
+                str(from_date),
+                str(to_date)
+            )).fetchall()
+
+        elif report_type == "جميع الأحكام الصادرة (لصالح / ضد)":
+
+            report_title = "كشف بالأحكام الصادرة"
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result IN
+                ('لصالح الهيئة','ضد الهيئة')
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة لصالح":
+
+            report_title = "كشف بالأحكام الصادرة لصالح الهيئة"
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result='لصالح الهيئة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة ضد":
+
+            report_title = "كشف بالأحكام الصادرة ضد الهيئة"
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE judgment_result='ضد الهيئة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        st.markdown("---")
+
+        st.markdown(
+            f"""
+### {report_title}
+
+خلال الفترة من {from_date}
+
+حتى {to_date}
+
+طرف الأستاذ / وليد شعبان حماد
+            """
+        )
             
 # =====================================
 # البحث
