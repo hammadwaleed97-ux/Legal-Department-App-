@@ -803,6 +803,85 @@ padding:10px;
 
 </div>
 """, unsafe_allow_html=True)
+        st.markdown("---")
+
+        st.subheader("📅 الجلسات")
+
+        updates = cur.execute("""
+            SELECT
+                roll_no,
+                next_session_date,
+                status_reason,
+                adjournment_reason
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY next_session_date ASC
+        """,(case_id,)).fetchall()
+
+        if updates:
+
+            st.markdown("""
+<div dir="rtl" style="display:flex;gap:6px;margin-bottom:8px;">
+
+<div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الرول
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+تاريخ الجلسة
+</div>
+
+<div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الإجراءات
+</div>
+
+<div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الملاحظات
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+            for item in updates:
+
+                session_date = "—"
+
+                if item[1]:
+                    session_date = (
+                        str(item[1])[:10].split("-")[2]
+                        + "/"
+                        + str(item[1])[:10].split("-")[1]
+                        + "/"
+                        + str(item[1])[:10].split("-")[0]
+                    )
+
+                st.markdown(f"""
+<div dir="rtl" style="display:flex;gap:6px;margin-bottom:6px;">
+
+<div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[0] if item[0] else "—"}
+</div>
+
+<div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{session_date}
+</div>
+
+<div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[2] if item[2] else "—"}
+</div>
+
+<div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[3] if item[3] else "—"}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        else:
+
+            st.info("لا توجد جلسات مسجلة")
+
+        st.markdown("---")
 # =====================================
 # إضافة جلسة جديدة
 # =====================================
