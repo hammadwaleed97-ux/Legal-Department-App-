@@ -1366,6 +1366,18 @@ font-weight:bold;
 
                 counter += 1
 
+if rows:
+
+    st.markdown(
+        "</table>",
+        unsafe_allow_html=True
+    )
+
+else:
+
+    st.warning(
+        "لا توجد بيانات للفترة المحددة"
+    )
             
 # =====================================
 # البحث
