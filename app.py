@@ -751,7 +751,7 @@ if st.session_state.page == "update_case":
 
             st.markdown(f"""
 <div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:10px;margin-bottom:8px;text-align:center;border-radius:8px;">
-<b>مأمورية الاستئناف</b><br>
+<b>مأمورية استئناف</b><br>
 {case_data[12] if case_data[12] else "ــــــ"}
 </div>
 """, unsafe_allow_html=True)
