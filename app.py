@@ -1372,7 +1372,6 @@ font-weight:bold;
             )
 
         else:
-
             st.warning(
                 "لا توجد بيانات للفترة المحددة"
             )        
