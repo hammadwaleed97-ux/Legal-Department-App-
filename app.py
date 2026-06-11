@@ -1308,3 +1308,51 @@ if st.session_state.page == "search":
                     st.rerun()
 
                 st.markdown("---")
+# =====================================
+# التنبيهات
+# =====================================
+
+if st.session_state.page == "alerts":
+
+    st.header("🔔 التنبيهات")
+
+    today = str(datetime.now().date())
+
+    rows = cur.execute("""
+        SELECT *
+        FROM case_updates
+        WHERE next_session_date >= ?
+        ORDER BY next_session_date ASC
+    """,(today,)).fetchall()
+
+    if not rows:
+
+        st.info("لا توجد جلسات قادمة")
+
+    else:
+
+        for row in rows:
+
+            case_data = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE id=?
+            """,(row[1],)).fetchone()
+
+            if case_data:
+
+                st.container(border=True)
+
+                st.write(
+                    f"{case_data[3]} ضد {case_data[5]}"
+                )
+
+                st.write(
+                    f"جلسة : {row[5]}"
+                )
+
+                st.write(
+                    f"الإجراء : {row[6]}"
+                )
+
+                st.markdown("---")
