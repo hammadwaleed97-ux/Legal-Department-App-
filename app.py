@@ -619,13 +619,6 @@ if st.session_state.page == "all_cases":
                 last_session = update[0]
                 last_action = update[1]
 
-            st.markdown(
-                f"""
-### {row[3]} ضد الهيئة - {row[13]} - جلسة {last_session} - {last_action}
-
-**{row[6]}/{row[7]}** - **{row[8]} {row[9]} {row[11]}**
-                """
-            )
 
             if st.button(
                 "📂 فتح القضية",
