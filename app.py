@@ -648,7 +648,101 @@ if st.session_state.page == "all_cases":
                 st.session_state.page = "update_case"
                 st.rerun()
 
-            st.markdown("---")           
+            st.markdown("---")  
+ # =====================================
+# فتح القضية
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.header("⚖️ ملف القضية")
+
+        st.markdown(f"""
+<div style="display:flex;gap:10px;">
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>رقم القضية</b><br>
+{case_data[6]}
+</div>
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>السنة القضائية</b><br>
+{case_data[7]}
+</div>
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>الدائرة</b><br>
+{case_data[8]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div style="display:flex;gap:10px;margin-top:5px;">
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>نوع الدعوى</b><br>
+{case_data[9]}
+</div>
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>المحكمة</b><br>
+{case_data[10]}
+</div>
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>اسم المحكمة</b><br>
+{case_data[11]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        if case_data[12]:
+
+            st.markdown(f"""
+<div style="margin-top:5px;border:1px solid black;background:white;color:black;padding:10px;text-align:center;">
+<b>مأمورية الاستئناف</b><br>
+{case_data[12]}
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div style="display:flex;gap:10px;margin-top:5px;">
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;">
+<b>{case_data[2]}</b><br><br>
+{case_data[3]}
+</div>
+
+<div style="flex:1;border:1px solid black;background:white;color:black;padding:10px;">
+<b>{case_data[4]}</b><br><br>
+{case_data[5]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div style="margin-top:5px;border:1px solid black;background:white;color:black;padding:10px;">
+<b>موضوع الدعوى / الاستئناف</b>
+<hr>
+{case_data[13]}
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("---")           
 # =====================================
 # الجلسات
 # =====================================
