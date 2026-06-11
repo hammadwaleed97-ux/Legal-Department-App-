@@ -649,6 +649,29 @@ if st.session_state.page == "all_cases":
                 st.rerun()
 
             st.markdown("---")
+            st.header("⚖️ ملف القضية")
+
+st.markdown(f"""
+### القضية رقم {case_data[6]} لسنة {case_data[7]}
+
+**الدائرة:** {case_data[8]}
+
+**{case_data[9]}**
+
+**{case_data[10]} {case_data[11]}**
+
+**مأمورية الاستئناف:** {case_data[12]}
+
+**{case_data[2]}:** {case_data[3]}
+
+**{case_data[4]}:** {case_data[5]}
+
+**موضوع الدعوى / الاستئناف:**
+
+{case_data[13]}
+""")
+
+st.markdown("---")
 # =====================================
 # الجلسات
 # =====================================
