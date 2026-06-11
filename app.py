@@ -600,6 +600,25 @@ if st.session_state.page == "all_cases":
         for row in rows:
 
             case_id = row[0]
+            st.markdown(
+    f"""
+### {row[3]} ضد الهيئة
+
+**موضوع الدعوى:** {row[13]}
+
+**الجلسة:** {last_session}
+
+**الإجراء:** {last_action}
+
+**رقم القضية:** {row[6]}/{row[7]}
+
+**الدائرة:** {row[8]}
+
+**المحكمة:** {row[10]}
+
+**اسم المحكمة:** {row[11]}
+    """
+            )
 
             last_session = row[14]
             last_action = row[15]
