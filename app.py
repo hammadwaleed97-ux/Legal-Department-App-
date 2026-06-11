@@ -415,10 +415,6 @@ if st.session_state.page == "cases":
         whatsapp_number = st.text_input(
             "رقم واتساب التنبيهات"
         )
-    if st.button("💾 حفظ القضية"):
-        
-    st.success("تم حفظ القضية بنجاح")       
-
             
 # =====================================
 # جدول المستندات
