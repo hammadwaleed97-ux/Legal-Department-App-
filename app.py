@@ -421,7 +421,8 @@ if st.session_state.page == "cases":
 
 if st.button("💾 حفظ القضية"):
 
-    if notifications_enabled:
+    if st.session_state.get('notifications_enabled', False):
+        
 
         if not (
             len(whatsapp_number) == 11
