@@ -751,3 +751,58 @@ if st.session_state.page == "update_case":
         else:
 
             st.info("لا توجد جلسات مضافة")
+# =====================================
+# إضافة جلسة جديدة
+# =====================================
+
+        st.markdown("---")
+
+        st.subheader("➕ إضافة جلسة جديدة")
+
+        new_roll = st.text_input(
+            "الرول"
+        )
+
+        next_session_date = st.date_input(
+            "تاريخ الجلسة"
+        )
+
+        status_reason = st.text_area(
+            "الإجراءات"
+        )
+
+        adjournment_reason = st.text_area(
+            "ملاحظات الجلسة"
+        )
+
+        if st.button(
+            "💾 حفظ الجلسة الجديدة"
+        ):
+
+            cur.execute("""
+                INSERT INTO case_updates
+                (
+                    case_id,
+                    roll_no,
+                    update_date,
+                    adjournment_reason,
+                    next_session_date,
+                    status_reason
+                )
+                VALUES
+                (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                case_id,
+                new_roll,
+                str(datetime.now()),
+                adjournment_reason,
+                str(next_session_date),
+                status_reason
+            ))
+
+            conn.commit()
+
+            st.success("تم حفظ الجلسة")
+
+            st.rerun()
