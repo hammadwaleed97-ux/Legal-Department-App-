@@ -1248,3 +1248,63 @@ if st.session_state.page == "reports":
                 f"{row[13]} | "
                 f"{last_action}"
             )
+# =====================================
+# البحث
+# =====================================
+
+if st.session_state.page == "search":
+
+    st.header("🔍 البحث")
+
+    search_text = st.text_input(
+        "ابحث برقم القضية أو الخصوم أو الموضوع"
+    )
+
+    if search_text:
+
+        rows = cur.execute("""
+            SELECT *
+            FROM cases
+            WHERE
+            case_no LIKE ?
+            OR claimant LIKE ?
+            OR defendant LIKE ?
+            OR subject LIKE ?
+        """,
+        (
+            f"%{search_text}%",
+            f"%{search_text}%",
+            f"%{search_text}%",
+            f"%{search_text}%"
+        )).fetchall()
+
+        if not rows:
+
+            st.warning("لا توجد نتائج")
+
+        else:
+
+            for row in rows:
+
+                case_id = row[0]
+
+                st.markdown(
+                    f"""
+### {row[3]} ضد {row[5]}
+
+**{row[6]}/{row[7]}**
+-
+**{row[13]}**
+                    """
+                )
+
+                if st.button(
+                    "📂 فتح القضية",
+                    key=f"search_open_{case_id}"
+                ):
+
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "update_case"
+                    st.rerun()
+
+                st.markdown("---")
