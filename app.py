@@ -1034,3 +1034,217 @@ if st.session_state.page == "deleted":
                 st.write(
                     f"تاريخ الحذف : {row[3]}"
                 )
+# =====================================
+# التقارير والإحصائيات
+# =====================================
+
+if st.session_state.page == "reports":
+
+    st.header("📊 التقارير والإحصائيات")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        from_date = st.date_input(
+            "من تاريخ",
+            key="report_from"
+        )
+
+    with col2:
+        to_date = st.date_input(
+            "إلى تاريخ",
+            key="report_to"
+        )
+
+    st.markdown("---")
+
+    total_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    active_cases = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE status='متداولة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    positive_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE status='لصالح الهيئة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    negative_judgments = cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE status='ضد الهيئة'
+        AND id NOT IN (
+            SELECT original_case_id
+            FROM deleted_cases
+        )
+    """).fetchone()[0]
+
+    total_judgments = (
+        positive_judgments +
+        negative_judgments
+    )
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    c1.metric(
+        "إجمالي القضايا",
+        total_cases
+    )
+
+    c2.metric(
+        "القضايا المتداولة",
+        active_cases
+    )
+
+    c3.metric(
+        "إجمالي الأحكام",
+        total_judgments
+    )
+
+    c4.metric(
+        "أحكام لصالح",
+        positive_judgments
+    )
+
+    c5.metric(
+        "أحكام ضد",
+        negative_judgments
+    )
+
+    st.markdown("---")
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "جميع القضايا المتداولة",
+            "القضايا المتداولة",
+            "جميع الأحكام الصادرة (لصالح / ضد)",
+            "الأحكام الصادرة لصالح",
+            "الأحكام الصادرة ضد",
+            "جميع صور الأحكام",
+            "صور الأحكام الصادرة لصالح",
+            "صور الأحكام الصادرة ضد"
+        ]
+    )
+
+    if st.button("📄 استخراج التقرير"):
+
+        rows = []
+
+        if report_type == "جميع القضايا المتداولة":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+                ORDER BY session_date
+            """).fetchall()
+
+        elif report_type == "القضايا المتداولة":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='متداولة'
+                AND session_date
+                BETWEEN ? AND ?
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+                ORDER BY session_date
+            """,
+            (
+                str(from_date),
+                str(to_date)
+            )).fetchall()
+
+        elif report_type == "جميع الأحكام الصادرة (لصالح / ضد)":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status IN
+                ('لصالح الهيئة','ضد الهيئة')
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة لصالح":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='لصالح الهيئة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        elif report_type == "الأحكام الصادرة ضد":
+
+            rows = cur.execute("""
+                SELECT *
+                FROM cases
+                WHERE status='ضد الهيئة'
+                AND id NOT IN (
+                    SELECT original_case_id
+                    FROM deleted_cases
+                )
+            """).fetchall()
+
+        st.markdown("### نتيجة التقرير")
+
+        for i, row in enumerate(rows, start=1):
+
+            last_action = row[15]
+
+            update = cur.execute("""
+                SELECT
+                    next_session_date,
+                    status_reason
+                FROM case_updates
+                WHERE case_id=?
+                ORDER BY next_session_date DESC
+                LIMIT 1
+            """,(row[0],)).fetchone()
+
+            if update:
+
+                last_action = (
+                    f"جلسة {update[0]} - "
+                    f"{update[1]}"
+                )
+
+            st.write(
+                f"{i}- "
+                f"{row[6]}/{row[7]} | "
+                f"{row[3]} ضد {row[5]} | "
+                f"{row[13]} | "
+                f"{last_action}"
+            )
