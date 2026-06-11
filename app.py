@@ -915,3 +915,66 @@ if st.session_state.page == "update_case":
                         conn.commit()
 
                         st.rerun()
+# =====================================
+# حذف القضية
+# =====================================
+
+        st.markdown("---")
+
+        st.subheader("🗑️ حذف القضية")
+
+        delete_reason = st.text_area(
+            "سبب الحذف"
+        )
+
+        if st.button(
+            "🗑️ نقل إلى القضايا المحذوفة"
+        ):
+
+            if not delete_reason.strip():
+
+                st.error(
+                    "يجب كتابة سبب الحذف"
+                )
+
+            else:
+
+                cur.execute("""
+                    INSERT INTO deleted_cases
+                    (
+                        original_case_id,
+                        delete_reason,
+                        deleted_at
+                    )
+                    VALUES
+                    (?, ?, ?)
+                """,
+                (
+                    case_id,
+                    delete_reason,
+                    str(datetime.now())
+                ))
+
+                conn.commit()
+
+                st.success(
+                    "تم نقل القضية إلى القضايا المحذوفة"
+                )
+
+                st.session_state.page = "deleted"
+
+                st.rerun()
+
+# =====================================
+# رجوع
+# =====================================
+
+        st.markdown("---")
+
+        if st.button(
+            "🔙 العودة للحصر العام"
+        ):
+
+            st.session_state.page = "all_cases"
+
+            st.rerun()
