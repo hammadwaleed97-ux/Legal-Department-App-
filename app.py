@@ -74,6 +74,78 @@ CREATE TABLE IF NOT EXISTS cases(
 )
 """)
 # =====================================
+# جدول تحديثات القضايا
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_updates(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    roll_no TEXT,
+
+    update_date TEXT,
+
+    adjournment_reason TEXT,
+
+    next_session_date TEXT,
+
+    status_reason TEXT,
+
+    reserved_judgment_date TEXT,
+
+    judgment_text TEXT,
+
+    judgment_result TEXT,
+
+    judgment_action TEXT
+)
+""")
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN roll_no TEXT
+    """)
+except:
+    pass
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN reserved_judgment_date TEXT
+    """)
+except:
+    pass
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN judgment_text TEXT
+    """)
+except:
+    pass
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN judgment_result TEXT
+    """)
+except:
+    pass
+
+try:
+    cur.execute("""
+    ALTER TABLE case_updates
+    ADD COLUMN judgment_action TEXT
+    """)
+except:
+    pass
+
+conn.commit()
+# =====================================
 # جدول التنبيهات
 # =====================================
 
