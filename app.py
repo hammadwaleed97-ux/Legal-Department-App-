@@ -74,6 +74,21 @@ owner_user TEXT,
 created_at TEXT
 )
 """)
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases(
+...
+)
+""")
+
+try:
+    cur.execute("""
+    ALTER TABLE cases
+    ADD COLUMN owner_user TEXT
+    """)
+except:
+    pass
+
+conn.commit()
 # =====================================
 # جدول تحديثات القضايا
 # =====================================
