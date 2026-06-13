@@ -23,6 +23,68 @@ conn = sqlite3.connect(
 
 cur = conn.cursor()
 # =====================================
+# جدول القضايا
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    litigation_type TEXT,
+
+    claimant_type TEXT,
+    claimant TEXT,
+
+    defendant_type TEXT,
+    defendant TEXT,
+
+    case_no TEXT,
+
+    judicial_year TEXT,
+
+    circuit TEXT,
+
+    case_type TEXT,
+
+    court TEXT,
+
+    court_name TEXT,
+
+    appeal_office TEXT,
+
+    subject TEXT,
+
+    session_date TEXT,
+
+    reason TEXT,
+
+    notes TEXT,
+
+    judgment_result TEXT,
+
+    notifications_enabled INTEGER DEFAULT 0,
+
+    whatsapp_number TEXT,
+
+    status TEXT DEFAULT 'متداولة',
+
+    owner_user TEXT,
+
+    created_at TEXT
+)
+""")
+
+try:
+    cur.execute("""
+    ALTER TABLE cases
+    ADD COLUMN owner_user TEXT
+    """)
+except:
+    pass
+
+conn.commit()
+# =====================================
 # جدول تحديثات القضايا
 # =====================================
 
