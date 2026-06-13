@@ -67,10 +67,11 @@ CREATE TABLE IF NOT EXISTS cases(
     notifications_enabled INTEGER DEFAULT 0,
 
     whatsapp_number TEXT,
-
     status TEXT DEFAULT 'متداولة',
 
-    created_at TEXT
+owner_user TEXT,
+
+created_at TEXT
 )
 """)
 # =====================================
