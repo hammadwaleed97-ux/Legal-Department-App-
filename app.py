@@ -23,6 +23,90 @@ conn = sqlite3.connect(
 
 cur = conn.cursor()
 # =====================================
+# جدول القضايا
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    litigation_type TEXT,
+
+    claimant_type TEXT,
+    claimant TEXT,
+
+    defendant_type TEXT,
+    defendant TEXT,
+
+    case_no TEXT,
+
+    judicial_year TEXT,
+
+    circuit TEXT,
+
+    case_type TEXT,
+
+    court TEXT,
+
+    court_name TEXT,
+
+    appeal_office TEXT,
+
+    subject TEXT,
+
+    session_date TEXT,
+
+    reason TEXT,
+
+    notes TEXT,
+
+    judgment_result TEXT,
+
+    notifications_enabled INTEGER DEFAULT 0,
+
+    whatsapp_number TEXT,
+
+    status TEXT DEFAULT 'متداولة',
+
+    owner_user TEXT,
+
+    created_at TEXT
+)
+""")
+
+try:
+    cur.execute("""
+    ALTER TABLE cases
+    ADD COLUMN owner_user TEXT
+    """)
+except:
+    pass
+
+# =====================================
+# جدول المستخدمين
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS users(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    username TEXT UNIQUE,
+
+    password TEXT,
+
+    full_name TEXT,
+
+    role TEXT DEFAULT 'user',
+
+    active INTEGER DEFAULT 1,
+
+    created_at TEXT
+)
+""")
+
+# =====================================
 # جدول تحديثات القضايا
 # =====================================
 
@@ -41,15 +125,7 @@ CREATE TABLE IF NOT EXISTS case_updates(
 
     next_session_date TEXT,
 
-    status_reason TEXT,
-
-    reserved_judgment_date TEXT,
-
-    judgment_text TEXT,
-
-    judgment_result TEXT,
-
-    judgment_action TEXT
+    status_reason TEXT
 )
 """)
 
@@ -61,39 +137,6 @@ try:
 except:
     pass
 
-try:
-    cur.execute("""
-    ALTER TABLE case_updates
-    ADD COLUMN reserved_judgment_date TEXT
-    """)
-except:
-    pass
-
-try:
-    cur.execute("""
-    ALTER TABLE case_updates
-    ADD COLUMN judgment_text TEXT
-    """)
-except:
-    pass
-
-try:
-    cur.execute("""
-    ALTER TABLE case_updates
-    ADD COLUMN judgment_result TEXT
-    """)
-except:
-    pass
-
-try:
-    cur.execute("""
-    ALTER TABLE case_updates
-    ADD COLUMN judgment_action TEXT
-    """)
-except:
-    pass
-
-conn.commit()
 # =====================================
 # جدول التنبيهات
 # =====================================
@@ -133,7 +176,6 @@ CREATE TABLE IF NOT EXISTS deleted_cases(
 """)
 
 conn.commit()
-
 # =====================================
 # اختبار التشغيل
 # =====================================
