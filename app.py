@@ -219,6 +219,181 @@ if "role" not in st.session_state:
 
 if "full_name" not in st.session_state:
     st.session_state.full_name = ""
+    # =====================================
+# اختبار التشغيل + تسجيل الدخول
+# =====================================
+
+# =====================================
+# Session State
+# =====================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "role" not in st.session_state:
+    st.session_state.role = ""
+
+if "full_name" not in st.session_state:
+    st.session_state.full_name = ""
+
+# =====================================
+# تسجيل الدخول
+# =====================================
+
+if not st.session_state.logged_in:
+
+    st.markdown("""
+    <style>
+
+    .stApp{
+        background:#062456;
+    }
+
+    h1,h2,h3,h4,h5,h6,
+    label,p,span{
+        color:white !important;
+    }
+
+    .login-box{
+        text-align:center;
+        color:white;
+        margin-top:50px;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(
+        """
+        <div class="login-box">
+        <h1>⚖️ إدارة القضايا</h1>
+        <h3>تسجيل الدخول</h3>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    username = st.text_input(
+        "اسم المستخدم"
+    )
+
+    password = st.text_input(
+        "كلمة المرور",
+        type="password"
+    )
+
+    if st.button("دخول"):
+
+        user = cur.execute("""
+            SELECT
+                username,
+                password,
+                full_name,
+                role
+            FROM users
+            WHERE username=?
+            AND active=1
+        """,
+        (username,)
+        ).fetchone()
+
+        if user and user[1] == password:
+
+            st.session_state.logged_in = True
+            st.session_state.username = user[0]
+            st.session_state.full_name = user[2]
+            st.session_state.role = user[3]
+
+            st.rerun()
+
+        else:
+
+            st.error(
+                "اسم المستخدم أو كلمة المرور غير صحيحة"
+            )
+
+    st.stop()
+
+# =====================================
+# شكل البرنامج بعد الدخول
+# =====================================
+
+st.markdown("""
+<style>
+
+.stApp{
+    background:#062456;
+}
+
+h1,h2,h3,h4,h5,h6,
+label,p,span{
+    color:white !important;
+}
+
+.stTextInput input{
+    color:black !important;
+}
+
+.stTextArea textarea{
+    color:black !important;
+}
+
+.stDateInput input{
+    color:black !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div{
+    color:black !important;
+}
+
+.logo-box{
+    text-align:center;
+    color:white;
+}
+
+.logo-icon{
+    font-size:60px;
+}
+
+.logo-main{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.logo-sub{
+    font-size:24px;
+    font-weight:bold;
+}
+
+.logo-place{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.logo-name{
+    color:#FFD700;
+    font-size:30px;
+    font-weight:bold;
+}
+
+div.stButton > button{
+    width:340px;
+    height:65px;
+    border-radius:15px;
+    border:none;
+    background:#2f55d4;
+    color:white;
+    font-size:20px;
+    font-weight:bold;
+    display:block;
+    margin:auto;
+}
+
+</style>
+""", unsafe_allow_html=True)
 # =====================================
 # اللوجو
 # =====================================
