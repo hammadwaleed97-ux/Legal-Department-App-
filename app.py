@@ -457,66 +457,6 @@ st.markdown("""
 
 """, unsafe_allow_html=True)
 # =====================================
-# مدير البرنامج
-# =====================================
-
-if st.session_state.role == "admin":
-
-    st.markdown("---")
-
-    with st.expander("👑 مدير البرنامج"):
-
-        st.write("إدارة المستخدمين")
-
-        new_username = st.text_input(
-            "اسم المستخدم الجديد"
-        )
-
-        new_password = st.text_input(
-            "كلمة المرور",
-            type="password",
-            key="new_pass"
-        )
-
-        new_full_name = st.text_input(
-            "الاسم بالكامل"
-        )
-
-        if st.button("➕ إنشاء مستخدم"):
-
-            try:
-
-                cur.execute("""
-                    INSERT INTO users
-                    (
-                        username,
-                        password,
-                        full_name,
-                        role,
-                        active,
-                        created_at
-                    )
-                    VALUES
-                    (?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    new_username,
-                    new_password,
-                    new_full_name,
-                    "user",
-                    1,
-                    str(datetime.now())
-                ))
-
-                conn.commit()
-
-                st.success("تم إنشاء المستخدم")
-
-            except:
-
-                st.error("اسم المستخدم موجود بالفعل")
-
-# =====================================
 # الصفحة الحالية
 # =====================================
 
