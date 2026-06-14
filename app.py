@@ -395,6 +395,31 @@ div.stButton > button{
 </style>
 """, unsafe_allow_html=True)
 # =====================================
+# معلومات المستخدم
+# =====================================
+
+col1, col2 = st.columns([4,1])
+
+with col1:
+
+    st.success(
+        f"المستخدم: {st.session_state.full_name}"
+    )
+
+with col2:
+
+    if st.button("🚪 خروج"):
+
+        st.session_state.logged_in = False
+
+        st.session_state.username = ""
+
+        st.session_state.role = ""
+
+        st.session_state.full_name = ""
+
+        st.rerun()
+# =====================================
 # اللوجو
 # =====================================
 
