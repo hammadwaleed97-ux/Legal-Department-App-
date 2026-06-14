@@ -176,6 +176,34 @@ CREATE TABLE IF NOT EXISTS deleted_cases(
 """)
 
 conn.commit()
+try:
+
+    cur.execute("""
+        INSERT INTO users
+        (
+            username,
+            password,
+            full_name,
+            role,
+            active,
+            created_at
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?)
+    """,
+    (
+        "waleedhammad",
+        "123456",
+        "وليد حماد",
+        "admin",
+        1,
+        str(datetime.now())
+    ))
+
+    conn.commit()
+
+except:
+    pass
 # =====================================
 # اختبار التشغيل
 # =====================================
