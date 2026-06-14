@@ -457,6 +457,141 @@ st.markdown("""
 
 """, unsafe_allow_html=True)
 # =====================================
+# مدير البرنامج
+# =====================================
+
+if st.session_state.role == "admin":
+
+    st.markdown("---")
+
+    with st.expander("👑 مدير البرنامج"):
+
+        st.subheader("➕ إنشاء مستخدم جديد")
+
+        new_username = st.text_input(
+            "اسم المستخدم الجديد"
+        )
+
+        new_password = st.text_input(
+            "كلمة المرور",
+            type="password",
+            key="new_pass"
+        )
+
+        new_full_name = st.text_input(
+            "الاسم بالكامل"
+        )
+
+        if st.button("➕ إنشاء مستخدم"):
+
+            try:
+
+                cur.execute("""
+                    INSERT INTO users
+                    (
+                        username,
+                        password,
+                        full_name,
+                        role,
+                        active,
+                        created_at
+                    )
+                    VALUES
+                    (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    new_username,
+                    new_password,
+                    new_full_name,
+                    "user",
+                    1,
+                    str(datetime.now())
+                ))
+
+                conn.commit()
+
+                st.success("تم إنشاء المستخدم")
+
+                st.rerun()
+
+            except:
+
+                st.error("اسم المستخدم موجود بالفعل")
+
+        st.markdown("---")
+
+        st.subheader("👥 المستخدمون")
+
+        users = cur.execute("""
+            SELECT
+                id,
+                username,
+                full_name,
+                role,
+                active
+            FROM users
+            ORDER BY full_name
+        """).fetchall()
+
+        for u in users:
+
+            col1, col2, col3 = st.columns([6,1,1])
+
+            with col1:
+
+                status = "✅ مفعل" if u[4] == 1 else "❌ موقوف"
+
+                st.write(
+                    f"{u[2]} | {u[1]} | {status}"
+                )
+
+            with col2:
+
+                if u[1] != "waleedhammad":
+
+                    if st.button(
+                        "🔑",
+                        key=f"reset_{u[0]}"
+                    ):
+
+                        cur.execute("""
+                            UPDATE users
+                            SET password='123456'
+                            WHERE id=?
+                        """,
+                        (u[0],))
+
+                        conn.commit()
+
+                        st.success(
+                            f"تم إعادة كلمة المرور للمستخدم {u[1]}"
+                        )
+
+                        st.rerun()
+
+            with col3:
+
+                if u[1] != "waleedhammad":
+
+                    if st.button(
+                        "🗑️",
+                        key=f"delete_{u[0]}"
+                    ):
+
+                        cur.execute("""
+                            DELETE FROM users
+                            WHERE id=?
+                        """,
+                        (u[0],))
+
+                        conn.commit()
+
+                        st.success(
+                            f"تم حذف المستخدم {u[1]}"
+                        )
+
+                        st.rerun()
+# =====================================
 # الصفحة الحالية
 # =====================================
 
