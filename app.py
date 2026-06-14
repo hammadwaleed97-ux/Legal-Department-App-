@@ -205,6 +205,21 @@ try:
 except:
     pass
 # =====================================
+# Session State
+# =====================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "role" not in st.session_state:
+    st.session_state.role = ""
+
+if "full_name" not in st.session_state:
+    st.session_state.full_name = ""
+# =====================================
 # اختبار التشغيل
 # =====================================
 # =====================================
