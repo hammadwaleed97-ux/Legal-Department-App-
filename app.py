@@ -136,7 +136,32 @@ try:
     """)
 except:
     pass
+    
+# =====================================
+# جدول المستندات
+# =====================================
 
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_documents(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    document_name TEXT,
+
+    document_type TEXT,
+
+    document_date TEXT,
+
+    document_notes TEXT,
+
+    uploaded_at TEXT
+
+)
+""")
+
+conn.commit()
 # =====================================
 # جدول التنبيهات
 # =====================================
