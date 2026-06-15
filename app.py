@@ -749,6 +749,116 @@ if st.session_state.page == "cases":
         whatsapp_number = st.text_input(
             "رقم واتساب التنبيهات"
         )
+        # =====================================
+# حفظ القضية
+# =====================================
+
+if st.button("💾 حفظ القضية"):
+
+    if notifications_enabled:
+
+        if not (
+            len(whatsapp_number) == 11
+            and whatsapp_number.startswith(
+                ("010", "011", "012", "015")
+            )
+        ):
+
+            st.error("رقم واتساب غير صحيح")
+            st.stop()
+
+    cur.execute(
+        """
+        INSERT INTO cases
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            session_date,
+            reason,
+            notes,
+            judgment_result,
+            notifications_enabled,
+            whatsapp_number,
+            status,
+            owner_user,
+            created_at
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?
+        )
+        """,
+        (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            str(session_date),
+            reason,
+            notes,
+            judgment_result,
+            1 if notifications_enabled else 0,
+            whatsapp_number,
+            "متداولة",
+            st.session_state.username,
+            str(datetime.now())
+        )
+    )
+
+    conn.commit()
+
+    new_case_id = cur.lastrowid
+
+    cur.execute("""
+        INSERT INTO case_updates
+        (
+            case_id,
+            roll_no,
+            update_date,
+            adjournment_reason,
+            next_session_date,
+            status_reason
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?)
+    """,
+    (
+        new_case_id,
+        roll_no,
+        str(datetime.now()),
+        reason,
+        str(session_date),
+        reason
+    ))
+
+    conn.commit()
+
+    st.success("تم حفظ القضية بنجاح")
+
+    st.rerun()
 # =====================================
 # جدول المستندات
 # =====================================
