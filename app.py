@@ -42,7 +42,7 @@ for key, val in {"logged_in":False, "username":"", "role":"", "full_name":"", "p
 # تسجيل الدخول
 # =====================================
 if not st.session_state.logged_in:
-    st.markdown("<style>.stApp{background:#062456;} h1,h2,h3,h4,h5,h6,label,p,span{color:white!important;}.login-box{text-align:center;color:white;margin-top:50px;}</style>", unsafe_allow_html=True)
+    st.markdown("""<style>.stApp{background:#062456;} h1,h2,h3,h4,h5,h6,label,p,span{color:white!important;}.login-box{text-align:center;color:white;margin-top:50px;}</style>""", unsafe_allow_html=True)
     st.markdown('<div class="login-box"><h1>⚖️ إدارة القضايا</h1><h3>تسجيل الدخول</h3></div>', unsafe_allow_html=True)
     username = st.text_input("اسم المستخدم")
     password = st.text_input("كلمة المرور", type="password")
@@ -153,12 +153,10 @@ if st.session_state.page == "cases":
         if notifications_enabled and not (len(whatsapp_number) == 11 and whatsapp_number.startswith(("010", "011", "012", "015"))):
             st.error("رقم واتساب غير صحيح")
             st.stop()
-        # 22 عمود = 22 علامة?
         cur.execute("INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, session_date, reason, notes, judgment_result, notifications_enabled, whatsapp_number, status, owner_user, created_at) VALUES (?,?,?,?,?,?)",
         (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, str(session_date), reason, notes, judgment_result, 1 if notifications_enabled else 0, whatsapp_number, "متداولة", st.session_state.username, str(datetime.now())))
         conn.commit()
         new_case_id = cur.lastrowid
-        # 10 أعمدة = 10 علامات?
         cur.execute("INSERT INTO case_updates (case_id, roll_no, update_date, adjournment_reason, next_session_date, status_reason, reserved_judgment_date, judgment_text, judgment_result, judgment_action) VALUES (?,?,?,?,?,?)",
         (new_case_id, roll_no, str(datetime.now()), reason, str(session_date), reason, "", ""))
         conn.commit()
@@ -212,4 +210,43 @@ if st.session_state.page == "update_case":
         case_type_title = "نوع الدعوى" if case_data[1] == "دعوى" else "نوع الاستئناف" if case_data[1] == "استئناف" else "نوع الطعن"
         subject_title = "موضوع الدعوى" if case_data[1] == "دعوى" else "موضوع الاستئناف" if case_data[1] == "استئناف" else "موضوع الطعن"
 
-        st.markdown(f'<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;"><b>{case_title}</b><br>{case_data[6]}</
+        html1 = f"""
+        <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>{case_title}</b><br>{case_data[6]}
+            </div>
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>السنة القضائية</b><br>{case_data[7]}
+            </div>
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>الدائرة</b><br>{case_data[8]}
+            </div>
+        </div>
+        """
+        st.markdown(html1, unsafe_allow_html=True)
+
+        html2 = f"""
+        <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>{case_type_title}</b><br>{case_data[9]}
+            </div>
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>المحكمة</b><br>{case_data[10]}
+            </div>
+            <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+                <b>اسم المحكمة</b><br>{case_data[11]}
+            </div>
+        </div>
+        """
+        st.markdown(html2, unsafe_allow_html=True)
+
+        if case_data[1] == "استئناف":
+            html3 = f"""
+            <div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:10px;margin-bottom:8px;text-align:center;border-radius:8px;">
+                <b>مأمورية استئناف</b><br>{case_data[12] if case_data[12] else "ــــــ"}
+            </div>
+            """
+            st.markdown(html3, unsafe_allow_html=True)
+
+        html4 = f"""
+        <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8
