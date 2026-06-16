@@ -199,7 +199,7 @@ if st.session_state.page == "all_cases":
             st.markdown("---")
 
 # =====================================
-# فتح القضية
+# فتح القضية - كامل ومقفول صح
 # =====================================
 if st.session_state.page == "update_case":
     case_id = st.session_state.selected_case
@@ -249,4 +249,204 @@ if st.session_state.page == "update_case":
             st.markdown(html3, unsafe_allow_html=True)
 
         html4 = f"""
-        <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8
+        <div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+            <div style="flex:1;border:2px solid #198754;background:#f8fff8;color:black;padding:15px;text-align:center;border-radius:8px;">
+                <div style="color:#198754;font-weight:bold;font-size:18px;">{case_data[2]}</div>
+                <hr>
+                <div style="color:#c00000;font-size:20px;font-weight:bold;">{case_data[3]}</div>
+            </div>
+            <div style="flex:1;border:2px solid #198754;background:#f8fff8;color:black;padding:15px;text-align:center;border-radius:8px;">
+                <div style="color:#198754;font-weight:bold;font-size:18px;">{case_data[4]}</div>
+                <hr>
+                <div style="color:#c00000;font-size:20px;font-weight:bold;">{case_data[5]}</div>
+            </div>
+        </div>
+        """
+        st.markdown(html4, unsafe_allow_html=True)
+
+        html5 = f"""
+        <div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:15px;margin-bottom:8px;border-radius:8px;">
+            <div style="text-align:center;font-size:22px;font-weight:bold;color:#0b3b91;">{subject_title}</div>
+            <hr>
+            <div style="text-align:center;font-size:24px;font-weight:bold;color:#c00000;padding:10px;">{case_data[13]}</div>
+        </div>
+        """
+        st.markdown(html5, unsafe_allow_html=True)
+
+        st.markdown("---")
+        st.subheader("📅 الجلسات")
+        updates = cur.execute("SELECT roll_no, next_session_date, status_reason, adjournment_reason FROM case_updates WHERE case_id=? ORDER BY next_session_date ASC",(case_id,)).fetchall()
+        if updates:
+            header_html = """
+            <div dir="rtl" style="display:flex;gap:6px;margin-bottom:8px;">
+                <div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">الرول</div>
+                <div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">تاريخ الجلسة</div>
+                <div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">الإجراءات</div>
+                <div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">الملاحظات</div>
+            </div>
+            """
+            st.markdown(header_html, unsafe_allow_html=True)
+            for item in updates:
+                session_date = "—" if not item[1] else str(item[1])[:10].split("-")[2] + "/" + str(item[1])[:10].split("-")[1] + "/" + str(item[1])[:10].split("-")[0]
+                row_html = f"""
+                <div dir="rtl" style="display:flex;gap:6px;margin-bottom:6px;">
+                    <div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">{item[0] if item[0] else "—"}</div>
+                    <div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">{session_date}</div>
+                    <div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">{item[2] if item[2] else "—"}</div>
+                    <div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">{item[3] if item[3] else "—"}</div>
+                </div>
+                """
+                st.markdown(row_html, unsafe_allow_html=True)
+        else: st.info("لا توجد جلسات مسجلة")
+
+        st.markdown("---")
+        st.subheader("➕ إضافة جلسة جديدة")
+        new_roll = st.text_input("الرول")
+        next_session_date = st.date_input("تاريخ الجلسة")
+        status_reason = st.text_area("الإجراءات")
+        adjournment_reason = st.text_area("ملاحظات الجلسة")
+        reserved_judgment_date = st.date_input("جلسة الحكم")
+        judgment_text = st.text_area("منطوق الحكم")
+        judgment_result = st.selectbox("نتيجة الجلسة", ["", "لصالح الهيئة", "ضد الهيئة", "إعادة للمرافعة", "إحالة خبير", "إحالة طب شرعي", "تحقيق", "استجواب", "مد أجل للحكم", "وقف", "أخرى"])
+        judgment_action = st.text_input("الإجراء بعد الحكم")
+
+        if st.button("💾 حفظ الجلسة الجديدة"):
+            cur.execute("INSERT INTO case_updates (case_id, roll_no, update_date, adjournment_reason, next_session_date, status_reason, reserved_judgment_date, judgment_text, judgment_result, judgment_action) VALUES (?,?,?,?,?,?)",
+            (case_id, new_roll, str(datetime.now()), adjournment_reason, str(next_session_date), status_reason, str(reserved_judgment_date), judgment_text, judgment_result, judgment_action))
+            if judgment_result in ["لصالح الهيئة", "ضد الهيئة"]:
+                cur.execute("UPDATE cases SET status='محكوم فيها', judgment_result=? WHERE id=?", (judgment_result, case_id))
+            conn.commit()
+            st.success("تم حفظ الجلسة")
+            st.rerun()
+
+        st.markdown("---")
+        st.subheader("📎 مستندات القضية")
+        document_name = st.text_input("اسم المستند")
+        document_type = st.selectbox("نوع المستند", ["صحيفة دعوى", "مذكرة", "حافظة مستندات", "حكم", "إعلان", "مستند آخر"])
+        document_date = st.date_input("تاريخ المستند")
+        document_notes = st.text_area("بيانات المستند")
+        if st.button("💾 إضافة المستند"):
+            cur.execute("INSERT INTO case_documents (case_id, document_name, document_type, document_date, document_notes, uploaded_at) VALUES (?,?,?,?,?,?)",
+            (case_id, document_name, document_type, str(document_date), document_notes, str(datetime.now())))
+            conn.commit()
+            st.success("تم إضافة المستند")
+            st.rerun()
+        docs = cur.execute("SELECT * FROM case_documents WHERE case_id=? ORDER BY id DESC",(case_id,)).fetchall()
+        if docs:
+            st.markdown("### 📂 المستندات المضافة")
+            for d in docs:
+                col1, col2, col3 = st.columns([6,1,1])
+                with col1: st.write(f"{d[2]} | {d[3]} | {d[4]}")
+                with col2:
+                    if st.button("✏️", key=f"edit_doc_{d[0]}"): st.session_state.edit_doc = d[0]
+                with col3:
+                    if st.button("🗑️", key=f"delete_doc_{d[0]}"):
+                        cur.execute("DELETE FROM case_documents WHERE id=?", (d[0],))
+                        conn.commit()
+                        st.rerun()
+
+        st.markdown("---")
+        st.subheader("🗑️ حذف القضية")
+        delete_reason = st.text_area("سبب الحذف")
+        if st.button("🗑️ نقل إلى القضايا المحذوفة"):
+            if not delete_reason.strip(): st.error("يجب كتابة سبب الحذف")
+            else:
+                cur.execute("INSERT INTO deleted_cases (original_case_id, delete_reason, deleted_at) VALUES (?,?,?)", (case_id, delete_reason, str(datetime.now())))
+                conn.commit()
+                st.success("تم نقل القضية إلى القضايا المحذوفة")
+                st.session_state.page = "deleted"
+                st.rerun()
+        st.markdown("---")
+        if st.button("🔙 العودة للحصر العام"):
+            st.session_state.page = "all_cases"
+            st.rerun()
+
+# =====================================
+# القضايا المحذوفة
+# =====================================
+if st.session_state.page == "deleted":
+    st.header("❌ القضايا المحذوفة")
+    rows = cur.execute("SELECT d.id, d.original_case_id, d.delete_reason, d.deleted_at, c.case_no, c.judicial_year, c.claimant, c.defendant, c.subject FROM deleted_cases d LEFT JOIN cases c ON d.original_case_id = c.id ORDER BY d.deleted_at DESC").fetchall()
+    if not rows: st.warning("لا توجد قضايا محذوفة")
+    else:
+        for row in rows:
+            with st.container(border=True):
+                st.write(f"رقم القضية : {row[4]} / {row[5]}")
+                st.write(f"{row[6]} ضد {row[7]}")
+                st.write(f"موضوع الدعوى : {row[8]}")
+                st.write(f"سبب الحذف : {row[2]}")
+                st.write(f"تاريخ الحذف : {row[3]}")
+
+# =====================================
+# التقارير
+# =====================================
+if st.session_state.page == "reports":
+    st.header("📊 التقارير والإحصائيات")
+    col1, col2 = st.columns(2)
+    with col1: from_date = st.date_input("من تاريخ", key="report_from")
+    with col2: to_date = st.date_input("إلى تاريخ", key="report_to")
+    st.markdown("---")
+    total_cases = cur.execute("SELECT COUNT(*) FROM cases WHERE id NOT IN (SELECT original_case_id FROM deleted_cases)").fetchone()[0]
+    active_cases = cur.execute("SELECT COUNT(*) FROM cases WHERE status='متداولة' AND id NOT IN (SELECT original_case_id FROM deleted_cases)").fetchone()[0]
+    positive_judgments = cur.execute("SELECT COUNT(*) FROM cases WHERE judgment_result='لصالح الهيئة'").fetchone()[0]
+    negative_judgments = cur.execute("SELECT COUNT(*) FROM cases WHERE judgment_result='ضد الهيئة'").fetchone()[0]
+    total_judgments = positive_judgments + negative_judgments
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("إجمالي القضايا", total_cases)
+    c2.metric("القضايا المتداولة", active_cases)
+    c3.metric("إجمالي الأحكام الصادرة", total_judgments)
+    c4.metric("الأحكام الصادرة لصالح", positive_judgments)
+    c5.metric("الأحكام الصادرة ضد", negative_judgments)
+    st.markdown("---")
+    report_type = st.selectbox("نوع التقرير", ["جميع القضايا المتداولة", "القضايا المتداولة خلال الفترة", "جميع الأحكام الصادرة (لصالح / ضد)", "الأحكام الصادرة لصالح", "الأحكام الصادرة ضد"])
+    if st.button("📄 استخراج التقرير"):
+        rows = []
+        if report_type == "جميع القضايا المتداولة": rows = cur.execute("SELECT * FROM cases WHERE status='متداولة'").fetchall()
+        elif report_type == "القضايا المتداولة خلال الفترة": rows = cur.execute("SELECT * FROM cases WHERE status='متداولة' AND session_date BETWEEN? AND?", (str(from_date), str(to_date))).fetchall()
+        elif report_type == "جميع الأحكام الصادرة (لصالح / ضد)": rows = cur.execute("SELECT * FROM cases WHERE judgment_result IN ('لصالح الهيئة','ضد الهيئة')").fetchall()
+        elif report_type == "الأحكام الصادرة لصالح": rows = cur.execute("SELECT * FROM cases WHERE judgment_result='لصالح الهيئة'").fetchall()
+        elif report_type == "الأحكام الصادرة ضد": rows = cur.execute("SELECT * FROM cases WHERE judgment_result='ضد الهيئة'").fetchall()
+        if rows:
+            st.markdown(f"### التقرير خلال الفترة من {from_date} حتى {to_date}")
+            for row in rows:
+                update = cur.execute("SELECT next_session_date, status_reason FROM case_updates WHERE case_id=? ORDER BY id DESC LIMIT 1",(row[0],)).fetchone()
+                last_action = f"{update[0]} - {update[1]}" if update else f"{row[14]} - {row[15]}"
+                st.markdown(f"**رقم القضية:** {row[6]}/{row[7]}\n**الخصوم:** {row[3]} ضد {row[5]}\n**المحكمة:** {row[11]}\n**الموضوع:** {row[13]}\n**آخر إجراء / منطوق الحكم:** {last_action}\n---")
+        else: st.warning("لا توجد بيانات للفترة المحددة")
+
+# =====================================
+# البحث
+# =====================================
+if st.session_state.page == "search":
+    st.header("🔍 البحث")
+    search_text = st.text_input("ابحث برقم القضية أو الخصوم أو الموضوع")
+    if search_text:
+        rows = cur.execute("SELECT * FROM cases WHERE case_no LIKE? OR claimant LIKE? OR defendant LIKE? OR subject LIKE?", (f"%{search_text}%", f"%{search_text}%", f"%{search_text}%", f"%{search_text}%")).fetchall()
+        if not rows: st.warning("لا توجد نتائج")
+        else:
+            for row in rows:
+                case_id = row[0]
+                st.markdown(f"### {row[3]} ضد {row[5]}\n**{row[6]}/{row[7]}**\n**{row[13]}**")
+                if st.button("📂 فتح القضية", key=f"search_open_{case_id}"):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "update_case"
+                    st.rerun()
+                st.markdown("---")
+
+# =====================================
+# التنبيهات
+# =====================================
+if st.session_state.page == "alerts":
+    st.header("🔔 التنبيهات")
+    today = str(datetime.now().date())
+    rows = cur.execute("SELECT * FROM case_updates WHERE next_session_date >=? ORDER BY next_session_date ASC",(today,)).fetchall()
+    if not rows: st.info("لا توجد جلسات قادمة")
+    else:
+        for row in rows:
+            case_data = cur.execute("SELECT * FROM cases WHERE id=?",(row[1],)).fetchone()
+            if case_data:
+                st.container(border=True)
+                st.write(f"{case_data[3]} ضد {case_data[5]}")
+                st.write(f"جلسة : {row[5]}")
+                st.write(f"الإجراء : {row[6]}")
+                st.markdown("---")
