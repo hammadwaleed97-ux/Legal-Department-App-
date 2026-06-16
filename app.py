@@ -153,12 +153,12 @@ if st.session_state.page == "cases":
         if notifications_enabled and not (len(whatsapp_number) == 11 and whatsapp_number.startswith(("010", "011", "012", "015"))):
             st.error("رقم واتساب غير صحيح")
             st.stop()
-        # تم التعديل النهائي: 22 علامة?
+        # 22 عمود = 22 علامة?
         cur.execute("INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, session_date, reason, notes, judgment_result, notifications_enabled, whatsapp_number, status, owner_user, created_at) VALUES (?,?,?,?,?,?)",
         (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, str(session_date), reason, notes, judgment_result, 1 if notifications_enabled else 0, whatsapp_number, "متداولة", st.session_state.username, str(datetime.now())))
         conn.commit()
         new_case_id = cur.lastrowid
-        # تم التعديل النهائي: 10 علامة?
+        # 10 أعمدة = 10 علامات?
         cur.execute("INSERT INTO case_updates (case_id, roll_no, update_date, adjournment_reason, next_session_date, status_reason, reserved_judgment_date, judgment_text, judgment_result, judgment_action) VALUES (?,?,?,?,?,?)",
         (new_case_id, roll_no, str(datetime.now()), reason, str(session_date), reason, "", ""))
         conn.commit()
@@ -212,4 +212,4 @@ if st.session_state.page == "update_case":
         case_type_title = "نوع الدعوى" if case_data[1] == "دعوى" else "نوع الاستئناف" if case_data[1] == "استئناف" else "نوع الطعن"
         subject_title = "موضوع الدعوى" if case_data[1] == "دعوى" else "موضوع الاستئناف" if case_data[1] == "استئناف" else "موضوع الطعن"
 
-        st.markdown(f'<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;"><b>{case_title}</b><br>{case_data[6]}</div><div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;"><b>السنة القضائية</b><br>{case_data[7]}</div
+        st.markdown(f'<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;"><div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;"><b>{case_title}</b><br>{case_data[6]}</
