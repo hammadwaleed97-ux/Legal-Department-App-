@@ -205,7 +205,7 @@ if st.session_state.page == "cases":
             st.error("رقم واتساب غير صحيح")
             st.stop()
 
-        # تصليح خطأ الـ INSERT هنا - 22 عمود = 22 علامة استفهام
+        # تصليح نهائي: 22 عمود = 22 علامة استفهام
         cur.execute("""
             INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, session_date, reason, notes, judgment_result, notifications_enabled, whatsapp_number, status, owner_user, created_at)
             VALUES (?,?,?,?,?,?)
