@@ -115,3 +115,65 @@ if st.session_state.page == "all_cases":
             st.rerun()
     show_footer()
     
+# =====================================
+# فتح ملف القضية (تحديثات القضية)
+# =====================================
+if st.session_state.page == "update_case" and "selected_case" in st.session_state:
+    case_id = st.session_state.selected_case
+    case_data = cur.execute("SELECT * FROM cases WHERE id=?", (case_id,)).fetchone()
+    
+    st.header("⚖️ ملف القضية")
+    st.write(f"رقم القضية: {case_data[6]}/{case_data[7]} | الموضوع: {case_data[13]}")
+    
+    # إضافة تحديث (جلسة)
+    with st.expander("➕ إضافة تحديث/جلسة"):
+        next_session = st.date_input("تاريخ الجلسة القادمة")
+        judgment = st.selectbox("نتيجة الحكم", ["", "لصالح الهيئة", "ضد الهيئة"])
+        action = st.text_area("الإجراء/منطوق الحكم")
+        if st.button("💾 حفظ التحديث"):
+            cur.execute("INSERT INTO case_updates (case_id, next_session_date, status_reason, judgment_result) VALUES (?, ?, ?, ?)", (case_id, str(next_session), action, judgment))
+            if judgment in ["لصالح الهيئة", "ضد الهيئة"]:
+                cur.execute("UPDATE cases SET status='محكوم فيها', judgment_result=? WHERE id=?", (judgment, case_id))
+            conn.commit()
+            st.rerun()
+
+    # حذف القضية
+    if st.button("🗑️ نقل إلى القضايا المحذوفة"):
+        cur.execute("INSERT INTO deleted_cases (original_case_id, delete_reason) VALUES (?, ?)", (case_id, "تم الحذف من قبل المستخدم"))
+        conn.commit()
+        st.session_state.page = "all_cases"
+        st.rerun()
+    
+    show_footer()
+
+# =====================================
+# التقارير والإحصائيات
+# =====================================
+if st.session_state.page == "reports":
+    st.header("📊 التقارير")
+    # استعلام القضايا مع استبعاد المحذوفة
+    total = cur.execute("SELECT COUNT(*) FROM cases WHERE id NOT IN (SELECT original_case_id FROM deleted_cases)").fetchone()[0]
+    st.metric("إجمالي القضايا", total)
+    show_footer()
+
+# =====================================
+# البحث (البحث الذكي)
+# =====================================
+if st.session_state.page == "search":
+    st.header("🔍 البحث")
+    query = st.text_input("كلمة البحث")
+    if query:
+        results = cur.execute("SELECT * FROM cases WHERE (claimant LIKE ? OR defendant LIKE ? OR case_no LIKE ?) AND id NOT IN (SELECT original_case_id FROM deleted_cases)", (f"%{query}%", f"%{query}%", f"%{query}%")).fetchall()
+        for row in results:
+            st.write(f"رقم: {row[6]} - {row[3]} ضد {row[5]}")
+    show_footer()
+
+# =====================================
+# القضايا المحذوفة
+# =====================================
+if st.session_state.page == "deleted":
+    st.header("❌ القضايا المحذوفة")
+    deleted_rows = cur.execute("SELECT c.case_no, c.claimant FROM cases c JOIN deleted_cases d ON c.id = d.original_case_id").fetchall()
+    for row in deleted_rows:
+        st.write(f"القضية المحذوفة: {row[0]} - الخصم: {row[1]}")
+    show_footer()
