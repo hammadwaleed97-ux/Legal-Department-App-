@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+from flask import Flask, render_template_string
+
+app = Flask(__name__)
+
+HTML_CODE = """<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -65,7 +69,6 @@ tr:nth-child(even) { background:#f8f9fa; }
     <button onclick="showSection('search')">البحث عن دعوى</button>
   </div>
 
-  <!-- قسم التقارير -->
   <div id="reports" class="section active">
     <div class="bayan-header">
       <label>بيان </label>
@@ -120,7 +123,6 @@ tr:nth-child(even) { background:#f8f9fa; }
     </div>
   </div>
 
-  <!-- قسم الأرشيف -->
   <div id="archive" class="section">
     <h3 style="margin-bottom:15px; color:#0d47a1;">أرشيف الأحكام المحكوم فيها</h3>
     <div class="table-wrapper">
@@ -136,7 +138,6 @@ tr:nth-child(even) { background:#f8f9fa; }
     </div>
   </div>
 
-  <!-- قسم المحذوفات -->
   <div id="deleted" class="section">
     <h3 style="margin-bottom:15px; color:#d32f2f;">القضايا المحذوفة</h3>
     <div class="table-wrapper">
@@ -152,7 +153,6 @@ tr:nth-child(even) { background:#f8f9fa; }
     </div>
   </div>
 
-  <!-- قسم البحث -->
   <div id="search" class="section">
     <div class="search-box">
       <h3 style="margin-bottom:15px; color:#0d47a1;">البحث عن دعوى</h3>
@@ -167,7 +167,6 @@ tr:nth-child(even) { background:#f8f9fa; }
   </div>
 </div>
 
-<!-- مودال إضافة إجراء -->
 <div id="actionModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -180,7 +179,6 @@ tr:nth-child(even) { background:#f8f9fa; }
   </div>
 </div>
 
-<!-- مودال عرض القضية المحذوفة -->
 <div id="deletedModal" class="modal">
   <div class="modal-content">
     <span class="close-btn" onclick="closeDeletedModal()">&times;</span>
@@ -219,7 +217,6 @@ function loadReport() {
         <th>السنة القضائية</th><th>الدائرة</th><th>النوع</th><th>المحكمة</th><th>اسم المحكمة</th>
         <th>المأمورية</th><th>أسماء الخصوم</th><th>موضوع الدعوى</th><th>الاستئناف</th><th>الطعن</th><th>آخر إجراء</th>
       </tr>`;
-    // بيانات تجريبية من الحصر العام + الأحكام التمهيدية
     document.getElementById('tableBody').innerHTML = `
       <tr><td>1</td><td>123</td><td>-</td><td>-</td><td>متداولة</td><td>2025</td><td>3</td><td>مدني</td>
       <td>ابتدائية</td><td>محكمة دمنهور</td><td>مسجلة</td><td>أحمد ضد الهيئة</td><td>مطالبة</td><td>-</td><td>-</td>
@@ -233,7 +230,6 @@ function loadReport() {
         <th>المأمورية</th><th>أسماء الخصوم</th><th>موضوع الدعوى</th><th>الاستئناف</th><th>الطعن</th>
         <th>تاريخ الحكم</th><th>منطوق الحكم</th><th>الصالح/الضد</th>
       </tr>`;
-    // بيانات من أرشيف الأحكام المحكوم فيها فقط
     document.getElementById('tableBody').innerHTML = `
       <tr><td>1</td><td>456</td><td>-</td><td>-</td><td>محكوم</td><td>2024</td><td>2</td><td>عمال</td>
       <td>ابتدائية</td><td>محكمة كفر الدوار</td><td>مسجلة</td><td>محمد ضد الهيئة</td><td>تعويض</td><td>-</td><td>-</td>
@@ -260,7 +256,6 @@ function extractAhkam() {
 
 function downloadAllAhkamWord() { alert('تحميل كل الأحكام في ملف Word مرتبة'); }
 
-// الأرشيف
 document.getElementById('archiveBody').innerHTML = `
   <tr><td>1</td><td>456</td><td>2024</td><td>ابتدائية</td><td>محمد ضد الهيئة</td><td>تعويض</td><td>10/3/2026</td><td>قبول</td><td>الصالح</td>
   <td><button class="btn btn-warning" onclick="openActionModal(1)">إضافة الإجراء</button></td></tr>`;
@@ -294,7 +289,6 @@ function saveTaanArchive() { alert('تم حفظ الطعن في الأرشيف -
 function addTaanQadaya() { alert('تم إضافة الطعن للقضايا المتداولة برقم '+document.getElementById('taanNum').value); closeModal(); }
 function saveHifz() { alert('تم حفظ بيانات المذكرة - لا تظهر في تقارير الأحكام'); closeModal(); }
 
-// المحذوفات
 document.getElementById('deletedBody').innerHTML = `
   <tr><td>1</td><td>999</td><td>2023</td><td>ابتدائية</td><td>سعيد ضد الهيئة</td><td>مطالبة</td><td>1/1/2026</td><td>تصالح</td>
   <td><button class="btn open" onclick="openDeleted(1)">فتح القضية</button></td></tr>`;
@@ -315,7 +309,6 @@ function closeDeletedModal() {
   document.getElementById('deletedModal').style.display = 'none';
 }
 
-// البحث
 function searchCase() {
   const name = document.getElementById('searchName').value;
   const num = document.getElementById('searchNumber').value;
@@ -328,8 +321,14 @@ function searchCase() {
     </table>`;
 }
 
-// تحميل أولي
 loadReport();
 </script>
 </body>
-</html>
+</html>"""
+
+@app.route('/')
+def home():
+    return render_template_string(HTML_CODE)
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
