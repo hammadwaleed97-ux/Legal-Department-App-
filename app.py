@@ -1013,6 +1013,271 @@ if st.session_state.page == "all_cases":
                 st.rerun()
 
             st.markdown("---")
+# =====================================
+# فتح القضية
+# =====================================
+
+if st.session_state.page == "update_case":
+
+    case_id = st.session_state.selected_case
+
+    case_data = cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,)).fetchone()
+
+    if case_data:
+
+        st.header("⚖️ ملف القضية")
+
+        # زرار التعديل
+        col_btn1, col_btn2, col_btn3 = st.columns([1,1,1])
+        with col_btn2:
+            if st.button("✏️ تعديل بيانات القضية", key=f"edit_case_{case_id}", use_container_width=True):
+                st.session_state.edit_mode = not st.session_state.get("edit_mode", False)
+                st.rerun()
+
+        case_title = "رقم الدعوى"
+        case_type_title = "نوع الدعوى"
+        subject_title = "موضوع الدعوى"
+
+        if case_data[1] == "استئناف":
+            case_title = "رقم الاستئناف"
+            case_type_title = "نوع الاستئناف"
+            subject_title = "موضوع الاستئناف"
+
+        elif case_data[1] == "نقض":
+            case_title = "رقم الطعن"
+            case_type_title = "نوع الطعن"
+            subject_title = "موضوع الطعن"
+
+        # وضع التعديل
+        if st.session_state.get("edit_mode", False):
+            st.markdown("---")
+            st.subheader("✏️ تعديل بيانات القضية")
+
+            with st.form(f"edit_form_{case_id}"):
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    new_case_no = st.text_input(case_title, value=case_data[6])
+                with col2:
+                    new_year = st.text_input("السنة القضائية", value=case_data[7])
+                with col3:
+                    new_circle = st.text_input("الدائرة", value=case_data[8])
+
+                col4, col5, col6 = st.columns(3)
+                with col4:
+                    new_case_type = st.text_input(case_type_title, value=case_data[9])
+                with col5:
+                    new_court = st.text_input("المحكمة", value=case_data[10])
+                with col6:
+                    new_court_name = st.text_input("اسم المحكمة", value=case_data[11])
+
+                new_subject = st.text_area(subject_title, value=case_data[13], height=100)
+
+                col_save, col_cancel = st.columns(2)
+                with col_save:
+                    save_btn = st.form_submit_button("💾 حفظ التعديلات", use_container_width=True, type="primary")
+                with col_cancel:
+                    cancel_btn = st.form_submit_button("❌ إلغاء", use_container_width=True)
+
+                if save_btn:
+                    cur.execute("""
+                        UPDATE cases SET
+                        case_no=?, year=?, circle=?, case_type=?,
+                        court=?, court_name=?, subject=?
+                        WHERE id=?
+                    """, (new_case_no, new_year, new_circle, new_case_type,
+                          new_court, new_court_name, new_subject, case_id))
+                    conn.commit()
+                    st.success("تم حفظ التعديلات بنجاح ✅")
+                    st.session_state.edit_mode = False
+                    st.rerun()
+
+                if cancel_btn:
+                    st.session_state.edit_mode = False
+                    st.rerun()
+
+            st.markdown("---")
+
+        st.markdown(f"""
+<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>{case_title}</b><br>
+{case_data[6]}
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>السنة القضائية</b><br>
+{case_data[7]}
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>الدائرة</b><br>
+{case_data[8]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>{case_type_title}</b><br>
+{case_data[9]}
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>المحكمة</b><br>
+{case_data[10]}
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
+<b>اسم المحكمة</b><br>
+{case_data[11]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        if case_data[1] == "استئناف":
+
+            st.markdown(f"""
+<div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:10px;margin-bottom:8px;text-align:center;border-radius:8px;">
+<b>مأمورية استئناف</b><br>
+{case_data[12] if case_data[12] else "ــــــ"}
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div dir="rtl" style="display:flex;gap:8px;margin-bottom:8px;">
+
+<div style="flex:1;border:2px solid #198754;background:#f8fff8;color:black;padding:15px;text-align:center;border-radius:8px;">
+<div style="color:#198754;font-weight:bold;font-size:18px;">
+{case_data[2]}
+</div>
+<hr>
+<div style="color:#c00000;font-size:20px;font-weight:bold;">
+{case_data[3]}
+</div>
+</div>
+
+<div style="flex:1;border:2px solid #198754;background:#f8fff8;color:black;padding:15px;text-align:center;border-radius:8px;">
+<div style="color:#198754;font-weight:bold;font-size:18px;">
+{case_data[4]}
+</div>
+<hr>
+<div color="#c00000;font-size:20px;font-weight:bold;">
+{case_data[5]}
+</div>
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown(f"""
+<div dir="rtl" style="border:2px solid #0b3b91;background:white;color:black;padding:15px;margin-bottom:8px;border-radius:8px;">
+
+<div style="text-align:center;font-size:22px;font-weight:bold;color:#0b3b91;">
+{subject_title}
+</div>
+
+<hr>
+
+<div style="
+text-align:center;
+font-size:24px;
+font-weight:bold;
+color:#c00000;
+padding:10px;
+">
+{case_data[13]}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+        st.markdown("---")
+
+        st.subheader("📅 الجلسات")
+
+        updates = cur.execute("""
+            SELECT
+                roll_no,
+                next_session_date,
+                status_reason,
+                adjournment_reason
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY next_session_date ASC
+        """,(case_id,)).fetchall()
+
+        if updates:
+
+            st.markdown("""
+<div dir="rtl" style="display:flex;gap:6px;margin-bottom:8px;">
+
+<div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الرول
+</div>
+
+<div style="flex:1;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+تاريخ الجلسة
+</div>
+
+<div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الإجراءات
+</div>
+
+<div style="flex:2;border:2px solid #0b3b91;background:#e8f0ff;color:#0b3b91;padding:8px;font-size:14px;text-align:center;border-radius:8px;font-weight:bold;">
+الملاحظات
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+            for item in updates:
+
+                session_date = "—"
+
+                if item[1]:
+                    session_date = (
+                        str(item[1])[:10].split("-")[2]
+                        + "/"
+                        + str(item[1])[:10].split("-")[1]
+                        + "/"
+                        + str(item[1])[:10].split("-")[0]
+                    )
+
+                st.markdown(f"""
+<div dir="rtl" style="display:flex;gap:6px;margin-bottom:6px;">
+
+<div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[0] if item[0] else "—"}
+</div>
+
+<div style="flex:1;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{session_date}
+</div>
+
+<div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[2] if item[2] else "—"}
+</div>
+
+<div style="flex:2;border:1px solid #0b3b91;background:white;color:black;padding:8px;font-size:14px;text-align:center;border-radius:8px;">
+{item[3] if item[3] else "—"}
+</div>
+
+</div>
+""", unsafe_allow_html=True)
+
+        else:
+
+            st.info("لا توجد جلسات مسجلة")
+
+        st.markdown("---")   
         # =====================================
         # إضافة جلسة جديدة
         # =====================================
