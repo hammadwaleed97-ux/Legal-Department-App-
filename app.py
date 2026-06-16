@@ -54,3 +54,64 @@ with col2:
         st.rerun()
 
 st.markdown("""<div class="logo-box"><div class="logo-icon">⚖️</div><div class="logo-main">الهيئة القومية للتأمين الاجتماعي</div><div class="logo-sub">الإدارة العامة للشئون القانونية</div><div class="logo-place">ديوان عام منطقة البحيرة</div><br><div>مع تحيات</div><div class="logo-name">وليد شعبان حماد</div></div>""", unsafe_allow_html=True)
+# =====================================
+# القائمة الرئيسية (Navigation)
+# =====================================
+if "page" not in st.session_state: st.session_state.page = "home"
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    if st.button("⚖️ تسجيل القضايا"): st.session_state.page = "cases"
+    if st.button("🔔 التنبيهات"): st.session_state.page = "alerts"
+    if st.button("📊 التقارير"): st.session_state.page = "reports"
+    if st.button("📂 أرشيف القضايا"): st.session_state.page = "archive"
+    if st.button("📋 حصر عام القضايا"): st.session_state.page = "all_cases"
+    if st.button("🔍 البحث"): st.session_state.page = "search"
+    if st.button("❌ القضايا المحذوفة"): st.session_state.page = "deleted"
+
+# =====================================
+# تسجيل القضايا
+# =====================================
+if st.session_state.page == "cases":
+    st.markdown("<h2 style='text-align:center;'>⚖️ تسجيل القضايا</h2>", unsafe_allow_html=True)
+    litigation_type = st.selectbox("نوع الإجراء", ["دعوى", "استئناف", "نقض"])
+    claimant = st.text_input("اسم الخصم الأول")
+    defendant = st.text_input("اسم الخصم الثاني")
+    case_no = st.text_input("رقم القضية")
+    judicial_year = st.text_input("السنة القضائية")
+    subject = st.text_area("موضوع الدعوى")
+    session_date = st.date_input("تاريخ الجلسة")
+    judgment_result = st.selectbox("حالة الدعوى", ["متداولة", "لصالح الهيئة", "ضد الهيئة"])
+
+    if st.button("💾 حفظ القضية"):
+        cur.execute("INSERT INTO cases (litigation_type, claimant, defendant, case_no, judicial_year, subject, session_date, judgment_result, status, owner_user, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (litigation_type, claimant, defendant, case_no, judicial_year, subject, str(session_date), judgment_result, "متداولة" if judgment_result == "متداولة" else "محكوم فيها", st.session_state.username, str(datetime.now())))
+        conn.commit()
+        st.success("تم حفظ القضية")
+        st.rerun()
+    show_footer()
+
+# =====================================
+# إدارة المدير (Admin)
+# =====================================
+if st.session_state.role == "admin":
+    with st.expander("👑 لوحة تحكم المدير"):
+        new_username = st.text_input("اسم المستخدم الجديد")
+        if st.button("➕ إنشاء مستخدم"):
+            cur.execute("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, ?)", (new_username, "123456", "مستخدم جديد", "user"))
+            conn.commit()
+            st.rerun()
+
+# =====================================
+# الحصر العام (مع استبعاد المحذوفات)
+# =====================================
+if st.session_state.page == "all_cases":
+    st.header("📋 حصر عام القضايا")
+    rows = cur.execute("SELECT * FROM cases WHERE status='متداولة' AND id NOT IN (SELECT original_case_id FROM deleted_cases) ORDER BY session_date ASC").fetchall()
+    for row in rows:
+        st.write(f"رقم: {row[6]}/{row[7]} - {row[3]} ضد {row[5]}")
+        if st.button("📂 فتح", key=f"open_{row[0]}"):
+            st.session_state.update({"selected_case": row[0], "page": "update_case"})
+            st.rerun()
+    show_footer()
+    
