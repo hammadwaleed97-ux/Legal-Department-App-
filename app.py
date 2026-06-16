@@ -2,26 +2,10 @@ import streamlit as st
 import sqlite3
 from datetime import datetime, date
 
-# =====================================
-# إعداد الصفحة
-# =====================================
-
-st.set_page_config(
-    page_title="إدارة القضايا",
-    page_icon="⚖️",
-    layout="wide"
-)
-
-# =====================================
-# الاتصال بقاعدة البيانات
-# =====================================
+st.set_page_config(page_title="إدارة القضايا", page_icon="⚖️", layout="wide")
 
 conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
-
-# =====================================
-# جدول القضايا
-# =====================================
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS cases(
@@ -51,14 +35,8 @@ CREATE TABLE IF NOT EXISTS cases(
 )
 """)
 
-try:
-    cur.execute("ALTER TABLE cases ADD COLUMN owner_user TEXT")
-except:
-    pass
-
-# =====================================
-# جدول المستخدمين
-# =====================================
+try: cur.execute("ALTER TABLE cases ADD COLUMN owner_user TEXT")
+except: pass
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS users(
@@ -71,10 +49,6 @@ CREATE TABLE IF NOT EXISTS users(
     created_at TEXT
 )
 """)
-
-# =====================================
-# جدول تحديثات القضايا
-# =====================================
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS case_updates(
@@ -92,14 +66,8 @@ CREATE TABLE IF NOT EXISTS case_updates(
 )
 """)
 
-try:
-    cur.execute("ALTER TABLE case_updates ADD COLUMN roll_no TEXT")
-except:
-    pass
-
-# =====================================
-# جدول المستندات
-# =====================================
+try: cur.execute("ALTER TABLE case_updates ADD COLUMN roll_no TEXT")
+except: pass
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS case_documents(
@@ -113,12 +81,6 @@ CREATE TABLE IF NOT EXISTS case_documents(
 )
 """)
 
-conn.commit()
-
-# =====================================
-# جدول التنبيهات
-# =====================================
-
 cur.execute("""
 CREATE TABLE IF NOT EXISTS notifications(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,10 +91,6 @@ CREATE TABLE IF NOT EXISTS notifications(
     status TEXT
 )
 """)
-
-# =====================================
-# جدول المحذوفات
-# =====================================
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS deleted_cases(
@@ -146,49 +104,23 @@ CREATE TABLE IF NOT EXISTS deleted_cases(
 conn.commit()
 
 try:
-    cur.execute("""
-        INSERT INTO users (username, password, full_name, role, active, created_at)
-        VALUES (?,?,?,?,?,?)
-    """, ("waleedhammad", "123456", "وليد حماد", "admin", 1, str(datetime.now())))
+    cur.execute("INSERT INTO users (username, password, full_name, role, active, created_at) VALUES (?,?,?,?,?,?)",
+    ("waleedhammad", "123456", "وليد حماد", "admin", 1, str(datetime.now())))
     conn.commit()
-except:
-    pass
+except: pass
 
-# =====================================
-# Session State
-# =====================================
-
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "username" not in st.session_state:
-    st.session_state.username = ""
-if "role" not in st.session_state:
-    st.session_state.role = ""
-if "full_name" not in st.session_state:
-    st.session_state.full_name = ""
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-if "selected_case" not in st.session_state:
-    st.session_state.selected_case = None
-
-# =====================================
-# تسجيل الدخول
-# =====================================
+if "logged_in" not in st.session_state: st.session_state.logged_in = False
+if "username" not in st.session_state: st.session_state.username = ""
+if "role" not in st.session_state: st.session_state.role = ""
+if "full_name" not in st.session_state: st.session_state.full_name = ""
+if "page" not in st.session_state: st.session_state.page = "home"
+if "selected_case" not in st.session_state: st.session_state.selected_case = None
 
 if not st.session_state.logged_in:
-    st.markdown("""
-    <style>
-   .stApp{ background:#062456; }
-    h1,h2,h3,h4,h5,h6, label,p,span{ color:white!important; }
-   .login-box{ text-align:center; color:white; margin-top:50px; }
-    </style>
-    """, unsafe_allow_html=True)
-
+    st.markdown("""<style>.stApp{ background:#062456; } h1,h2,h3,h4,h5,h6, label,p,span{ color:white!important; }.login-box{ text-align:center; color:white; margin-top:50px; }</style>""", unsafe_allow_html=True)
     st.markdown('<div class="login-box"><h1>⚖️ إدارة القضايا</h1><h3>تسجيل الدخول</h3></div>', unsafe_allow_html=True)
-
     username = st.text_input("اسم المستخدم")
     password = st.text_input("كلمة المرور", type="password")
-
     if st.button("دخول"):
         user = cur.execute("SELECT username, password, full_name, role FROM users WHERE username=? AND active=1", (username,)).fetchone()
         if user and user[1] == password:
@@ -201,39 +133,10 @@ if not st.session_state.logged_in:
             st.error("اسم المستخدم أو كلمة المرور غير صحيحة")
     st.stop()
 
-# =====================================
-# شكل البرنامج بعد الدخول
-# =====================================
-
-st.markdown("""
-<style>
-.stApp{ background:#062456; }
-h1,h2,h3,h4,h5,h6, label,p,span{ color:white!important; }
-.stTextInput input{ color:black!important; }
-.stTextArea textarea{ color:black!important; }
-.stDateInput input{ color:black!important; }
-.stSelectbox div[data-baseweb="select"] > div{ color:black!important; }
-.logo-box{ text-align:center; color:white; }
-.logo-icon{ font-size:60px; }
-.logo-main{ font-size:28px; font-weight:bold; }
-.logo-sub{ font-size:24px; font-weight:bold; }
-.logo-place{ font-size:22px; font-weight:bold; }
-.logo-name{ color:#FFD700; font-size:30px; font-weight:bold; }
-div.stButton > button{
-    width:340px; height:65px; border-radius:15px; border:none;
-    background:#2f55d4; color:white; font-size:20px; font-weight:bold;
-    display:block; margin:auto;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# =====================================
-# معلومات المستخدم
-# =====================================
+st.markdown("""<style>.stApp{ background:#062456; } h1,h2,h3,h4,h5,h6, label,p,span{ color:white!important; }.stTextInput input{ color:black!important; }.stTextArea textarea{ color:black!important; }.stDateInput input{ color:black!important; }.stSelectbox div[data-baseweb="select"] > div{ color:black!important; }.logo-box{ text-align:center; color:white; }.logo-icon{ font-size:60px; }.logo-main{ font-size:28px; font-weight:bold; }.logo-sub{ font-size:24px; font-weight:bold; }.logo-place{ font-size:22px; font-weight:bold; }.logo-name{ color:#FFD700; font-size:30px; font-weight:bold; } div.stButton > button{ width:340px; height:65px; border-radius:15px; border:none; background:#2f55d4; color:white; font-size:20px; font-weight:bold; display:block; margin:auto; }</style>""", unsafe_allow_html=True)
 
 col1, col2 = st.columns([4,1])
-with col1:
-    st.success(f"المستخدم: {st.session_state.full_name}")
+with col1: st.success(f"المستخدم: {st.session_state.full_name}")
 with col2:
     if st.button("🚪 خروج"):
         st.session_state.logged_in = False
@@ -242,24 +145,7 @@ with col2:
         st.session_state.full_name = ""
         st.rerun()
 
-# =====================================
-# اللوجو
-# =====================================
-
-st.markdown("""
-<div class="logo-box">
-<div class="logo-icon">⚖️</div>
-<div class="logo-main">الهيئة القومية للتأمين الاجتماعي</div>
-<div class="logo-sub">الإدارة العامة للشئون القانونية</div>
-<div class="logo-place">ديوان عام منطقة البحيرة</div>
-<br><div>مع تحيات</div>
-<div class="logo-name">وليد شعبان حماد</div>
-</div>
-""", unsafe_allow_html=True)
-
-# =====================================
-# مدير البرنامج
-# =====================================
+st.markdown("""<div class="logo-box"><div class="logo-icon">⚖️</div><div class="logo-main">الهيئة القومية للتأمين الاجتماعي</div><div class="logo-sub">الإدارة العامة للشئون القانونية</div><div class="logo-place">ديوان عام منطقة البحيرة</div><br><div>مع تحيات</div><div class="logo-name">وليد شعبان حماد</div></div>""", unsafe_allow_html=True)
 
 if st.session_state.role == "admin":
     st.markdown("---")
@@ -275,12 +161,7 @@ if st.session_state.role == "admin":
                 conn.commit()
                 st.success("تم إنشاء المستخدم")
                 st.rerun()
-            except:
-                st.error("اسم المستخدم موجود بالفعل")
-
-# =====================================
-# القائمة الرئيسية
-# =====================================
+            except: st.error("اسم المستخدم موجود بالفعل")
 
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
@@ -291,10 +172,6 @@ with col2:
     if st.button("📋 حصر عام القضايا"): st.session_state.page = "all_cases"
     if st.button("🔍 البحث"): st.session_state.page = "search"
     if st.button("❌ القضايا المحذوفة"): st.session_state.page = "deleted"
-
-# =====================================
-# تسجيل القضايا - زي القديم
-# =====================================
 
 if st.session_state.page == "cases":
     st.markdown("<h2 style='text-align:center;color:white'>⚖️ تسجيل القضايا</h2>", unsafe_allow_html=True)
@@ -328,9 +205,10 @@ if st.session_state.page == "cases":
             st.error("رقم واتساب غير صحيح")
             st.stop()
 
+        # تصليح خطأ الـ INSERT هنا - 22 عمود = 22 علامة استفهام
         cur.execute("""
             INSERT INTO cases (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, session_date, reason, notes, judgment_result, notifications_enabled, whatsapp_number, status, owner_user, created_at)
-            VALUES (?,?,?,?,?,?,?)
+            VALUES (?,?,?,?,?,?)
         """, (litigation_type, claimant_type, claimant, defendant_type, defendant, case_no, judicial_year, circuit, case_type, court, court_name, appeal_office, subject, str(session_date), reason, notes, judgment_result, 1 if notifications_enabled else 0, whatsapp_number, "متداولة", st.session_state.username, str(datetime.now())))
         conn.commit()
 
@@ -342,18 +220,12 @@ if st.session_state.page == "cases":
         st.success("تم حفظ القضية بنجاح")
         st.rerun()
 
-# =====================================
-# البحث - زي القديم
-# =====================================
-
 elif st.session_state.page == "search":
     st.header("🔍 البحث")
     search_text = st.text_input("ابحث برقم القضية أو الخصوم أو الموضوع")
-
     if search_text:
         rows = cur.execute("SELECT * FROM cases WHERE case_no LIKE? OR claimant LIKE? OR defendant LIKE? OR subject LIKE?",
         (f"%{search_text}%", f"%{search_text}%", f"%{search_text}%", f"%{search_text}%")).fetchall()
-
         if not rows:
             st.warning("لا توجد نتائج")
         else:
@@ -366,18 +238,12 @@ elif st.session_state.page == "search":
                     st.rerun()
                 st.markdown("---")
 
-# =====================================
-# فتح القضية - زي القديم بدون كروت
-# =====================================
-
 elif st.session_state.page == "update_case":
     st.button("⬅️ العودة للحصر العام", on_click=lambda: st.session_state.update({'page': 'all_cases'}))
     case_id = st.session_state.selected_case
     case_data = cur.execute("SELECT * FROM cases WHERE id=?", (case_id,)).fetchone()
-
     if case_data:
         st.header("⚖️ ملف القضية")
-
         case_title = "رقم الدعوى"
         case_type_title = "نوع الدعوى"
         subject_title = "موضوع الدعوى"
@@ -431,87 +297,38 @@ elif st.session_state.page == "update_case":
             st.success("تم حفظ الجلسة")
             st.rerun()
 
-# =====================================
-# التقارير - مصح
-# =====================================
-
 elif st.session_state.page == "reports":
     st.button("⬅️ رجوع", on_click=lambda: st.session_state.update({'page': 'home'}))
     st.header("📊 التقارير والإحصائيات")
-
     col1, col2 = st.columns(2)
-    with col1:
-        from_date = st.date_input("من تاريخ", key="report_from")
-    with col2:
-        to_date = st.date_input("إلى تاريخ", key="report_to")
-
+    with col1: from_date = st.date_input("من تاريخ", key="report_from")
+    with col2: to_date = st.date_input("إلى تاريخ", key="report_to")
     st.markdown("---")
-
     total_cases = cur.execute("SELECT COUNT(*) FROM cases WHERE id NOT IN (SELECT original_case_id FROM deleted_cases)").fetchone()[0]
     active_cases = cur.execute("SELECT COUNT(*) FROM cases WHERE status='متداولة' AND id NOT IN (SELECT original_case_id FROM deleted_cases)").fetchone()[0]
     positive_judgments = cur.execute("SELECT COUNT(*) FROM cases WHERE judgment_result='لصالح الهيئة'").fetchone()[0]
     negative_judgments = cur.execute("SELECT COUNT(*) FROM cases WHERE judgment_result='ضد الهيئة'").fetchone()[0]
     total_judgments = positive_judgments + negative_judgments
-
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("إجمالي القضايا", total_cases)
     c2.metric("القضايا المتداولة", active_cases)
     c3.metric("إجمالي الأحكام الصادرة", total_judgments)
     c4.metric("الأحكام الصادرة لصالح", positive_judgments)
     c5.metric("الأحكام الصادرة ضد", negative_judgments)
-
     st.markdown("---")
-
-    report_type = st.selectbox(
-        "نوع التقرير",
-        [
-            "جميع القضايا المتداولة",
-            "القضايا المتداولة خلال الفترة",
-            "جميع الأحكام الصادرة (لصالح / ضد)",
-            "الأحكام الصادرة لصالح",
-            "الأحكام الصادرة ضد"
-        ]
-    )
-
+    report_type = st.selectbox("نوع التقرير", ["جميع القضايا المتداولة", "القضايا المتداولة خلال الفترة", "جميع الأحكام الصادرة (لصالح / ضد)", "الأحكام الصادرة لصالح", "الأحكام الصادرة ضد"])
     if st.button("📄 استخراج التقرير"):
         rows = []
-
         if report_type == "جميع القضايا المتداولة":
-            rows = cur.execute("""
-                SELECT *
-                FROM cases
-                WHERE status='متداولة'
-            """).fetchall()
-
+            rows = cur.execute("SELECT * FROM cases WHERE status='متداولة'").fetchall()
         elif report_type == "القضايا المتداولة خلال الفترة":
-            rows = cur.execute("""
-                SELECT *
-                FROM cases
-                WHERE status='متداولة'
-                AND session_date BETWEEN? AND?
-            """, (str(from_date), str(to_date))).fetchall()
-
+            rows = cur.execute("SELECT * FROM cases WHERE status='متداولة' AND session_date BETWEEN? AND?", (str(from_date), str(to_date))).fetchall()
         elif report_type == "جميع الأحكام الصادرة (لصالح / ضد)":
-            rows = cur.execute("""
-                SELECT *
-                FROM cases
-                WHERE judgment_result IN ('لصالح الهيئة','ضد الهيئة')
-            """).fetchall()
-
+            rows = cur.execute("SELECT * FROM cases WHERE judgment_result IN ('لصالح الهيئة','ضد الهيئة')").fetchall()
         elif report_type == "الأحكام الصادرة لصالح":
-            rows = cur.execute("""
-                SELECT *
-                FROM cases
-                WHERE judgment_result='لصالح الهيئة'
-            """).fetchall()
-
+            rows = cur.execute("SELECT * FROM cases WHERE judgment_result='لصالح الهيئة'").fetchall()
         elif report_type == "الأحكام الصادرة ضد":
-            rows = cur.execute("""
-                SELECT *
-                FROM cases
-                WHERE judgment_result='ضد الهيئة'
-            """).fetchall()
-
+            rows = cur.execute("SELECT * FROM cases WHERE judgment_result='ضد الهيئة'").fetchall()
         if rows:
             st.markdown(f"### التقرير خلال الفترة من {from_date} حتى {to_date}")
             for row in rows:
@@ -521,14 +338,9 @@ elif st.session_state.page == "reports":
         else:
             st.warning("لا توجد بيانات للفترة المحددة")
 
-# =====================================
-# الأرشيف
-# =====================================
-
 elif st.session_state.page == "archive":
     st.header("📂 أرشيف القضايا")
     rows = cur.execute("SELECT * FROM cases WHERE status <> 'متداولة' AND id NOT IN (SELECT original_case_id FROM deleted_cases) ORDER BY session_date ASC").fetchall()
-
     if not rows:
         st.warning("لا توجد قضايا مؤرشفة")
     else:
@@ -539,14 +351,9 @@ elif st.session_state.page == "archive":
                 st.write(f"موضوع الدعوى : {row[13]}")
                 st.write(f"الحالة : {row[20]}")
 
-# =====================================
-# الحصر العام
-# =====================================
-
 elif st.session_state.page == "all_cases":
     st.header("📋 حصر عام القضايا")
     rows = cur.execute("SELECT * FROM cases WHERE status='متداولة' AND id NOT IN (SELECT original_case_id FROM deleted_cases) ORDER BY session_date ASC").fetchall()
-
     if not rows:
         st.warning("لا توجد قضايا متداولة")
     else:
@@ -555,7 +362,6 @@ elif st.session_state.page == "all_cases":
             update = cur.execute("SELECT next_session_date, status_reason FROM case_updates WHERE case_id=? ORDER BY next_session_date DESC LIMIT 1", (case_id,)).fetchone()
             last_session = update[0] if update else row[14]
             last_action = update[1] if update else row[15]
-
             st.markdown(f"### {row[3]} ضد الهيئة\n**موضوع الدعوى:** {row[13]}\n**الجلسة:** {last_session}\n**الإجراء:** {last_action}\n**رقم القضية:** {row[6]}/{row[7]}\n**الدائرة:** {row[8]}\n**المحكمة:** {row[10]}\n**اسم المحكمة:** {row[11]}")
             if st.button("📂 فتح القضية", key=f"open_case_{case_id}"):
                 st.session_state.selected_case = case_id
@@ -563,17 +369,9 @@ elif st.session_state.page == "all_cases":
                 st.rerun()
             st.markdown("---")
 
-# =====================================
-# القضايا المحذوفة
-# =====================================
-
 elif st.session_state.page == "deleted":
     st.header("❌ القضايا المحذوفة")
-    rows = cur.execute("""
-        SELECT d.id, d.original_case_id, d.delete_reason, d.deleted_at, c.case_no, c.judicial_year, c.claimant, c.defendant, c.subject
-        FROM deleted_cases d LEFT JOIN cases c ON d.original_case_id = c.id ORDER BY d.deleted_at DESC
-    """).fetchall()
-
+    rows = cur.execute("SELECT d.id, d.original_case_id, d.delete_reason, d.deleted_at, c.case_no, c.judicial_year, c.claimant, c.defendant, c.subject FROM deleted_cases d LEFT JOIN cases c ON d.original_case_id = c.id ORDER BY d.deleted_at DESC").fetchall()
     if not rows:
         st.warning("لا توجد قضايا محذوفة")
     else:
@@ -585,15 +383,10 @@ elif st.session_state.page == "deleted":
                 st.write(f"سبب الحذف : {row[2]}")
                 st.write(f"تاريخ الحذف : {row[3]}")
 
-# =====================================
-# التنبيهات
-# =====================================
-
 elif st.session_state.page == "alerts":
     st.header("🔔 التنبيهات")
     today = str(date.today())
     rows = cur.execute("SELECT * FROM case_updates WHERE next_session_date >=? ORDER BY next_session_date ASC", (today,)).fetchall()
-
     if not rows:
         st.info("لا توجد جلسات قادمة")
     else:
