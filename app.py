@@ -652,7 +652,6 @@ with col2:
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
         if st.session_state.page == "cases":
-
     st.markdown("""
     <h2 style='text-align:center;color:white'>
     ⚖️ تسجيل القضايا
