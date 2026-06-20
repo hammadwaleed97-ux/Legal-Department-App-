@@ -1756,7 +1756,7 @@ if st.session_state.page == "alerts":
                 )
 
                 st.markdown("---")
-     elif st.session_state.page == "reports":
+         elif st.session_state.page == "reports":
 
     st.markdown("""
     <h2 style='text-align:center;color:white'>
