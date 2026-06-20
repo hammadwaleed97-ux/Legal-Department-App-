@@ -1644,16 +1644,7 @@ if st.session_state.page == "deleted":
                 )
 
                 st.write(
-                    f"تاريخ الحذف : {row[3]}"
-                    import streamlit as st
-import pandas as pd
-import sqlite3
-from io import BytesIO
-import matplotlib.pyplot as plt
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-
+                    f"تاريخ الحذف : {row[3]}"                  
 # =========================
 # إعداد الصفحة
 # =========================
