@@ -1761,6 +1761,29 @@ if st.session_state.page == "alerts":
 # =====================================
 
 if st.session_state.page == "reports":
+    st.markdown("---")
+
+st.markdown(f"""
+<div style="text-align:center;color:white">
+
+<h2>المستخدم: {st.session_state.full_name}</h2>
+
+<h1>⚖️ الهيئة القومية للتأمين الاجتماعي</h1>
+
+<h3>الإدارة العامة للشئون القانونية</h3>
+
+<h3>ديوان عام منطقة البحيرة</h3>
+
+<h3>مع تحيات</h3>
+
+<h2 style="color:#FFD700;">وليد شعبان حماد</h2>
+
+<hr>
+
+<h2>📊 التقارير والإحصائيات</h2>
+
+</div>
+""", unsafe_allow_html=True)
 
     st.markdown("---")  # فاصل بينه وبين اللي قبله
 
