@@ -1646,7 +1646,7 @@ if st.session_state.page == "deleted":
                 st.write(
                     f"تاريخ الحذف : {row[3]}"  
                 )
-                    import streamlit as st
+import streamlit as st
 import pandas as pd
 import sqlite3
 from io import BytesIO
