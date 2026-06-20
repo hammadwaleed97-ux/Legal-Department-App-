@@ -1758,7 +1758,7 @@ if st.session_state.page == "alerts":
                 st.markdown("---")
                 if st.session_state.page == "reports":
 
-    st.markdown(f"""
+                st.markdown(f"""
     <div style="text-align:center;color:white">
 
     <h2>المستخدم: {st.session_state.full_name}</h2>
