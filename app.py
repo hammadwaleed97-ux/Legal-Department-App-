@@ -1755,3 +1755,225 @@ if st.session_state.page == "alerts":
                 )
 
                 st.markdown("---")
+elif st.session_state.page == "reports":
+
+    import pandas as pd
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    📊 التقارير والإحصائيات
+    </h2>
+    """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    df = pd.read_sql_query(
+        "SELECT * FROM cases",
+        conn
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        from_date = st.date_input(
+            "من تاريخ",
+            key="report_from"
+        )
+
+    with col2:
+        to_date = st.date_input(
+            "حتى تاريخ",
+            key="report_to"
+        )
+
+    if "session_date" in df.columns:
+
+        df["session_date"] = pd.to_datetime(
+            df["session_date"],
+            errors="coerce"
+        )
+
+        filtered_df = df[
+            (df["session_date"] >= pd.to_datetime(from_date))
+            &
+            (df["session_date"] <= pd.to_datetime(to_date))
+        ]
+
+    else:
+
+        filtered_df = df.copy()
+
+    total_cases = len(
+        filtered_df[
+            filtered_df["judgment_result"] == "متداولة"
+        ]
+    )
+
+    win_cases = len(
+        filtered_df[
+            filtered_df["judgment_result"] == "لصالح الهيئة"
+        ]
+    )
+
+    lose_cases = len(
+        filtered_df[
+            filtered_df["judgment_result"] == "ضد الهيئة"
+        ]
+    )
+
+    total_judgments = win_cases + lose_cases
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.metric(
+            "إجمالي القضايا المتداولة",
+            total_cases
+        )
+
+    with c2:
+        st.metric(
+            "إجمالي الأحكام الصادرة",
+            total_judgments
+        )
+
+    with c3:
+        st.metric(
+            "الأحكام لصالح الهيئة",
+            win_cases
+        )
+
+    with c4:
+        st.metric(
+            "الأحكام ضد الهيئة",
+            lose_cases
+        )
+
+    st.markdown("---")
+
+    st.subheader("📋 بيان الدعاوى المتداولة")
+
+    lawsuits = filtered_df[
+        filtered_df["judgment_result"] == "متداولة"
+    ]
+
+    if len(lawsuits) == 0:
+
+        st.info("لا توجد دعاوى خلال الفترة المحددة")
+
+    else:
+
+        report_df = pd.DataFrame()
+
+        report_df["م"] = range(
+            1,
+            len(lawsuits) + 1
+        )
+
+        report_df["رقم القضية"] = lawsuits["case_no"]
+
+        report_df["السنة القضائية"] = lawsuits["judicial_year"]
+
+        report_df["الدائرة"] = lawsuits["circuit"]
+
+        report_df["النوع"] = lawsuits["case_type"]
+
+        report_df["المحكمة"] = lawsuits["court"]
+
+        report_df["اسم المحكمة"] = lawsuits["court_name"]
+
+        report_df["الخصوم"] = (
+            lawsuits["claimant"]
+            + " ضد "
+            + lawsuits["defendant"]
+        )
+
+        report_df["موضوع القضية"] = lawsuits["subject"]
+
+        report_df["آخر جلسة"] = lawsuits["session_date"]
+
+        st.dataframe(
+            report_df,
+            use_container_width=True
+        )
+
+    st.markdown("---")
+
+    st.subheader("⚖️ بيان الأحكام الصادرة")
+
+    judgments = filtered_df[
+        filtered_df["judgment_result"].isin(
+            [
+                "لصالح الهيئة",
+                "ضد الهيئة"
+            ]
+        )
+    ]
+
+    if len(judgments) == 0:
+
+        st.info("لا توجد أحكام خلال الفترة المحددة")
+
+    else:
+
+        judgment_df = pd.DataFrame()
+
+        judgment_df["م"] = range(
+            1,
+            len(judgments) + 1
+        )
+
+        judgment_df["رقم القضية"] = judgments["case_no"]
+
+        judgment_df["السنة القضائية"] = judgments["judicial_year"]
+
+        judgment_df["الدائرة"] = judgments["circuit"]
+
+        judgment_df["النوع"] = judgments["case_type"]
+
+        judgment_df["المحكمة"] = judgments["court"]
+
+        judgment_df["اسم المحكمة"] = judgments["court_name"]
+
+        judgment_df["الخصوم"] = (
+            judgments["claimant"]
+            + " ضد "
+            + judgments["defendant"]
+        )
+
+        judgment_df["موضوع القضية"] = judgments["subject"]
+
+        judgment_df["تاريخ الحكم"] = judgments["session_date"]
+
+        judgment_df["النتيجة"] = judgments["judgment_result"]
+
+        st.dataframe(
+            judgment_df,
+            use_container_width=True
+        )
+
+    st.markdown("---")
+
+    st.subheader("✅ الأحكام لصالح الهيئة")
+
+    win_df = judgments[
+        judgments["judgment_result"] == "لصالح الهيئة"
+    ]
+
+    st.dataframe(
+        win_df,
+        use_container_width=True
+    )
+
+    st.markdown("---")
+
+    st.subheader("❌ الأحكام ضد الهيئة")
+
+    lose_df = judgments[
+        judgments["judgment_result"] == "ضد الهيئة"
+    ]
+
+    st.dataframe(
+        lose_df,
+        use_container_width=True
+    )
