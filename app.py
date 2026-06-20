@@ -1644,7 +1644,220 @@ if st.session_state.page == "deleted":
                 )
 
                 st.write(
-                    f"تاريخ الحذف : {row[3]}"                  
+                    f"تاريخ الحذف : {row[3]}"  
+                    import streamlit as st
+import pandas as pd
+import sqlite3
+from io import BytesIO
+import matplotlib.pyplot as plt
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+
+# =========================
+# إعداد الصفحة
+# =========================
+st.set_page_config(
+    page_title="النظام القانوني",
+    layout="wide"
+)
+
+# =========================
+# 🎨 تصميم رسمي
+# =========================
+st.markdown("""
+<style>
+.stApp {
+    background-color: #071a33;
+    color: white;
+}
+.block {
+    background-color: #102a4d;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #1e3f66;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
+# 🔥 فاصل بداية قسم التقارير (أول الكود كما طلبت)
+# =========================
+st.markdown("""
+<div style="
+    background-color:#102a4d;
+    padding:15px;
+    border-radius:10px;
+    border:2px solid #1e3f66;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
+    color:white;
+">
+📊 قسم التقارير والإحصائيات
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<hr style='border:3px solid #1e3f66;'>", unsafe_allow_html=True)
+
+# =========================
+# الاتصال بقاعدة البيانات
+# =========================
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+df = pd.read_sql_query("SELECT * FROM cases", conn)
+
+if "case_date" in df.columns:
+    df["case_date"] = pd.to_datetime(df["case_date"])
+
+# =========================
+# 📅 فلترة التاريخ
+# =========================
+col1, col2 = st.columns(2)
+
+with col1:
+    from_date = st.date_input("من تاريخ")
+with col2:
+    to_date = st.date_input("حتى تاريخ")
+
+if from_date and to_date:
+    df = df[
+        (df["case_date"] >= pd.to_datetime(from_date)) &
+        (df["case_date"] <= pd.to_datetime(to_date))
+    ]
+
+# =========================
+# 📊 الإحصائيات
+# =========================
+total_cases = len(df)
+
+judged = df[df["final_judgment"].notnull()]
+
+win_cases = len(judged[judged["judgment_result"] == "صالح"])
+lose_cases = len(judged[judged["judgment_result"] == "ضد"])
+
+st.title("📊 Dashboard التقارير القانونية")
+
+c1, c2, c3 = st.columns(3)
+
+c1.markdown('<div class="block">', unsafe_allow_html=True)
+c1.metric("إجمالي القضايا", total_cases)
+c1.markdown('</div>', unsafe_allow_html=True)
+
+c2.markdown('<div class="block">', unsafe_allow_html=True)
+c2.metric("الأحكام الصادرة", len(judged))
+c2.markdown('</div>', unsafe_allow_html=True)
+
+c3.markdown('<div class="block">', unsafe_allow_html=True)
+c3.metric("نسبة النجاح", f"{round((win_cases/max(len(judged),1))*100,1)}%")
+c3.markdown('</div>', unsafe_allow_html=True)
+
+# =========================
+# 📊 رسم بياني (صالح / ضد)
+# =========================
+st.subheader("📈 توزيع الأحكام")
+
+fig1, ax1 = plt.subplots()
+ax1.pie(
+    [win_cases, lose_cases],
+    labels=["صالح", "ضد"],
+    autopct="%1.1f%%"
+)
+st.pyplot(fig1)
+
+# =========================
+# 📊 رسم بياني (إجمالي / أحكام)
+# =========================
+st.subheader("📊 مقارنة القضايا")
+
+fig2, ax2 = plt.subplots()
+ax2.bar(["إجمالي القضايا", "الأحكام"], [total_cases, len(judged)])
+st.pyplot(fig2)
+
+# =========================
+# 📁 بيان الدعاوى
+# =========================
+st.subheader("📁 بيان الدعاوى المتداولة")
+
+st.dataframe(df, use_container_width=True)
+
+st.markdown("""
+**الهيئة القومية للتأمين الاجتماعي**  
+**الإدارة العامة للشئون القانونية**
+""")
+
+# =========================
+# ⚖️ بيان الأحكام
+# =========================
+st.subheader("⚖️ بيان الأحكام الصادرة")
+
+st.dataframe(judged, use_container_width=True)
+
+st.markdown("""
+**بيان الأحكام الصادرة (صالح / ضد)**  
+الهيئة القومية للتأمين الاجتماعي  
+""")
+
+# =========================
+# 📄 PDF رسمي
+# =========================
+def make_pdf(data, title):
+    buffer = BytesIO()
+    pdf = SimpleDocTemplate(buffer)
+
+    styles = getSampleStyleSheet()
+    elements = []
+
+    elements.append(Paragraph("الهيئة القومية للتأمين الاجتماعي", styles["Title"]))
+    elements.append(Paragraph("الإدارة العامة للشئون القانونية", styles["Normal"]))
+    elements.append(Spacer(1, 10))
+
+    elements.append(Paragraph(title, styles["Title"]))
+    elements.append(Spacer(1, 10))
+
+    table_data = [list(data.columns)] + data.values.tolist()
+
+    table = Table(table_data)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#071a33")),
+        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+        ("GRID", (0,0), (-1,-1), 0.5, colors.black),
+        ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
+    ]))
+
+    elements.append(table)
+
+    # ختم إداري
+    elements.append(Spacer(1, 20))
+    elements.append(Paragraph("ختم الإدارة القانونية", styles["Normal"]))
+    elements.append(Paragraph("____________________", styles["Normal"]))
+
+    pdf.build(elements)
+    buffer.seek(0)
+    return buffer
+
+# =========================
+# ⬇️ تحميل التقارير
+# =========================
+st.subheader("⬇️ تحميل التقارير")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("تحميل بيان الدعاوى PDF"):
+        pdf = make_pdf(df, "بيان بالدعاوى المتداولة")
+        st.download_button("تحميل الملف", pdf, file_name="dawaawy.pdf")
+
+with col2:
+    if st.button("تحميل بيان الأحكام PDF"):
+        pdf = make_pdf(judged, "بيان الأحكام الصادرة")
+        st.download_button("تحميل الملف", pdf, file_name="ahkam.pdf")
+
+# =========================
+# 🖨️ طباعة
+# =========================
+st.button("🖨️ طباعة التقرير", on_click=lambda: st.markdown(
+    "<script>window.print()</script>", unsafe_allow_html=True
+))
 # =========================
 # إعداد الصفحة
 # =========================
