@@ -444,6 +444,43 @@ with col2:
         st.session_state.full_name = ""
 
         st.rerun()
+        # =====================================
+# اللوجو
+# =====================================
+
+st.markdown("""
+
+<div class="logo-box">
+
+<div class="logo-icon">
+⚖️
+</div>
+
+<div class="logo-main">
+الهيئة القومية للتأمين الاجتماعي
+</div>
+
+<div class="logo-sub">
+الإدارة العامة للشئون القانونية
+</div>
+
+<div class="logo-place">
+ديوان عام منطقة البحيرة
+</div>
+
+<br>
+
+<div>
+مع تحيات
+</div>
+
+<div class="logo-name">
+وليد شعبان حماد
+</div>
+
+</div>
+
+""", unsafe_allow_html=True)
 # =====================================
 # مدير البرنامج
 # =====================================
