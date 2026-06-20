@@ -444,6 +444,89 @@ with col2:
         st.session_state.full_name = ""
 
         st.rerun()
+        # =====================================
+# اللوجو
+# =====================================
+
+st.markdown("""
+<style>
+.logo-box {
+    background: #0a1a3a;
+    border: 3px solid #d4af37;
+    border-radius: 20px;
+    padding: 35px 20px;
+    text-align: center;
+    direction: rtl;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+.logo-box::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 15px;
+    pointer-events: none;
+}
+.logo-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+.logo-main {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin-bottom: 8px;
+}
+.logo-sub {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 20px;
+}
+.logo-greeting {
+    font-size: 20px;
+    color: red;
+    font-weight: bold;
+    margin: 15px 0 5px 0;
+}
+.logo-place {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 15px;
+}
+.logo-name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+</style>
+
+<div class="logo-box" dir="rtl">
+
+<div class="logo-icon">&#9878;</div>
+
+<div class="logo-main">الإدارة العامة للقضايا</div>
+
+<div class="logo-sub">بالهيئة القومية للتأمين الاجتماعي</div>
+
+<div class="logo-greeting">مع تحيات</div>
+
+<div class="logo-place">الإدارة العامة للشئون القانونية<br>بديوان عام منطقة البحيرة</div>
+
+<div class="logo-name">وليد حماد</div>
+
+</div>
+
+""", unsafe_allow_html=True)
 # =====================================
 # مدير البرنامج
 # =====================================
