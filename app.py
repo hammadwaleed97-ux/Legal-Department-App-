@@ -1646,7 +1646,7 @@ if st.session_state.page == "deleted":
                 st.write(
                     f"تاريخ الحذف : {row[3]}"  
                 )
-               elif st.session_state.page == "reports":
+    elif st.session_state.page == "reports":
 
     import pandas as pd
 
