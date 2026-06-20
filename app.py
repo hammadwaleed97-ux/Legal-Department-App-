@@ -445,6 +445,93 @@ with col2:
 
         st.rerun()
 # =====================================
+# اللوجو - بانر الإدارة العامة للقضايا
+# =====================================
+
+st.markdown("""
+<style>
+.logo-box {
+    background: linear-gradient(135deg, #0a1a3a 0%, #0b3b91 100%);
+    border: 3px solid #d4af37;
+    border-radius: 20px;
+    padding: 30px 20px;
+    text-align: center;
+    direction: rtl;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    position: relative;
+    overflow: hidden;
+}
+.logo-box::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #d4af37;
+    border-radius: 15px;
+    pointer-events: none;
+}
+.logo-main {
+    font-size: 38px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin-bottom: 10px;
+}
+.logo-sub {
+    font-size: 26px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 15px;
+}
+.logo-place {
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 25px;
+}
+.logo-greeting {
+    font-size: 20px;
+    color: #ffd700;
+    margin-bottom: 5px;
+}
+.logo-name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+.books {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+.book {
+    background: #1a2a4a;
+    border: 2px solid #d4af37;
+    border-radius: 5px;
+    padding: 8px 12px;
+    color: #ffd700;
+    font-size: 14px;
+    font-weight: bold;
+    min-width: 100px;
+    text-align: center;
+}
+</style>
+
+<div class="logo-box" dir="rtl">
+
+<div style="font-size: 50px;">&#9878;</div>
+
+<div class="logo-main">الإدارة العامة للقضايا</div>
+<div class="logo-sub">بالهيئة القومية للتأمين الاجتماعي</div>
+
+<div style="margin: 25px 0; font-size: 24px; color: white; line-height: 1.8;">
+مع تحيات الإدارة العامة للشئون القانونية
+# =====================================
 # مدير البرنامج
 # =====================================
 
