@@ -1899,15 +1899,3 @@ if st.session_state.page == "alerts":
                 )
 
                 st.markdown("---")
-# =====================================
-# بانر الشئون القانونية
-# =====================================
-
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-st.image(
-    "footer_banner.png",
-    use_container_width=True
-)
-
-st.markdown("<br>", unsafe_allow_html=True)
