@@ -246,6 +246,160 @@ if st.session_state.page == "cases":
         st.success("تم حفظ القضية بنجاح ✔")
 
         st.rerun()
+        # =====================================
+# 📦 إعداد قاعدة البيانات (Tables)
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE,
+    password TEXT,
+    full_name TEXT,
+    role TEXT DEFAULT 'user',
+    active INTEGER DEFAULT 1,
+    created_at TEXT
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_updates(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id INTEGER,
+    roll_no TEXT,
+    update_date TEXT,
+    adjournment_reason TEXT,
+    next_session_date TEXT,
+    status_reason TEXT
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS case_documents(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id INTEGER,
+    document_name TEXT,
+    document_type TEXT,
+    document_date TEXT,
+    document_notes TEXT,
+    uploaded_at TEXT
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS notifications(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    case_id INTEGER,
+    whatsapp_number TEXT,
+    notification_type TEXT,
+    sent_at TEXT,
+    status TEXT
+)
+""")
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS deleted_cases(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    original_case_id INTEGER,
+    delete_reason TEXT,
+    deleted_at TEXT
+)
+""")
+
+conn.commit()
+
+# =====================================
+# 👤 إنشاء مستخدم افتراضي
+# =====================================
+
+try:
+    cur.execute("""
+        INSERT INTO users (
+            username, password, full_name, role, active, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        "waleedhammad",
+        "123456",
+        "وليد حماد",
+        "admin",
+        1,
+        str(datetime.now())
+    ))
+    conn.commit()
+except:
+    pass
+
+
+# =====================================
+# 🧠 Session State (نظيف)
+# =====================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "role" not in st.session_state:
+    st.session_state.role = ""
+
+if "full_name" not in st.session_state:
+    st.session_state.full_name = ""
+
+
+# =====================================
+# 🔐 تسجيل الدخول
+# =====================================
+
+if not st.session_state.logged_in:
+
+    st.markdown("""
+    <style>
+    .stApp{
+        background:#062456;
+    }
+    h1,h2,h3,h4,h5,h6,label,p,span{
+        color:white !important;
+    }
+    .login-box{
+        text-align:center;
+        color:white;
+        margin-top:50px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="login-box">
+        <h1>⚖️ إدارة القضايا</h1>
+        <h3>تسجيل الدخول</h3>
+    </div>
+    """, unsafe_allow_html=True)
+
+    username = st.text_input("اسم المستخدم", key="login_user")
+    password = st.text_input("كلمة المرور", type="password", key="login_pass")
+
+    if st.button("دخول", key="login_btn"):
+
+        user = cur.execute("""
+            SELECT username, password, full_name, role
+            FROM users
+            WHERE username=? AND active=1
+        """, (username,)).fetchone()
+
+        if user and user[1] == password:
+
+            st.session_state.logged_in = True
+            st.session_state.username = user[0]
+            st.session_state.full_name = user[2]
+            st.session_state.role = user[3]
+
+            st.rerun()
+
+        else:
+            st.error("اسم المستخدم أو كلمة المرور غير صحيحة")
+
+    st.stop()
 # =====================================
 # شكل البرنامج بعد الدخول
 # =====================================
