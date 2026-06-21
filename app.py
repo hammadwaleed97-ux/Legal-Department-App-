@@ -41,6 +41,45 @@ def create_word(rows, user_name):
     doc.save(buffer)
     buffer.seek(0)
     return buffer
+    # =====================================
+# 📄 PDF Report (محسن)
+# =====================================
+
+def create_pdf(rows, user_name):
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+
+    y = 800
+
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, y, "التقرير القضائي")
+    y -= 30
+
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, "الهيئة القومية للتأمين الاجتماعي")
+    y -= 20
+    p.drawString(50, y, "الإدارة العامة للشئون القانونية")
+    y -= 20
+    p.drawString(50, y, f"المستخدم: {user_name}")
+    y -= 30
+
+    for i, row in enumerate(rows, start=1):
+
+        if y < 50:
+            p.showPage()
+            y = 800
+
+        p.drawString(
+            50,
+            y,
+            f"{i} - {row[6]}/{row[7]} - {row[3]} ضد {row[5]} - {row[17]}"
+        )
+        y -= 20
+
+    p.save()
+    buffer.seek(0)
+    return buffer
     # =========================
     # بيانات القضية
     # =========================
