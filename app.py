@@ -1,3 +1,7 @@
+import sqlite3
+
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+cur = conn.cursor()
 # =====================================
 # 📊 Word Report (محسن)
 # =====================================
