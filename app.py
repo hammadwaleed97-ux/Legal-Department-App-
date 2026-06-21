@@ -4,6 +4,15 @@ from io import BytesIO
 from docx import Document
 
 # =========================
+# 🧠 Debug (فحص جدول cases)
+# =========================
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+cur = conn.cursor()
+
+cur.execute("PRAGMA table_info(cases)")
+st.write(cur.fetchall())
+
+# =========================
 # Session State (لازم أول البرنامج)
 # =========================
 
@@ -15,7 +24,6 @@ if "page" not in st.session_state:
 
 if "full_name" not in st.session_state:
     st.session_state.full_name = "مستخدم"
-
 # =========================
 # Database
 # =========================
