@@ -8,6 +8,7 @@ from docx import Document
 # =========================
 conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
+st.write(cur.execute("SELECT * FROM cases LIMIT 1").fetchall())
 
 cur.execute("PRAGMA table_info(cases)")
 st.write(cur.fetchall())
