@@ -1,4 +1,50 @@
+import sqlite3
+from io import BytesIO
+from docx import Document
 
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+cur = conn.cursor()
+
+# =====================================
+# 📊 Word Report (محسن)
+# =====================================
+
+def create_word(rows, user_name):
+
+    doc = Document()
+
+    doc.add_heading("التقرير القضائي", level=1)
+
+    doc.add_paragraph("الهيئة القومية للتأمين الاجتماعي")
+    doc.add_paragraph("الإدارة العامة للشئون القانونية")
+    doc.add_paragraph("ديوان عام منطقة البحيرة")
+    doc.add_paragraph(f"المستخدم: {user_name}")
+
+    doc.add_paragraph("===================================")
+
+    table = doc.add_table(rows=1, cols=5)
+    table.style = "Table Grid"
+
+    hdr = table.rows[0].cells
+    hdr[0].text = "م"
+    hdr[1].text = "رقم القضية"
+    hdr[2].text = "الخصوم"
+    hdr[3].text = "الموضوع"
+    hdr[4].text = "النتيجة"
+
+    for i, row in enumerate(rows, start=1):
+
+        cells = table.add_row().cells
+        cells[0].text = str(i)
+        cells[1].text = f"{row[6]}/{row[7]}"
+        cells[2].text = f"{row[3]} ضد {row[5]}"
+        cells[3].text = str(row[13] or "")
+        cells[4].text = str(row[17] or "")
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
     # =====================================
 # 📄 PDF Report (محسن)
 # =====================================
