@@ -1,4 +1,50 @@
+# =====================================
+# 📦 Imports نظيفة
+# =====================================
 
+from io import BytesIO
+
+import streamlit as st
+import sqlite3
+from datetime import datetime
+import pandas as pd
+
+from docx import Document
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+
+
+# =====================================
+# 🧠 Session State الأساسي (مهم جدًا)
+# =====================================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "username" not in st.session_state:
+    st.session_state.username = ""
+
+if "role" not in st.session_state:
+    st.session_state.role = ""
+
+if "full_name" not in st.session_state:
+    st.session_state.full_name = ""
+
+# ⭐ الصفحة الافتراضية
+if "page" not in st.session_state:
+    st.session_state.page = "cases"
+
+
+# =====================================
+# 🗄️ قاعدة البيانات
+# =====================================
+
+conn = sqlite3.connect(
+    "cases.db",
+    check_same_thread=False
+)
+
+cur = conn.cursor()
 # =====================================
 # 📊 Word Report (احترافي)
 # =====================================
