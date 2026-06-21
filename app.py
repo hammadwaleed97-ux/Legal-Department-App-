@@ -1853,3 +1853,211 @@ if st.session_state.page == "alerts":
                 )
 
                 st.markdown("---")
+                # =====================================
+# 📊 التقارير والإحصائيات
+# =====================================
+
+if st.session_state.page == "reports":
+
+    import pandas as pd
+
+    st.header("📊 التقارير والإحصائيات")
+
+    # =========================
+    # 🧪 بيانات تجريبية
+    # =========================
+    if st.button("🧪 إضافة بيانات تجريبية"):
+
+        demo_cases = [
+            (1, None, None, "محمد أحمد", None, "علي حسن", 2024, 2024, "دائرة 1", "مدني", "محكمة طنطا", "طنطا", None, "تعويض", None, None, None, "لصالح الهيئة", None, None, "متداولة"),
+            (2, None, None, "سعيد علي", None, "أحمد محمود", 2025, 2025, "دائرة 2", "عمالي", "محكمة دمنهور", "دمنهور", None, "مستحقات", None, None, None, "ضد الهيئة", None, None, "حكم")
+        ]
+
+        for c in demo_cases:
+            cur.execute("""
+                INSERT INTO cases
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, c)
+
+        conn.commit()
+        st.success("تم إضافة بيانات تجريبية ✔")
+
+    # =========================
+    # الفلاتر
+    # =========================
+    col1, col2 = st.columns(2)
+
+    with col1:
+        from_date = st.date_input("من تاريخ")
+
+    with col2:
+        to_date = st.date_input("حتى تاريخ")
+
+    area_name = st.text_input("منطقة", value="البحيرة")
+    lawyer_name = st.text_input("طرف الأستاذ /", value="")
+
+    # =========================
+    # جلب البيانات
+    # =========================
+    rows = cur.execute("""
+        SELECT *
+        FROM cases
+        ORDER BY id DESC
+    """).fetchall()
+
+    # =========================
+    # الإحصائيات
+    # =========================
+    total_active = 0
+    total_reserved = 0
+    total_judgments = 0
+    total_win = 0
+    total_lose = 0
+
+    for row in rows:
+
+        status = str(row[20])
+
+        if status == "متداولة":
+            total_active += 1
+
+        if "حكم" in status:
+            total_reserved += 1
+
+        if row[17] == "لصالح الهيئة":
+            total_judgments += 1
+            total_win += 1
+
+        if row[17] == "ضد الهيئة":
+            total_judgments += 1
+            total_lose += 1
+
+    st.markdown("## 📈 الإحصائيات")
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+
+    c1.metric("المتداولة", total_active)
+    c2.metric("محجوزة للحكم", total_reserved)
+    c3.metric("الأحكام الصادرة", total_judgments)
+    c4.metric("لصالح الهيئة", total_win)
+    c5.metric("ضد الهيئة", total_lose)
+
+    st.markdown("---")
+
+    # =========================
+    # نوع التقرير
+    # =========================
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "بيان بالدعاوى المتداولة",
+            "بيان بالأحكام الصادرة",
+            "بيان بالأحكام الصادرة لصالح الهيئة",
+            "بيان بالأحكام الصادرة ضد الهيئة"
+        ]
+    )
+
+    st.markdown(f"""
+### الهيئة القومية للتأمين الاجتماعي  
+### الإدارة العامة للشئون القانونية  
+### ديوان عام منطقة {area_name}  
+
+#### {report_type}  
+
+من {from_date} إلى {to_date}  
+طرف الأستاذ / {lawyer_name}
+""")
+
+    # =========================
+    # تجهيز البيانات
+    # =========================
+    report_rows = []
+
+    for row in rows:
+
+        if report_type == "بيان بالدعاوى المتداولة":
+            if row[17] in ["لصالح الهيئة", "ضد الهيئة"]:
+                continue
+
+        elif report_type == "بيان بالأحكام الصادرة":
+            if row[17] not in ["لصالح الهيئة", "ضد الهيئة"]:
+                continue
+
+        elif report_type == "بيان بالأحكام الصادرة لصالح الهيئة":
+            if row[17] != "لصالح الهيئة":
+                continue
+
+        elif report_type == "بيان بالأحكام الصادرة ضد الهيئة":
+            if row[17] != "ضد الهيئة":
+                continue
+
+        updates = cur.execute("""
+            SELECT next_session_date, status_reason
+            FROM case_updates
+            WHERE case_id=?
+            ORDER BY id DESC
+            LIMIT 1
+        """, (row[0],)).fetchone()
+
+        last_session = ""
+        last_action = ""
+
+        if updates:
+            last_session = updates[0]
+            last_action = updates[1]
+
+        report_rows.append({
+            "م": len(report_rows) + 1,
+            "رقم القضية": row[6],
+            "السنة": row[7],
+            "الدائرة": row[8],
+            "النوع": row[9],
+            "المحكمة": row[10],
+            "الخصوم": f"{row[3]} ضد {row[5]}",
+            "الموضوع": row[13],
+            "آخر جلسة": last_session,
+            "آخر إجراء": last_action,
+            "النتيجة": row[17]
+        })
+
+    # =========================
+    # عرض الجدول
+    # =========================
+    if report_rows:
+
+        df = pd.DataFrame(report_rows)
+        st.dataframe(df, use_container_width=True)
+
+    else:
+        st.warning("لا توجد بيانات خلال الفترة المحددة")
+
+    st.markdown("---")
+
+    st.markdown("""
+### وتفضلوا بقبول وافر الاحترام  
+
+عضو الإدارة القانونية  
+مدير الإدارة القانونية  
+مدير عام الإدارات القانونية  
+""")
+
+    # =========================
+    # Word + PDF
+    # =========================
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.download_button(
+            "📝 تحميل Word",
+            data=create_word(rows, st.session_state.full_name),
+            file_name="التقرير.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+    with col2:
+        st.download_button(
+            "📄 تحميل PDF",
+            data=create_pdf(rows, st.session_state.full_name),
+            file_name="التقرير.pdf",
+            mime="application/pdf"
+            )
