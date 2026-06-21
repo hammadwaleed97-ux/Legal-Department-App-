@@ -4,17 +4,24 @@ from io import BytesIO
 from docx import Document
 
 # =========================
-# 🧠 Debug (فحص جدول cases)
+# Session State (لازم أول البرنامج)
 # =========================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "page" not in st.session_state:
+    st.session_state.page = "cases"
+
+if "full_name" not in st.session_state:
+    st.session_state.full_name = "مستخدم"
+
+# =========================
+# Database
+# =========================
+
 conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
-cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='cases'")
-st.write(cur.fetchall())
-st.write(cur.execute("SELECT * FROM cases LIMIT 1").fetchall())
-
-cur.execute("PRAGMA table_info(cases)")
-st.write(cur.fetchall())
-
 # =========================
 # Session State (لازم أول البرنامج)
 # =========================
