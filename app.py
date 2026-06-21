@@ -1,4 +1,105 @@
+# =====================================
+# 📦 Imports نظيفة
+# =====================================
 
+from io import BytesIO
+import streamlit as st
+import sqlite3
+from datetime import datetime
+import pandas as pd
+
+from docx import Document
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+
+
+# =====================================
+# 📊 Word Report (احترافي)
+# =====================================
+
+def create_word(rows, user_name):
+
+    doc = Document()
+
+    doc.add_heading("التقرير القضائي", level=1)
+
+    doc.add_paragraph("الهيئة القومية للتأمين الاجتماعي")
+    doc.add_paragraph("الإدارة العامة للشئون القانونية")
+    doc.add_paragraph("ديوان عام منطقة البحيرة")
+    doc.add_paragraph(f"المستخدم: {user_name}")
+
+    doc.add_paragraph("===================================")
+
+    table = doc.add_table(rows=1, cols=5)
+
+    hdr = table.rows[0].cells
+    hdr[0].text = "م"
+    hdr[1].text = "رقم القضية"
+    hdr[2].text = "الخصوم"
+    hdr[3].text = "الموضوع"
+    hdr[4].text = "النتيجة"
+
+    for i, row in enumerate(rows, start=1):
+        cells = table.add_row().cells
+        cells[0].text = str(i)
+        cells[1].text = f"{row[6]}/{row[7]}"
+        cells[2].text = f"{row[3]} ضد {row[5]}"
+        cells[3].text = str(row[13])
+        cells[4].text = str(row[17])
+
+    buffer = BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+
+# =====================================
+# 📄 PDF Report (احترافي)
+# =====================================
+
+def create_pdf(rows, user_name):
+
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+
+    y = 800
+
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, y, "التقرير القضائي")
+    y -= 30
+
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y, "الهيئة القومية للتأمين الاجتماعي")
+    y -= 20
+    p.drawString(50, y, "الإدارة العامة للشئون القانونية")
+    y -= 20
+    p.drawString(50, y, f"المستخدم: {user_name}")
+    y -= 30
+
+    for i, row in enumerate(rows, start=1):
+
+        if y < 50:
+            p.showPage()
+            y = 800
+
+        p.drawString(
+            50,
+            y,
+            f"{i} - {row[6]}/{row[7]} - {row[3]} ضد {row[5]} - {row[17]}"
+        )
+        y -= 20
+
+    p.save()
+    buffer.seek(0)
+    return buffer
+
+
+# =====================================
+# 🔗 باقي إعدادات البرنامج
+# =====================================
+
+import sqlite3
+from datetime import datetime
 # =====================================
 # إعداد الصفحة
 # =====================================
