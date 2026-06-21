@@ -1969,14 +1969,18 @@ if st.session_state.page == "reports":
 
     col1, col2 = st.columns(2)
 
-    with col1:
+with col1:
+    st.download_button(
+        "📝 تحميل Word",
+        data=create_word(rows, st.session_state.full_name),
+        file_name="التقرير.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
 
-        st.button(
-            "📝 فتح Word"
-        )
-
-    with col2:
-
-        st.button(
-            "📄 فتح PDF"
-        )
+with col2:
+    st.download_button(
+        "📄 تحميل PDF",
+        data=create_pdf(rows, st.session_state.full_name),
+        file_name="التقرير.pdf",
+        mime="application/pdf"
+    )
