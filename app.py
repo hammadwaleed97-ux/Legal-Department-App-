@@ -1,17 +1,3 @@
-# =====================================
-# 📦 Imports نظيفة
-# =====================================
-
-from io import BytesIO
-import streamlit as st
-import sqlite3
-from datetime import datetime
-import pandas as pd
-
-from docx import Document
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-
 
 # =====================================
 # 📊 Word Report (احترافي)
