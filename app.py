@@ -1,3 +1,8 @@
+from io import BytesIO
+from docx import Document
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 import streamlit as st
 import sqlite3
 from datetime import datetime
