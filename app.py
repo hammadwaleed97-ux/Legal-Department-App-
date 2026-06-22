@@ -771,12 +771,21 @@ if st.session_state.page == "cases":
     """, unsafe_allow_html=True)
 
     st.info(f"المستخدم الحالي: {st.session_state.full_name}")
+    # =========================
+# ⚖️ صفحة تسجيل القضايا
+# =========================
+
+if st.session_state.page == "cases":
+
+    st.markdown("## ⚖️ تسجيل القضايا")
+    st.info(f"المستخدم الحالي: {st.session_state.full_name}")
 
     # =========================
-    # بيانات القضايا
+    # بيانات القضية
     # =========================
 
     litigation_type = st.selectbox("نوع الإجراء", ["دعوى", "استئناف", "نقض"])
+
     claimant_type = st.selectbox("صفة الخصم الأول", ["المدعى", "المستأنف", "الطاعن"])
     claimant = st.text_input("اسم الخصم الأول")
 
@@ -795,7 +804,9 @@ if st.session_state.page == "cases":
 
     court_name = st.text_input("اسم المحكمة")
 
-    appeal_office = st.text_input("مأمورية الاستئناف") if litigation_type == "استئناف" else ""
+    appeal_office = ""
+    if litigation_type == "استئناف":
+        appeal_office = st.text_input("مأمورية الاستئناف")
 
     subject = st.text_area("موضوع الدعوى")
     roll_no = st.text_input("الرول")
@@ -810,22 +821,56 @@ if st.session_state.page == "cases":
 
     st.markdown("---")
 
+    # =========================
+    # 🔔 تنبيهات واتساب
+    # =========================
+
     notifications_enabled = st.checkbox("تفعيل تنبيهات واتساب", value=True)
-    whatsapp_number = st.text_input("رقم واتساب") if notifications_enabled else ""
+
+    whatsapp_number = ""
+    if notifications_enabled:
+        whatsapp_number = st.text_input("رقم واتساب")
 
     st.markdown("---")
 
     # =========================
-    # 💾 حفظ القضية (FIXED)
+    # 💾 حفظ القضية (FIXED نهائي)
     # =========================
-if st.button("💾 حفظ القضية"):
 
-    try:
-        conn = sqlite3.connect("cases.db", check_same_thread=False, timeout=10)
-        cur = conn.cursor()
+    if st.button("💾 حفظ القضية"):
 
-        cur.execute("""
-            INSERT INTO cases (
+        try:
+            conn = sqlite3.connect("cases.db", check_same_thread=False, timeout=10)
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO cases (
+                    litigation_type,
+                    claimant_type,
+                    claimant,
+                    defendant_type,
+                    defendant,
+                    case_no,
+                    judicial_year,
+                    circuit,
+                    case_type,
+                    court,
+                    court_name,
+                    appeal_office,
+                    subject,
+                    roll_no,
+                    session_date,
+                    reason,
+                    notes,
+                    judgment_result,
+                    notifications_enabled,
+                    whatsapp_number,
+                    status,
+                    owner_user,
+                    created_at
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
                 litigation_type,
                 claimant_type,
                 claimant,
@@ -840,53 +885,26 @@ if st.button("💾 حفظ القضية"):
                 appeal_office,
                 subject,
                 roll_no,
-                session_date,
+                str(session_date),
                 reason,
                 notes,
                 judgment_result,
-                notifications_enabled,
+                1 if notifications_enabled else 0,
                 whatsapp_number,
-                status,
-                owner_user,
-                created_at
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """, (
-            litigation_type,
-            claimant_type,
-            claimant,
-            defendant_type,
-            defendant,
-            case_no,
-            judicial_year,
-            circuit,
-            case_type,
-            court,
-            court_name,
-            appeal_office,
-            subject,
-            roll_no,
-            str(session_date),
-            reason,
-            notes,
-            judgment_result,
-            1 if notifications_enabled else 0,
-            whatsapp_number,
-            "متداولة",
-            st.session_state.full_name,
-            str(datetime.now())
-        ))
+                "متداولة",
+                st.session_state.full_name,
+                str(datetime.now())
+            ))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
 
-        st.success("✔ تم حفظ القضية بنجاح")
-        st.rerun()
+            st.success("✔ تم حفظ القضية بنجاح")
+            st.rerun()
 
-    except Exception as e:
-        st.error("❌ حصل خطأ أثناء الحفظ")
-        st.code(str(e))
-            
+        except Exception as e:
+            st.error("❌ حصل خطأ أثناء الحفظ")
+            st.code(str(e))
 # =====================================
 elif st.session_state.page == "alerts":
     st.title("🔔 التنبيهات")
