@@ -744,6 +744,132 @@ with col2:
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
+        ##### ⚖️ تسجيل القضايا #####
+
+if st.session_state.page == "cases":
+
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>⚖️ تسجيل القضايا</h2>
+    """, unsafe_allow_html=True)
+
+    st.info(f"المستخدم الحالي: {st.session_state.full_name}")
+
+    # =========================
+    # بيانات القضايا
+    # =========================
+
+    litigation_type = st.selectbox("نوع الإجراء", ["دعوى", "استئناف", "نقض"])
+    claimant_type = st.selectbox("صفة الخصم الأول", ["المدعى", "المستأنف", "الطاعن"])
+    claimant = st.text_input("اسم الخصم الأول")
+
+    defendant_type = st.selectbox("صفة الخصم الثاني", ["المدعى عليه", "المستأنف ضده", "المطعون ضده"])
+    defendant = st.text_input("اسم الخصم الثاني")
+
+    case_no = st.text_input("رقم الدعوى / الاستئناف / الطعن")
+    judicial_year = st.text_input("السنة القضائية")
+    circuit = st.text_input("الدائرة")
+    case_type = st.text_input("نوع الدعوى")
+
+    court = st.selectbox(
+        "المحكمة",
+        ["ابتدائي", "استئناف", "نقض", "إدارية", "تأديبية", "قضاء إداري", "إدارية عليا"]
+    )
+
+    court_name = st.text_input("اسم المحكمة")
+
+    appeal_office = st.text_input("مأمورية الاستئناف") if litigation_type == "استئناف" else ""
+
+    subject = st.text_area("موضوع الدعوى")
+    roll_no = st.text_input("الرول")
+    session_date = st.date_input("تاريخ الجلسة")
+    reason = st.text_area("السبب والإجراء المطلوب")
+    notes = st.text_area("ملاحظات")
+
+    judgment_result = st.selectbox(
+        "حالة الدعوى",
+        ["متداولة", "لصالح الهيئة", "ضد الهيئة"]
+    )
+
+    st.markdown("---")
+
+    notifications_enabled = st.checkbox("تفعيل تنبيهات واتساب", value=True)
+    whatsapp_number = st.text_input("رقم واتساب") if notifications_enabled else ""
+
+    st.markdown("---")
+
+    # =========================
+    # 💾 حفظ القضية (FIXED)
+    # =========================
+
+    if st.button("💾 حفظ القضية"):
+
+        try:
+            conn = sqlite3.connect("cases.db", timeout=10)
+            cur = conn.cursor()
+
+            cur.execute("""
+                INSERT INTO cases (
+                    litigation_type,
+                    claimant_type,
+                    claimant,
+                    defendant_type,
+                    defendant,
+                    case_no,
+                    judicial_year,
+                    circuit,
+                    case_type,
+                    court,
+                    court_name,
+                    appeal_office,
+                    subject,
+                    roll_no,
+                    session_date,
+                    reason,
+                    notes,
+                    judgment_result,
+                    notifications_enabled,
+                    whatsapp_number,
+                    status,
+                    owner_user,
+                    created_at
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                roll_no,
+                str(session_date),
+                reason,
+                notes,
+                judgment_result,
+                1 if notifications_enabled else 0,
+                whatsapp_number,
+                "متداولة",
+                st.session_state.full_name,
+                str(datetime.now())
+            ))
+
+            conn.commit()
+            conn.close()
+
+            st.success("✔ تم حفظ القضية بنجاح")
+
+            st.rerun()
+
+        except Exception as e:
+            st.error("❌ حصل خطأ أثناء الحفظ")
+            st.code(str(e))
             
 # =====================================
 elif st.session_state.page == "alerts":
