@@ -744,6 +744,79 @@ with col2:
 
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
+        # =====================================
+# 💾 بداية جزء الحفظ (زر حفظ القضية)
+# =====================================
+
+if st.button("💾 حفظ القضية", key="save_case_btn"):
+
+    try:
+        whatsapp = whatsapp_number if notifications_enabled else ""
+
+        cur.execute("""
+            INSERT INTO cases (
+                litigation_type,
+                claimant_type,
+                claimant,
+                defendant_type,
+                defendant,
+                case_no,
+                judicial_year,
+                circuit,
+                case_type,
+                court,
+                court_name,
+                appeal_office,
+                subject,
+                roll_no,
+                session_date,
+                reason,
+                notes,
+                judgment_result,
+                notifications_enabled,
+                whatsapp_number,
+                status,
+                owner_user,
+                created_at
+            )
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (
+            litigation_type,
+            claimant_type,
+            claimant,
+            defendant_type,
+            defendant,
+            case_no,
+            judicial_year,
+            circuit,
+            case_type,
+            court,
+            court_name,
+            appeal_office,
+            subject,
+            roll_no,
+            str(session_date),
+            reason,
+            notes,
+            judgment_result,
+            1 if notifications_enabled else 0,
+            whatsapp,
+            "متداولة",
+            st.session_state.full_name,
+            str(datetime.now())
+        ))
+
+        conn.commit()
+        st.success("✔ تم حفظ القضية بنجاح")
+        st.rerun()
+
+    except Exception as e:
+        st.error("❌ حصل خطأ أثناء الحفظ")
+        st.code(str(e))
+
+# =====================================
+# 💾 نهاية جزء الحفظ
+# =====================================
 # =====================================
 # صفحات أخرى (هيكل مبدئي)
 # =====================================
