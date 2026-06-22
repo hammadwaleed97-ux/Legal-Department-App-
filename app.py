@@ -16,6 +16,47 @@ if "page" not in st.session_state:
 
 if "full_name" not in st.session_state:
     st.session_state.full_name = "مستخدم"
+    # =========================
+# Database Connection
+# =========================
+
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+cur = conn.cursor()
+
+# =========================
+# إنشاء جدول القضايا (مهم جدًا)
+# =========================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    litigation_type TEXT,
+    claimant_type TEXT,
+    claimant TEXT,
+    defendant_type TEXT,
+    defendant TEXT,
+    case_no TEXT,
+    judicial_year TEXT,
+    circuit TEXT,
+    case_type TEXT,
+    court TEXT,
+    court_name TEXT,
+    appeal_office TEXT,
+    subject TEXT,
+    roll_no TEXT,
+    session_date TEXT,
+    reason TEXT,
+    notes TEXT,
+    judgment_result TEXT,
+    notifications_enabled INTEGER,
+    whatsapp_number TEXT,
+    status TEXT,
+    owner_user TEXT,
+    created_at TEXT
+)
+""")
+
+conn.commit()
 
 # =========================
 # Database
