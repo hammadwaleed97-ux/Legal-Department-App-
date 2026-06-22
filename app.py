@@ -81,8 +81,25 @@ if "full_name" not in st.session_state:
 # Database
 # =========================
 
-conn = sqlite3.connect("cases.db", check_same_thread=False)
-cur = conn.cursor()
+import sqlite3
+
+DB_PATH = "cases.db"
+
+def get_conn():
+    conn = sqlite3.connect(
+        DB_PATH,
+        check_same_thread=False,
+        timeout=10
+    )
+
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
+
+    return conn
+
+
+conn = get_conn()
+cur = conn.cursor())
 
 # =========================
 # Word Report
