@@ -806,6 +806,9 @@ if st.session_state.page == "cases":
     st.markdown("---")
 
     if st.button("💾 حفظ القضية", key="save_case_btn"):
+        cur.execute("PRAGMA table_info(cases)")
+    st.write(cur.fetchall())
+    st.stop()
 
         cur.execute("""
             INSERT INTO cases (
