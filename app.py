@@ -745,16 +745,121 @@ with col2:
     if st.button("❌ القضايا المحذوفة"):
         st.session_state.page = "deleted"
         # =====================================
-# 💾 بداية جزء الحفظ (زر حفظ القضية)
+# ⚖️ صفحة تسجيل القضايا
 # =====================================
 
-if st.button("💾 حفظ القضية", key="save_case_btn"):
+if st.session_state.page == "cases":
 
-    try:
-        whatsapp = whatsapp_number if notifications_enabled else ""
+    st.markdown("""
+    <h2 style='text-align:center;color:white'>
+    ⚖️ تسجيل القضايا
+    </h2>
+    """, unsafe_allow_html=True)
 
-        cur.execute("""
-            INSERT INTO cases (
+    st.info(f"المستخدم الحالي: {st.session_state.full_name}")
+
+    # =========================
+    # بيانات القضية
+    # =========================
+
+    litigation_type = st.selectbox(
+        "نوع الإجراء",
+        ["دعوى", "استئناف", "نقض"],
+        key="litigation_type"
+    )
+
+    claimant_type = st.selectbox(
+        "صفة الخصم الأول",
+        ["المدعى", "المستأنف", "الطاعن"],
+        key="claimant_type"
+    )
+    claimant = st.text_input("اسم الخصم الأول", key="claimant")
+
+    defendant_type = st.selectbox(
+        "صفة الخصم الثاني",
+        ["المدعى عليه", "المستأنف ضده", "المطعون ضده"],
+        key="defendant_type"
+    )
+    defendant = st.text_input("اسم الخصم الثاني", key="defendant")
+
+    case_no = st.text_input("رقم الدعوى / الاستئناف / الطعن", key="case_no")
+    judicial_year = st.text_input("السنة القضائية", key="judicial_year")
+    circuit = st.text_input("الدائرة", key="circuit")
+    case_type = st.text_input("نوع الدعوى", key="case_type")
+
+    court = st.selectbox(
+        "المحكمة",
+        ["ابتدائي", "استئناف", "نقض", "إدارية", "تأديبية", "قضاء إداري", "إدارية عليا"],
+        key="court"
+    )
+
+    court_name = st.text_input("اسم المحكمة", key="court_name")
+
+    appeal_office = ""
+    if litigation_type == "استئناف":
+        appeal_office = st.text_input("مأمورية الاستئناف", key="appeal_office")
+
+    subject = st.text_area("موضوع الدعوى", key="subject")
+    roll_no = st.text_input("الرول", key="roll_no")
+    session_date = st.date_input("تاريخ الجلسة", key="session_date")
+    reason = st.text_area("السبب والإجراء المطلوب", key="reason")
+    notes = st.text_area("ملاحظات", key="notes")
+
+    judgment_result = st.selectbox(
+        "حالة الدعوى",
+        ["متداولة", "لصالح الهيئة", "ضد الهيئة"],
+        key="judgment_result"
+    )
+
+    # =========================
+    # واتساب
+    # =========================
+
+    st.markdown("---")
+
+    notifications_enabled = st.checkbox("تفعيل تنبيهات واتساب", value=True, key="notif")
+
+    whatsapp_number = ""
+    if notifications_enabled:
+        whatsapp_number = st.text_input("رقم واتساب التنبيهات", key="whatsapp")
+
+    # =========================
+    # زر الحفظ (مهم جدًا)
+    # =========================
+
+    st.markdown("---")
+
+    if st.button("💾 حفظ القضية", key="save_case_btn"):
+
+        try:
+            cur.execute("""
+                INSERT INTO cases (
+                    litigation_type,
+                    claimant_type,
+                    claimant,
+                    defendant_type,
+                    defendant,
+                    case_no,
+                    judicial_year,
+                    circuit,
+                    case_type,
+                    court,
+                    court_name,
+                    appeal_office,
+                    subject,
+                    roll_no,
+                    session_date,
+                    reason,
+                    notes,
+                    judgment_result,
+                    notifications_enabled,
+                    whatsapp_number,
+                    status,
+                    owner_user,
+                    created_at
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, (
                 litigation_type,
                 claimant_type,
                 claimant,
@@ -769,55 +874,25 @@ if st.button("💾 حفظ القضية", key="save_case_btn"):
                 appeal_office,
                 subject,
                 roll_no,
-                session_date,
+                str(session_date),
                 reason,
                 notes,
                 judgment_result,
-                notifications_enabled,
-                whatsapp_number,
-                status,
-                owner_user,
-                created_at
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """, (
-            litigation_type,
-            claimant_type,
-            claimant,
-            defendant_type,
-            defendant,
-            case_no,
-            judicial_year,
-            circuit,
-            case_type,
-            court,
-            court_name,
-            appeal_office,
-            subject,
-            roll_no,
-            str(session_date),
-            reason,
-            notes,
-            judgment_result,
-            1 if notifications_enabled else 0,
-            whatsapp,
-            "متداولة",
-            st.session_state.full_name,
-            str(datetime.now())
-        ))
+                1 if notifications_enabled else 0,
+                whatsapp_number if notifications_enabled else "",
+                "متداولة",
+                st.session_state.full_name,
+                str(datetime.now())
+            ))
 
-        conn.commit()
-        st.success("✔ تم حفظ القضية بنجاح")
-        st.rerun()
+            conn.commit()
 
-    except Exception as e:
-        st.error("❌ حصل خطأ أثناء الحفظ")
-        st.code(str(e))
+            st.success("✔ تم حفظ القضية بنجاح")
+            st.rerun()
 
-# =====================================
-# 💾 نهاية جزء الحفظ
-# =====================================
-# =====================================
+        except Exception as e:
+            st.error("❌ حصل خطأ أثناء الحفظ")
+            st.code(str(e))
 # صفحات أخرى (هيكل مبدئي)
 # =====================================
 elif st.session_state.page == "alerts":
