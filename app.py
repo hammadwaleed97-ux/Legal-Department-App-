@@ -853,7 +853,7 @@ if st.session_state.page == "cases":
             notes,
             judgment_result,
             whatsapp_number
-        ))
+    )
 
         conn.commit()
 
