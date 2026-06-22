@@ -20,13 +20,10 @@ if "full_name" not in st.session_state:
 # Database Connection
 # =========================
 
-conn = sqlite3.connect(
-    "cases.db",
-    check_same_thread=False,
-    timeout=10
-)
+import sqlite3
 
-cur = conn.cursor()
+def get_conn():
+    return sqlite3.connect("cases.db", check_same_thread=False, timeout=10)
 # =========================
 # إنشاء جدول القضايا (مهم جدًا)
 # =========================
