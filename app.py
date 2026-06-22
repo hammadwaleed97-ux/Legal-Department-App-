@@ -749,6 +749,7 @@ with col2:
 # =====================================
 
 if st.session_state.page == "cases":
+    st.write(cur.execute("PRAGMA table_info(cases)").fetchall())
 
     st.markdown("""
     <h2 style='text-align:center;color:white'>
