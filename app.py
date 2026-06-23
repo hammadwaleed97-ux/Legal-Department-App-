@@ -1173,7 +1173,6 @@ if st.session_state.page == "update_case":
 <b>المحكمة</b><br>
 {case_data[10]}
 </div>
-
 <div style="flex:1;border:2px solid #0b3b91;background:white;color:black;padding:10px;text-align:center;border-radius:8px;">
 <b>اسم المحكمة</b><br>
 {case_data[11]}
