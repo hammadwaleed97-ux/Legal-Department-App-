@@ -8,21 +8,29 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 # =========================
-# إعداد
+# إعداد الصفحة
 # =========================
 st.set_page_config(page_title="إدارة القضايا", layout="wide", page_icon="⚖️")
 
+# =========================
+# تصميم رسمي أزرق
+# =========================
 st.markdown("""
 <style>
-.stApp{background:#061a33;color:white;}
+.stApp{
+    background:#061a33;
+    color:white;
+}
+
 .card{
     background:white;
     color:black;
     padding:12px;
     border-radius:12px;
-    margin:10px 0;
+    margin-bottom:10px;
     border-left:5px solid #1f4e79;
 }
+
 button{
     background:#1f4e79 !important;
     color:white !important;
@@ -39,6 +47,7 @@ conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 def init_db():
+
     cur.execute("""
     CREATE TABLE IF NOT EXISTS cases(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,16 +58,6 @@ def init_db():
         subject TEXT,
         status TEXT,
         created_at TEXT
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS sessions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        case_id INTEGER,
-        session_date TEXT,
-        action TEXT,
-        notes TEXT
     )
     """)
 
@@ -91,10 +90,10 @@ c1,c2,c3,c4,c5,c6 = st.columns(6)
 if c1.button("➕ تسجيل"):
     st.session_state.page = "add"
 
-if c2.button("📋 حصر عام"):
+if c2.button("📋 الحصر"):
     st.session_state.page = "all"
 
-if c3.button("📊 تقارير"):
+if c3.button("📊 التقارير"):
     st.session_state.page = "reports"
 
 if c4.button("🔔 تنبيهات"):
@@ -128,11 +127,11 @@ if st.session_state.page == "add":
         st.success("تم الحفظ ✔")
 
 # =========================
-# ALL CASES (حصر عام)
+# ALL CASES
 # =========================
 if st.session_state.page == "all":
 
-    st.subheader("📋 الحصر العام للقضايا")
+    st.subheader("📋 الحصر العام")
 
     rows = cur.execute("SELECT * FROM cases ORDER BY id DESC").fetchall()
 
@@ -147,9 +146,9 @@ if st.session_state.page == "all":
         </div>
         """, unsafe_allow_html=True)
 
-        reason = st.text_input(f"سبب الحذف {r[0]}", key=f"del_{r[0]}")
+        reason = st.text_input(f"سبب الحذف {r[0]}", key=f"r_{r[0]}")
 
-        if st.button(f"🗑️ حذف {r[0]}", key=f"btn_{r[0]}"):
+        if st.button(f"🗑️ حذف {r[0]}", key=f"d_{r[0]}"):
 
             cur.execute("""
             INSERT INTO deleted_cases(case_id,reason,deleted_at)
@@ -161,16 +160,13 @@ if st.session_state.page == "all":
             st.rerun()
 
 # =========================
-# ALERTS (تنبيهات)
+# ALERTS
 # =========================
 if st.session_state.page == "alerts":
 
-    st.subheader("🔔 تنبيهات الجلسات")
+    st.subheader("🔔 تنبيهات")
 
     rows = cur.execute("SELECT * FROM cases WHERE status='متداولة'").fetchall()
-
-    if not rows:
-        st.info("لا توجد تنبيهات")
 
     for r in rows:
         st.write(f"⚖️ {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
@@ -201,46 +197,101 @@ if st.session_state.page == "deleted":
 
     st.subheader("🗑️ القضايا المحذوفة")
 
-    rows = cur.execute("""
-    SELECT * FROM deleted_cases
-    """).fetchall()
+    rows = cur.execute("SELECT * FROM deleted_cases").fetchall()
 
     for r in rows:
-        st.write(f"قضية {r[1]} - سبب: {r[2]} - {r[3]}")
+        st.write(f"قضية {r[1]} - السبب: {r[2]} - {r[3]}")
 
 # =========================
-# REPORTS
+# 📊 REPORTS (جدول عربي احترافي)
 # =========================
 if st.session_state.page == "reports":
 
-    st.subheader("📊 التقارير")
+    st.subheader("📊 التقارير الرسمية")
 
-    rows = cur.execute("SELECT * FROM cases").fetchall()
+    rows = cur.execute("SELECT * FROM cases ORDER BY id DESC").fetchall()
 
-    df = pd.DataFrame(rows)
+    report_data = []
+
+    for i,r in enumerate(rows,1):
+
+        report_data.append({
+            "م": i,
+            "رقم القضية": r[1],
+            "السنة": r[2],
+            "المدعي": r[3],
+            "المدعى عليه": r[4],
+            "الموضوع": r[5],
+            "الحالة": r[6],
+            "تاريخ التسجيل": r[7]
+        })
+
+    df = pd.DataFrame(report_data)
+
+    # =========================
+    # عرض جدول عربي RTL
+    # =========================
+    st.markdown("""
+    <style>
+    table {
+        direction: rtl;
+        text-align: right;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.dataframe(df, use_container_width=True)
 
+    st.markdown("### 📄 تقرير رسمي")
+
+    st.markdown(f"""
+### الهيئة العامة / إدارة القضايا  
+### بيان تفصيلي بالقضايا  
+
+عدد القضايا: {len(report_data)}  
+تاريخ التقرير: {datetime.now().date()}  
+
+---
+
+""")
+
+    # =========================
+    # Word
+    # =========================
     doc = Document()
     doc.add_heading("تقرير القضايا",0)
 
-    for i,r in enumerate(rows,1):
-        doc.add_paragraph(f"{i}- {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
+    for r in report_data:
+        doc.add_paragraph(
+            f"{r['م']} - القضية {r['رقم القضية']} / {r['السنة']} - "
+            f"{r['المدعي']} ضد {r['المدعى عليه']} - {r['الحالة']}"
+        )
 
     buf = BytesIO()
     doc.save(buf)
     buf.seek(0)
 
-    st.download_button("Word",buf,"report.docx")
+    st.download_button("📄 تحميل Word", buf, "report.docx")
 
+    # =========================
+    # PDF
+    # =========================
     pdf = BytesIO()
-    p = canvas.Canvas(pdf,pagesize=A4)
+    p = canvas.Canvas(pdf, pagesize=A4)
 
-    y=800
-    for i,r in enumerate(rows,1):
-        p.drawString(50,y,f"{i}- {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
-        y-=20
+    y = 800
+
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(200, y, "تقرير القضايا")
+    y -= 30
+
+    for r in report_data:
+        p.drawString(50, y,
+            f"{r['م']} - {r['رقم القضية']} - {r['المدعي']} ضد {r['المدعى عليه']} - {r['الحالة']}"
+        )
+        y -= 20
 
     p.save()
     pdf.seek(0)
 
-    st.download_button("PDF",pdf,"report.pdf")
+    st.download_button("📄 تحميل PDF", pdf, "report.pdf")
