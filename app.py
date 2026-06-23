@@ -27,6 +27,8 @@ def get_conn():
 # =========================
 # إنشاء جدول القضايا (مهم جدًا)
 # =========================
+conn = get_conn()
+cur = conn.cursor()
 
 cur.execute("""
 CREATE TABLE IF NOT EXISTS cases (
