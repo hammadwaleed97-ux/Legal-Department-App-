@@ -1371,23 +1371,30 @@ padding:10px;
         )
 
         if st.button(
-            "💾 حفظ الجلسة الجديدة"
-        ):
+    "💾 حفظ الجلسة الجديدة"
+):
 
-            cur.execute("""
-                INSERT INTO case_updates
-                (
-                    case_id,
-                    roll_no,
-                    update_date,
-                    adjournment_reason,
-                    next_session_date,
-                    status_reason,
-                    reserved_judgment_date,
-                    judgment_text,
-                    judgment_result,
-                    judgment_action
-                )
+    cur.execute("""
+        INSERT INTO case_updates
+        (
+            case_id,
+            roll_no,
+            update_date,
+            adjournment_reason,
+            next_session_date,
+            status_reason
+        )
+        VALUES
+        (?, ?, ?, ?, ?, ?)
+    """,
+    (
+        case_id,
+        new_roll,
+        str(datetime.now()),
+        adjournment_reason,
+        str(next_session_date),
+        status_reason
+    ))
                 VALUES
                 (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
