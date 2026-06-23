@@ -99,7 +99,7 @@ def get_conn():
 
 
 conn = get_conn()
-cur = conn.cursor())
+cur = conn.cursor()
 
 # =========================
 # Word Report
