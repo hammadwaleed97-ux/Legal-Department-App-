@@ -97,7 +97,6 @@ def get_conn():
 
     return conn
 
-
 conn = get_conn()
 cur = conn.cursor()
 
