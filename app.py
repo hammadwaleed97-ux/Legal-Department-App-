@@ -1373,7 +1373,8 @@ padding:10px;
         if st.button(
     "💾 حفظ الجلسة الجديدة"
 ):
-
+conn = get_conn()
+cur = conn.cursor()
     cur.execute("""
         INSERT INTO case_updates
         (
