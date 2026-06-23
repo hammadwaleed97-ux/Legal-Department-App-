@@ -8,36 +8,26 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 # =========================
-# إعداد الصفحة
+# إعداد
 # =========================
-st.set_page_config(
-    page_title="نظام المحاكم",
-    layout="wide",
-    page_icon="⚖️"
-)
+st.set_page_config(page_title="إدارة القضايا", layout="wide", page_icon="⚖️")
 
-# =========================
-# تصميم رسمي
-# =========================
 st.markdown("""
 <style>
-.stApp{background:#041a3a;color:white;}
-h1,h2,h3,h4,h5,h6,p,label,span{color:white!important;}
-
+.stApp{background:#061a33;color:white;}
 .card{
     background:white;
     color:black;
     padding:12px;
     border-radius:12px;
-    border-left:6px solid #c9a227;
     margin:10px 0;
+    border-left:5px solid #1f4e79;
 }
-
 button{
-    background:#0b2c5f!important;
-    color:white!important;
-    font-weight:bold!important;
-    border-radius:10px!important;
+    background:#1f4e79 !important;
+    color:white !important;
+    font-weight:bold !important;
+    border-radius:10px !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -45,7 +35,7 @@ button{
 # =========================
 # DB
 # =========================
-conn = sqlite3.connect("court.db", check_same_thread=False)
+conn = sqlite3.connect("cases.db", check_same_thread=False)
 cur = conn.cursor()
 
 def init_db():
@@ -54,12 +44,10 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         case_no TEXT,
         year TEXT,
-        degree TEXT,
         claimant TEXT,
         defendant TEXT,
         subject TEXT,
         status TEXT,
-        judgment TEXT,
         created_at TEXT
     )
     """)
@@ -69,9 +57,17 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         case_id INTEGER,
         session_date TEXT,
-        roll TEXT,
         action TEXT,
         notes TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS deleted_cases(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER,
+        reason TEXT,
+        deleted_at TEXT
     )
     """)
 
@@ -80,87 +76,63 @@ def init_db():
 init_db()
 
 # =========================
-# SESSION
+# STATE
 # =========================
 if "page" not in st.session_state:
-    st.session_state.page = "dashboard"
-
-# =========================
-# HEADER
-# =========================
-st.markdown("""
-<div style="text-align:center">
-<h1>⚖️ نظام إدارة المحاكم</h1>
-<h3>وزارة العدل - نموذج تشغيلي داخلي</h3>
-<hr>
-<h4 style="color:#FFD700;">Court Management System</h4>
-</div>
-""", unsafe_allow_html=True)
-
-# =========================
-# DASHBOARD
-# =========================
-rows = cur.execute("SELECT * FROM cases").fetchall()
-
-total = len(rows)
-win = len([r for r in rows if r[8] == "لصالح الهيئة"])
-lose = len([r for r in rows if r[8] == "ضد الهيئة"])
-
-c1,c2,c3 = st.columns(3)
-c1.metric("إجمالي القضايا", total)
-c2.metric("أحكام لصالح", win)
-c3.metric("أحكام ضد", lose)
-
-st.markdown("---")
+    st.session_state.page = "add"
 
 # =========================
 # MENU
 # =========================
-m1,m2,m3,m4 = st.columns(4)
+st.title("⚖️ نظام إدارة القضايا")
 
-if m1.button("📁 القضايا"):
-    st.session_state.page = "cases"
+c1,c2,c3,c4,c5,c6 = st.columns(6)
 
-if m2.button("➕ تسجيل قضية"):
+if c1.button("➕ تسجيل"):
     st.session_state.page = "add"
 
-if m3.button("⚖️ الأحكام"):
-    st.session_state.page = "judgment"
+if c2.button("📋 حصر عام"):
+    st.session_state.page = "all"
 
-if m4.button("📊 تقارير"):
+if c3.button("📊 تقارير"):
     st.session_state.page = "reports"
+
+if c4.button("🔔 تنبيهات"):
+    st.session_state.page = "alerts"
+
+if c5.button("📂 أرشيف"):
+    st.session_state.page = "archive"
+
+if c6.button("🗑️ محذوفات"):
+    st.session_state.page = "deleted"
 
 # =========================
 # ADD CASE
 # =========================
 if st.session_state.page == "add":
 
-    st.subheader("➕ تسجيل قضية جديدة")
+    st.subheader("➕ تسجيل قضية")
 
     case_no = st.text_input("رقم القضية")
     year = st.text_input("السنة")
-    degree = st.selectbox("الدرجة", ["ابتدائي","استئناف","نقض"])
     claimant = st.text_input("المدعي")
     defendant = st.text_input("المدعى عليه")
     subject = st.text_area("الموضوع")
 
     if st.button("حفظ"):
-
         cur.execute("""
-        INSERT INTO cases(case_no,year,degree,claimant,defendant,subject,status,judgment,created_at)
-        VALUES(?,?,?,?,?,?,?,?,?)
-        """,(case_no,year,degree,claimant,defendant,subject,"متداولة","",str(datetime.now())))
-
+        INSERT INTO cases(case_no,year,claimant,defendant,subject,status,created_at)
+        VALUES(?,?,?,?,?,?,?)
+        """,(case_no,year,claimant,defendant,subject,"متداولة",str(datetime.now())))
         conn.commit()
         st.success("تم الحفظ ✔")
-        st.rerun()
 
 # =========================
-# CASE LIST
+# ALL CASES (حصر عام)
 # =========================
-if st.session_state.page == "cases":
+if st.session_state.page == "all":
 
-    st.subheader("📁 القضايا")
+    st.subheader("📋 الحصر العام للقضايا")
 
     rows = cur.execute("SELECT * FROM cases ORDER BY id DESC").fetchall()
 
@@ -169,70 +141,106 @@ if st.session_state.page == "cases":
         st.markdown(f"""
         <div class="card">
         <b>{r[1]} / {r[2]}</b><br>
-        <b>الدرجة:</b> {r[3]}<br>
-        {r[4]} ضد {r[5]}<br>
-        {r[6]}<br>
-        <b>الحالة:</b> {r[7]}<br>
-        <b>الحكم:</b> {r[8] or "لم يصدر"}
+        {r[3]} ضد {r[4]}<br>
+        {r[5]}<br>
+        <b>الحالة:</b> {r[6]}
+        </div>
+        """, unsafe_allow_html=True)
+
+        reason = st.text_input(f"سبب الحذف {r[0]}", key=f"del_{r[0]}")
+
+        if st.button(f"🗑️ حذف {r[0]}", key=f"btn_{r[0]}"):
+
+            cur.execute("""
+            INSERT INTO deleted_cases(case_id,reason,deleted_at)
+            VALUES(?,?,?)
+            """,(r[0],reason,str(datetime.now())))
+
+            cur.execute("DELETE FROM cases WHERE id=?",(r[0],))
+            conn.commit()
+            st.rerun()
+
+# =========================
+# ALERTS (تنبيهات)
+# =========================
+if st.session_state.page == "alerts":
+
+    st.subheader("🔔 تنبيهات الجلسات")
+
+    rows = cur.execute("SELECT * FROM cases WHERE status='متداولة'").fetchall()
+
+    if not rows:
+        st.info("لا توجد تنبيهات")
+
+    for r in rows:
+        st.write(f"⚖️ {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
+
+# =========================
+# ARCHIVE
+# =========================
+if st.session_state.page == "archive":
+
+    st.subheader("📂 الأرشيف")
+
+    rows = cur.execute("SELECT * FROM cases WHERE status!='متداولة'").fetchall()
+
+    for r in rows:
+        st.markdown(f"""
+        <div class="card">
+        {r[1]} / {r[2]}<br>
+        {r[3]} ضد {r[4]}<br>
+        {r[5]}<br>
+        <b>{r[6]}</b>
         </div>
         """, unsafe_allow_html=True)
 
 # =========================
-# JUDGMENT SYSTEM (قلب النظام)
+# DELETED
 # =========================
-if st.session_state.page == "judgment":
+if st.session_state.page == "deleted":
 
-    st.subheader("⚖️ تسجيل حكم")
+    st.subheader("🗑️ القضايا المحذوفة")
 
-    case_id = st.number_input("رقم القضية", min_value=1)
+    rows = cur.execute("""
+    SELECT * FROM deleted_cases
+    """).fetchall()
 
-    judgment = st.selectbox("الحكم", ["","لصالح الهيئة","ضد الهيئة","تأجيل","إحالة خبير"])
-
-    if st.button("اعتماد الحكم"):
-
-        cur.execute("""
-        UPDATE cases
-        SET judgment=?, status=?
-        WHERE id=?
-        """,(judgment,"منتهية" if judgment in ["لصالح الهيئة","ضد الهيئة"] else "متداولة",case_id))
-
-        conn.commit()
-        st.success("تم تسجيل الحكم ✔")
-        st.rerun()
+    for r in rows:
+        st.write(f"قضية {r[1]} - سبب: {r[2]} - {r[3]}")
 
 # =========================
 # REPORTS
 # =========================
 if st.session_state.page == "reports":
 
-    st.subheader("📊 تقارير المحاكم")
+    st.subheader("📊 التقارير")
 
     rows = cur.execute("SELECT * FROM cases").fetchall()
 
     df = pd.DataFrame(rows)
-    st.dataframe(df,use_container_width=True)
+    st.dataframe(df, use_container_width=True)
 
     doc = Document()
-    doc.add_heading("تقرير المحاكم",0)
+    doc.add_heading("تقرير القضايا",0)
 
     for i,r in enumerate(rows,1):
-        doc.add_paragraph(f"{i}- {r[1]} / {r[2]} - {r[4]} ضد {r[5]} - {r[8]}")
+        doc.add_paragraph(f"{i}- {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
 
     buf = BytesIO()
     doc.save(buf)
     buf.seek(0)
 
-    st.download_button("Word",buf,"court.docx")
+    st.download_button("Word",buf,"report.docx")
 
     pdf = BytesIO()
     p = canvas.Canvas(pdf,pagesize=A4)
 
     y=800
     for i,r in enumerate(rows,1):
-        p.drawString(50,y,f"{i}- {r[1]} / {r[2]} - {r[4]} ضد {r[5]} - {r[8]}")
+        p.drawString(50,y,f"{i}- {r[1]} / {r[2]} - {r[3]} ضد {r[4]}")
         y-=20
 
     p.save()
     pdf.seek(0)
 
-    st.download_button("PDF",pdf,"court.pdf")
+    st.download_button("PDF",pdf,"report.pdf")
