@@ -1,6 +1,7 @@
 import streamlit as st
 import sqlite3
 from datetime import datetime
+import pandas as pd
 from io import BytesIO
 from docx import Document
 from reportlab.pdfgen import canvas
@@ -10,119 +11,167 @@ from reportlab.lib.pagesizes import A4
 # إعداد الصفحة
 # =========================
 st.set_page_config(
-    page_title="نظام إدارة القضايا",
+    page_title="نظام مكتب قانوني",
     layout="wide",
     page_icon="⚖️"
 )
 
 # =========================
-# ستايل احترافي أزرق داكن
+# ستايل احترافي
 # =========================
 st.markdown("""
 <style>
+.stApp {background:#062456;color:white;}
+h1,h2,h3,h4,h5,h6,p,label,span{color:white!important;}
 
-.stApp {
-    background: #062456;
-    color: white;
+.block{
+    background:white;
+    color:black;
+    padding:12px;
+    border-radius:12px;
+    margin:8px 0;
+    border:2px solid #0b3b91;
 }
 
-h1,h2,h3,h4,h5,h6,p,label,span {
-    color: white !important;
+button {
+    border-radius:12px !important;
+    background:#2f55d4 !important;
+    color:white !important;
+    font-weight:bold;
 }
-
-.stTextInput input,
-.stTextArea textarea,
-.stSelectbox div {
-    color: black !important;
-}
-
-.block {
-    background: white;
-    color: black;
-    padding: 12px;
-    border-radius: 12px;
-    margin: 5px 0;
-    border: 2px solid #0b3b91;
-}
-
-.btn-main button {
-    background: #2f55d4 !important;
-    color: white !important;
-    border-radius: 12px;
-    height: 50px;
-    font-weight: bold;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
 # DB
 # =========================
-conn = sqlite3.connect("cases.db", check_same_thread=False)
+conn = sqlite3.connect("legal.db", check_same_thread=False)
 cur = conn.cursor()
 
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-case_no TEXT,
-year TEXT,
-claimant TEXT,
-defendant TEXT,
-subject TEXT,
-status TEXT,
-created_at TEXT
-)
-""")
+def init_db():
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT,
+        full_name TEXT,
+        role TEXT
+    )
+    """)
 
-conn.commit()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS cases(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_no TEXT,
+        year TEXT,
+        claimant TEXT,
+        defendant TEXT,
+        subject TEXT,
+        status TEXT,
+        created_at TEXT
+    )
+    """)
+
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS sessions(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        case_id INTEGER,
+        session_date TEXT,
+        roll TEXT,
+        action TEXT,
+        notes TEXT
+    )
+    """)
+
+    conn.commit()
+
+init_db()
 
 # =========================
 # Session
 # =========================
+if "logged" not in st.session_state:
+    st.session_state.logged = False
+
 if "page" not in st.session_state:
-    st.session_state.page = "home"
+    st.session_state.page = "login"
 
 # =========================
-# لوجو
+# Create default admin
+# =========================
+try:
+    cur.execute("""
+    INSERT INTO users(username,password,full_name,role)
+    VALUES(?,?,?,?)
+    """, ("admin","1234","مدير النظام","admin"))
+    conn.commit()
+except:
+    pass
+
+# =========================
+# LOGIN
+# =========================
+if st.session_state.page == "login":
+
+    st.title("⚖️ تسجيل الدخول")
+
+    u = st.text_input("المستخدم")
+    p = st.text_input("كلمة المرور", type="password")
+
+    if st.button("دخول"):
+
+        user = cur.execute("""
+        SELECT * FROM users WHERE username=? AND password=?
+        """, (u,p)).fetchone()
+
+        if user:
+            st.session_state.logged = True
+            st.session_state.page = "home"
+            st.rerun()
+        else:
+            st.error("خطأ في البيانات")
+
+    st.stop()
+
+# =========================
+# HEADER
 # =========================
 st.markdown("""
-<div style="text-align:center;">
+<div style="text-align:center">
 <h1>⚖️ الهيئة القومية للتأمين الاجتماعي</h1>
-<h3>الإدارة العامة للشئون القانونية</h3>
-<h4>ديوان عام منطقة البحيرة</h4>
+<h3>الإدارة القانونية</h3>
+<h4>نظام إدارة القضايا</h4>
 <hr>
-<h3 style="color:#FFD700;">وليد حماد</h3>
+<h3 style="color:#FFD700">وليد حماد</h3>
 </div>
 """, unsafe_allow_html=True)
 
 # =========================
 # MENU
 # =========================
-col1, col2, col3, col4 = st.columns(4)
+col1,col2,col3,col4,col5 = st.columns(5)
 
-with col1:
-    if st.button("📌 تسجيل القضايا"):
-        st.session_state.page = "add"
+if col1.button("📌 القضايا"):
+    st.session_state.page = "cases"
 
-with col2:
-    if st.button("📋 القضايا"):
-        st.session_state.page = "list"
+if col2.button("➕ إضافة"):
+    st.session_state.page = "add"
 
-with col3:
-    if st.button("📊 التقارير"):
-        st.session_state.page = "reports"
+if col3.button("📅 الجلسات"):
+    st.session_state.page = "sessions"
 
-with col4:
-    if st.button("🔍 البحث"):
-        st.session_state.page = "search"
+if col4.button("📊 تقارير"):
+    st.session_state.page = "reports"
+
+if col5.button("🔍 بحث"):
+    st.session_state.page = "search"
 
 # =========================
 # ADD CASE
 # =========================
 if st.session_state.page == "add":
 
-    st.subheader("➕ تسجيل قضية جديدة")
+    st.subheader("➕ إضافة قضية")
 
     case_no = st.text_input("رقم القضية")
     year = st.text_input("السنة")
@@ -130,26 +179,23 @@ if st.session_state.page == "add":
     defendant = st.text_input("المدعى عليه")
     subject = st.text_area("الموضوع")
 
-    if st.button("💾 حفظ القضية"):
+    if st.button("حفظ"):
 
         cur.execute("""
         INSERT INTO cases(case_no,year,claimant,defendant,subject,status,created_at)
-        VALUES (?,?,?,?,?,?,?)
-        """, (
-            case_no, year, claimant, defendant,
-            subject, "متداولة", str(datetime.now())
-        ))
+        VALUES(?,?,?,?,?,?,?)
+        """,(case_no,year,claimant,defendant,subject,"متداولة",str(datetime.now())))
 
         conn.commit()
-        st.success("تم الحفظ بنجاح ✔")
+        st.success("تم الحفظ ✔")
         st.rerun()
 
 # =========================
-# LIST CASES
+# CASES LIST
 # =========================
-if st.session_state.page == "list":
+if st.session_state.page == "cases":
 
-    st.subheader("📋 القضايا")
+    st.subheader("📌 القضايا")
 
     rows = cur.execute("SELECT * FROM cases ORDER BY id DESC").fetchall()
 
@@ -157,10 +203,10 @@ if st.session_state.page == "list":
 
         st.markdown(f"""
         <div class="block">
-        <b>رقم:</b> {r[1]} / {r[2]} <br>
-        <b>الخصوم:</b> {r[3]} ضد {r[4]} <br>
-        <b>الموضوع:</b> {r[5]} <br>
-        <b>الحالة:</b> {r[6]}
+        <b>{r[1]} / {r[2]}</b><br>
+        {r[3]} ضد {r[4]}<br>
+        {r[5]}<br>
+        <b>{r[6]}</b>
         </div>
         """, unsafe_allow_html=True)
 
@@ -171,16 +217,40 @@ if st.session_state.page == "search":
 
     st.subheader("🔍 بحث")
 
-    q = st.text_input("ابحث")
+    q = st.text_input("بحث")
 
     if q:
         rows = cur.execute("""
         SELECT * FROM cases
         WHERE case_no LIKE ? OR claimant LIKE ? OR defendant LIKE ?
-        """, (f"%{q}%", f"%{q}%", f"%{q}%")).fetchall()
+        """,(f"%{q}%",f"%{q}%",f"%{q}%")).fetchall()
 
         for r in rows:
             st.write(f"{r[1]} - {r[3]} ضد {r[4]}")
+
+# =========================
+# SESSIONS
+# =========================
+if st.session_state.page == "sessions":
+
+    st.subheader("📅 الجلسات")
+
+    case_id = st.number_input("رقم القضية", min_value=1)
+
+    session_date = st.date_input("تاريخ الجلسة")
+    roll = st.text_input("الرول")
+    action = st.text_area("الإجراء")
+    notes = st.text_area("ملاحظات")
+
+    if st.button("حفظ الجلسة"):
+
+        cur.execute("""
+        INSERT INTO sessions(case_id,session_date,roll,action,notes)
+        VALUES(?,?,?,?,?)
+        """,(case_id,str(session_date),roll,action,notes))
+
+        conn.commit()
+        st.success("تم الحفظ ✔")
 
 # =========================
 # REPORTS
@@ -191,39 +261,32 @@ if st.session_state.page == "reports":
 
     rows = cur.execute("SELECT * FROM cases").fetchall()
 
-    st.write(f"إجمالي القضايا: {len(rows)}")
+    df = pd.DataFrame(rows)
+    st.dataframe(df,use_container_width=True)
 
     # Word
     doc = Document()
-    doc.add_heading("تقرير القضايا", 0)
+    doc.add_heading("تقرير القضايا",0)
 
-    for i, r in enumerate(rows, 1):
+    for i,r in enumerate(rows,1):
         doc.add_paragraph(f"{i} - {r[1]} - {r[3]} ضد {r[4]}")
 
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)
 
-    st.download_button(
-        "📥 تحميل Word",
-        buffer,
-        file_name="report.docx"
-    )
+    st.download_button("Word",buffer,"report.docx")
 
     # PDF
     pdf = BytesIO()
-    p = canvas.Canvas(pdf, pagesize=A4)
+    p = canvas.Canvas(pdf,pagesize=A4)
 
-    y = 800
-    for i, r in enumerate(rows, 1):
-        p.drawString(50, y, f"{i} - {r[1]} - {r[3]} ضد {r[4]}")
-        y -= 20
+    y=800
+    for i,r in enumerate(rows,1):
+        p.drawString(50,y,f"{i} - {r[1]} - {r[3]} ضد {r[4]}")
+        y-=20
 
     p.save()
     pdf.seek(0)
 
-    st.download_button(
-        "📄 تحميل PDF",
-        pdf,
-        file_name="report.pdf"
-    )
+    st.download_button("PDF",pdf,"report.pdf")
