@@ -138,3 +138,35 @@ with center:
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
+st.markdown("""
+<marquee
+direction="left"
+scrollamount="5"
+style="
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#000814;
+border-top:2px solid gold;
+padding:8px;
+font-size:18px;
+font-weight:bold;
+z-index:9999;">
+
+<span style="color:#FFD700;">مع تحيات / وليد حماد</span>
+
+<span style="color:white;"> ⚖️ </span>
+
+<span style="color:#00FFFF;">الإدارة العامة للشئون القانونية</span>
+
+<span style="color:white;"> ⚖️ </span>
+
+<span style="color:#7FFF00;">ديوان عام منطقة البحيرة</span>
+
+<span style="color:white;"> ⚖️ </span>
+
+<span style="color:#FF4500;">الهيئة القومية للتأمين الاجتماعى</span>
+
+</marquee>
+""", unsafe_allow_html=True)
