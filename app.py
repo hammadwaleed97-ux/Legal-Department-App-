@@ -149,8 +149,8 @@ st.markdown("""
     bottom:0;
     right:0;
     width:100%;
-    height:38px;
-    background:rgba(0,0,0,0.85);
+    height:40px;
+    background:#000814;
     border-top:2px solid gold;
     overflow:hidden;
     z-index:999999;
@@ -159,52 +159,61 @@ st.markdown("""
 .news-text{
     position:absolute;
     white-space:nowrap;
+    line-height:40px;
     font-size:18px;
     font-weight:bold;
-    line-height:38px;
-    animation:newsmove 25s linear infinite;
+    right:-1500px;
+    animation:newsmove 30s linear infinite;
 }
 
 @keyframes newsmove{
-
-    0%{
-        transform:translateX(100vw);
+    from{
+        right:-1500px;
     }
 
-    100%{
-        transform:translateX(-100%);
+    to{
+        right:100%;
     }
-
 }
 
 </style>
 
 <div class="news-bar">
+
 <div class="news-text">
 
-<span style="color:#FFD700;text-shadow:0 0 8px #FFD700;">
+<span style="
+color:#FFD700;
+text-shadow:0px 0px 10px #FFD700;">
 مع تحيات / وليد حماد
 </span>
 
 <span style="color:white;"> ♦ </span>
 
-<span style="color:#00FFFF;text-shadow:0 0 8px #00FFFF;">
+<span style="
+color:#00FFFF;
+text-shadow:0px 0px 10px #00FFFF;">
 الإدارة العامة للشئون القانونية
 </span>
 
 <span style="color:white;"> ♦ </span>
 
-<span style="color:#7FFF00;text-shadow:0 0 8px #7FFF00;">
+<span style="
+color:#7FFF00;
+text-shadow:0px 0px 10px #7FFF00;">
 ديوان عام منطقة البحيرة
 </span>
 
 <span style="color:white;"> ♦ </span>
 
-<span style="color:#FF4500;text-shadow:0 0 8px #FF4500;">
+<span style="
+color:#FF4500;
+text-shadow:0px 0px 10px #FF4500;">
 الهيئة القومية للتأمين الاجتماعى
 </span>
 
 </div>
+
 </div>
 
 """, unsafe_allow_html=True)
