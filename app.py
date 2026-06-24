@@ -137,3 +137,74 @@ with center:
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
+# =====================================
+# الشريط السفلي المتحرك
+# =====================================
+
+st.markdown("""
+<style>
+
+.news-bar{
+    position:fixed;
+    bottom:0;
+    right:0;
+    width:100%;
+    height:38px;
+    background:rgba(0,0,0,0.85);
+    border-top:2px solid gold;
+    overflow:hidden;
+    z-index:999999;
+}
+
+.news-text{
+    position:absolute;
+    white-space:nowrap;
+    font-size:18px;
+    font-weight:bold;
+    line-height:38px;
+    animation:newsmove 25s linear infinite;
+}
+
+@keyframes newsmove{
+
+    0%{
+        transform:translateX(100vw);
+    }
+
+    100%{
+        transform:translateX(-100%);
+    }
+
+}
+
+</style>
+
+<div class="news-bar">
+<div class="news-text">
+
+<span style="color:#FFD700;text-shadow:0 0 8px #FFD700;">
+مع تحيات / وليد حماد
+</span>
+
+<span style="color:white;"> ♦ </span>
+
+<span style="color:#00FFFF;text-shadow:0 0 8px #00FFFF;">
+الإدارة العامة للشئون القانونية
+</span>
+
+<span style="color:white;"> ♦ </span>
+
+<span style="color:#7FFF00;text-shadow:0 0 8px #7FFF00;">
+ديوان عام منطقة البحيرة
+</span>
+
+<span style="color:white;"> ♦ </span>
+
+<span style="color:#FF4500;text-shadow:0 0 8px #FF4500;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
+
+</div>
+</div>
+
+""", unsafe_allow_html=True)
