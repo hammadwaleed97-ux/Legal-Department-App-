@@ -137,3 +137,52 @@ with center:
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
+# =====================================
+# الشريط السفلي المتحرك
+# =====================================
+
+st.markdown("""
+<style>
+
+.news-bar{
+    position:fixed;
+    bottom:0;
+    right:0;
+    width:100%;
+    height:38px;
+    background:rgba(0,0,0,0.85);
+    border-top:2px solid gold;
+    overflow:hidden;
+    z-index:999999;
+}
+
+.news-text{
+    position:absolute;
+    white-space:nowrap;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    line-height:38px;
+    text-shadow:0px 0px 10px white;
+    animation:newsmove 25s linear infinite;
+}
+
+@keyframes newsmove{
+    0%{
+        transform:translateX(100vw);
+    }
+
+    100%{
+        transform:translateX(-100%);
+    }
+}
+
+</style>
+
+<div class="news-bar">
+    <div class="news-text">
+        مع تحيات / وليد حماد - الإدارة العامة للشئون القانونية - ديوان عام منطقة البحيرة - الهيئة القومية للتأمين الاجتماعى
+    </div>
+</div>
+
+""", unsafe_allow_html=True)
