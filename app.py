@@ -140,7 +140,7 @@ st.markdown("<br><br><br><br>", unsafe_allow_html=True)
 # =====================================
 
 st.markdown("""
-<div class="bottom-bar">
+<div class="bottom-bar" dir="rtl">
 
 <span style="color:#FFD700;">
 مع تحيات / وليد حماد
