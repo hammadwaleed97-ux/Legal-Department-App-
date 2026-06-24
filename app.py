@@ -1,4 +1,3 @@
-
 import streamlit as st
 
 # =====================================
@@ -13,7 +12,7 @@ st.set_page_config(
 )
 
 # =====================================
-# إخفاء عناصر Streamlit
+# تنسيقات البرنامج
 # =====================================
 
 st.markdown("""
@@ -36,7 +35,7 @@ html, body, [class*="css"]{
     direction:rtl;
 }
 
-h1,h2,h3,h4,h5,h6,p,label,span{
+h1,h2,h3,h4,h5,h6,p,label{
     color:white !important;
 }
 
@@ -67,22 +66,9 @@ h1,h2,h3,h4,h5,h6,p,label,span{
 
 .title{
     text-align:center;
-    color:gold;
+    color:gold !important;
     font-size:42px;
     font-weight:bold;
-}
-
-.footer{
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-    line-height:2;
-    animation:glow 2s infinite alternate;
-}
-
-@keyframes glow{
-from{opacity:.4;}
-to{opacity:1;}
 }
 
 </style>
@@ -108,7 +94,7 @@ unsafe_allow_html=True
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================
-# الأزرار في منتصف الصفحة بالطول
+# القائمة الرئيسية
 # =====================================
 
 left, center, right = st.columns([2,3,2])
@@ -137,11 +123,20 @@ with center:
 
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
-st.markdown("<br><br><br>", unsafe_allow_html=True)
+# =====================================
+# مسافة أسفل الصفحة
+# =====================================
+
+st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+
+# =====================================
+# شريط الأخبار السفلي
+# =====================================
+
 st.markdown("""
 <marquee
-direction="left"
-scrollamount="5"
+direction="right"
+scrollamount="6"
 style="
 position:fixed;
 bottom:0;
@@ -154,19 +149,27 @@ font-size:18px;
 font-weight:bold;
 z-index:9999;">
 
-<span style="color:#FFD700;">مع تحيات / وليد حماد</span>
+<span style="color:#FFD700;text-shadow:0 0 8px #FFD700;">
+مع تحيات / وليد حماد
+</span>
 
 <span style="color:white;"> ⚖️ </span>
 
-<span style="color:#00FFFF;">الإدارة العامة للشئون القانونية</span>
+<span style="color:#00FFFF;text-shadow:0 0 8px #00FFFF;">
+الإدارة العامة للشئون القانونية
+</span>
 
 <span style="color:white;"> ⚖️ </span>
 
-<span style="color:#7FFF00;">ديوان عام منطقة البحيرة</span>
+<span style="color:#7FFF00;text-shadow:0 0 8px #7FFF00;">
+ديوان عام منطقة البحيرة
+</span>
 
 <span style="color:white;"> ⚖️ </span>
 
-<span style="color:#FF4500;">الهيئة القومية للتأمين الاجتماعى</span>
+<span style="color:#FF4500;text-shadow:0 0 8px #FF4500;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
 
 </marquee>
 """, unsafe_allow_html=True)
