@@ -138,7 +138,7 @@ with center:
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
 # =====================================
-# الشريط السفلي المتحرك
+# الشريط السفلي المتحرك الاحترافي
 # =====================================
 
 st.markdown("""
@@ -149,7 +149,7 @@ st.markdown("""
     bottom:0;
     right:0;
     width:100%;
-    height:40px;
+    height:42px;
     background:#000814;
     border-top:2px solid gold;
     overflow:hidden;
@@ -159,21 +159,51 @@ st.markdown("""
 .news-text{
     position:absolute;
     white-space:nowrap;
-    line-height:40px;
-    font-size:18px;
+    line-height:42px;
+    font-size:20px;
     font-weight:bold;
-    right:-1500px;
-    animation:newsmove 30s linear infinite;
+    right:-2200px;
+    animation:
+        newsmove 35s linear infinite,
+        colorchange 6s linear infinite;
 }
 
 @keyframes newsmove{
     from{
-        right:-1500px;
+        right:-2200px;
     }
-
     to{
         right:100%;
     }
+}
+
+@keyframes colorchange{
+
+    0%{
+        color:#FFD700;
+        text-shadow:0 0 10px #FFD700;
+    }
+
+    25%{
+        color:#00FFFF;
+        text-shadow:0 0 10px #00FFFF;
+    }
+
+    50%{
+        color:#7FFF00;
+        text-shadow:0 0 10px #7FFF00;
+    }
+
+    75%{
+        color:#FF4500;
+        text-shadow:0 0 10px #FF4500;
+    }
+
+    100%{
+        color:#FFD700;
+        text-shadow:0 0 10px #FFD700;
+    }
+
 }
 
 </style>
@@ -182,35 +212,7 @@ st.markdown("""
 
 <div class="news-text">
 
-<span style="
-color:#FFD700;
-text-shadow:0px 0px 10px #FFD700;">
-مع تحيات / وليد حماد
-</span>
-
-<span style="color:white;"> ♦ </span>
-
-<span style="
-color:#00FFFF;
-text-shadow:0px 0px 10px #00FFFF;">
-الإدارة العامة للشئون القانونية
-</span>
-
-<span style="color:white;"> ♦ </span>
-
-<span style="
-color:#7FFF00;
-text-shadow:0px 0px 10px #7FFF00;">
-ديوان عام منطقة البحيرة
-</span>
-
-<span style="color:white;"> ♦ </span>
-
-<span style="
-color:#FF4500;
-text-shadow:0px 0px 10px #FF4500;">
-الهيئة القومية للتأمين الاجتماعى
-</span>
+⚖️ مع تحيات / وليد حماد — الإدارة العامة للشئون القانونية — ديوان عام منطقة البحيرة — الهيئة القومية للتأمين الاجتماعى ⚖️
 
 </div>
 
