@@ -5,25 +5,34 @@ import streamlit as st
 # =====================================
 
 st.set_page_config(
-    page_title="إدارة القضايا",
+    page_title="",
     page_icon="⚖️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # =====================================
-# تنسيق البرنامج
+# إخفاء عناصر Streamlit
 # =====================================
 
 st.markdown("""
 <style>
 
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+
 .stApp{
     background: linear-gradient(
-        to bottom,
-        #001f3f,
-        #003366,
-        #001f3f
+        180deg,
+        #00152d,
+        #002b5c,
+        #00152d
     );
+}
+
+html, body, [class*="css"]{
+    direction:rtl;
 }
 
 h1,h2,h3,h4,h5,h6,p,label,span{
@@ -32,7 +41,7 @@ h1,h2,h3,h4,h5,h6,p,label,span{
 
 .stButton > button{
     width:100%;
-    height:120px;
+    height:95px;
     font-size:24px;
     font-weight:bold;
     border-radius:20px;
@@ -42,28 +51,37 @@ h1,h2,h3,h4,h5,h6,p,label,span{
         #0d47a1,
         #1565c0
     );
-    color:white;
+    color:white !important;
+    box-shadow:0 0 15px rgba(255,215,0,.5);
 }
 
 .stButton > button:hover{
     transform:scale(1.03);
 }
 
-.footer{
+.logo{
+    text-align:center;
+    font-size:90px;
+}
+
+.title{
     text-align:center;
     color:gold;
-    font-size:22px;
+    font-size:42px;
     font-weight:bold;
-    animation: glow 2s infinite alternate;
+}
+
+.footer{
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    line-height:2;
+    animation:glow 2s infinite alternate;
 }
 
 @keyframes glow{
-    from{
-        opacity:0.4;
-    }
-    to{
-        opacity:1;
-    }
+from{opacity:.4;}
+to{opacity:1;}
 }
 
 </style>
@@ -75,78 +93,80 @@ h1,h2,h3,h4,h5,h6,p,label,span{
 
 st.markdown(
 """
-<div style='text-align:center'>
-
-<h1 style='font-size:70px'>
+<div class='logo'>
 ⚖️
-</h1>
+</div>
 
-<h1>
+<div class='title'>
 إدارة القضايا
-</h1>
-
 </div>
 """,
 unsafe_allow_html=True
 )
 
-st.markdown("---")
+st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================
-# القائمة الرئيسية
+# الأزرار في منتصف الصفحة بالطول
 # =====================================
 
-left,center,right = st.columns([1,3,1])
+left, center, right = st.columns([2,3,2])
 
 with center:
 
-    col1,col2,col3 = st.columns(3)
-
-    with col1:
-        st.button("⚖️\nتسجيل القضايا")
-
-    with col2:
-        st.button("📋\nالحصر العام")
-
-    with col3:
-        st.button("🔔\nالتنبيهات")
+    st.button("⚖️ تسجيل القضايا", use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    col4,col5,col6 = st.columns(3)
+    st.button("📋 الحصر العام", use_container_width=True)
 
-    with col4:
-        st.button("📊\nالتقارير")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    with col5:
-        st.button("🗄️\nالأرشيف")
+    st.button("🔔 التنبيهات", use_container_width=True)
 
-    with col6:
-        st.button("📚\nالمكتبة القانونية")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-# =====================================
-# تذييل الصفحة
-# =====================================
+    st.button("📊 التقارير", use_container_width=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.button("🗄️ الأرشيف", use_container_width=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
+
+# =====================================
+# التوقيع
+# =====================================
 
 st.markdown(
 """
 <div class='footer'>
 
+<span style="color:#FFD700;">
 مع تحيات / وليد حماد
+</span>
 
 <br>
 
+<span style="color:#00FFFF;">
 الإدارة العامة للشئون القانونية
+</span>
 
 <br>
 
+<span style="color:#7CFC00;">
 ديوان عام منطقة البحيرة
+</span>
 
 <br>
 
-الهيئة القومية للتأمين الاجتماعي
+<span style="color:#FF69B4;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
 
 </div>
 """,
