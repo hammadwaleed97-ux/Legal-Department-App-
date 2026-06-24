@@ -1,211 +1,186 @@
 import streamlit as st
-import sqlite3
-
-# =====================================
-# إعداد الصفحة
-# =====================================
 
 st.set_page_config(
-    page_title="إدارة القضايا",
+    page_title="",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# =====================================
-# قاعدة البيانات
-# =====================================
+# =========================
+# CSS
+# =========================
 
-conn = sqlite3.connect("cases.db", check_same_thread=False)
-cur = conn.cursor()
+st.markdown("""
+<style>
 
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-case_type TEXT,
-court_type TEXT,
-court_name TEXT,
-mission TEXT,
-case_number TEXT,
-judicial_year TEXT,
-circuit TEXT,
-case_category TEXT,
-plaintiff TEXT,
-defendant TEXT,
-subject TEXT,
-notes TEXT,
-first_session_date TEXT,
-roll_number TEXT,
-first_procedure TEXT
-)
-""")
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
 
-conn.commit()
+.stApp{
+    background: linear-gradient(180deg,#00152d,#002b5c,#00152d);
+}
 
-# =====================================
-# إعداد الصفحات
-# =====================================
+html, body, [class*="css"]{
+    direction:rtl;
+}
 
-if "page" not in st.session_state:
-    st.session_state.page = "home"
+.main-title{
+    text-align:center;
+    font-size:55px;
+    font-weight:bold;
+    color:#FFD700;
+    text-shadow:0px 0px 15px gold;
+}
 
-# =====================================
-# الصفحة الرئيسية
-# =====================================
+.logo{
+    text-align:center;
+    font-size:110px;
+}
 
-if st.session_state.page == "home":
+.watermark{
+    position:fixed;
+    top:35%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:280px;
+    opacity:0.05;
+    z-index:0;
+}
 
-    st.title("⚖️ إدارة القضايا")
+.stButton > button{
+    width:100%;
+    height:95px;
+    font-size:28px;
+    font-weight:bold;
+    border-radius:25px;
+    border:3px solid gold;
+    background:linear-gradient(135deg,#0d47a1,#1565c0);
+    color:white !important;
+    box-shadow:0 0 25px rgba(255,215,0,.6);
+}
 
-    col1,col2,col3 = st.columns([2,3,2])
+.stButton > button:hover{
+    transform:scale(1.03);
+}
 
-    with col2:
+.news-bar{
+    position:fixed;
+    bottom:0;
+    right:0;
+    width:100%;
+    height:42px;
+    background:#000814;
+    border-top:2px solid gold;
+    overflow:hidden;
+    z-index:999999;
+}
 
-        if st.button("⚖️ تسجيل القضايا", use_container_width=True):
-            st.session_state.page = "cases"
-            st.rerun()
+.news-text{
+    position:absolute;
+    white-space:nowrap;
+    font-size:20px;
+    font-weight:bold;
+    line-height:42px;
+    animation:scrollText 25s linear infinite;
+}
 
-        if st.button("📋 الحصر العام", use_container_width=True):
-            st.session_state.page = "inventory"
-            st.rerun()
+@keyframes scrollText{
+0%{
+transform:translateX(-100%);
+}
+100%{
+transform:translateX(100vw);
+}
+}
 
-# =====================================
-# تسجيل القضايا
-# =====================================
+</style>
+""", unsafe_allow_html=True)
 
-elif st.session_state.page == "cases":
+# =========================
+# خلفية ميزان شفافة
+# =========================
 
-    st.subheader("⚖️ تسجيل قضية جديدة")
+st.markdown("""
+<div class="watermark">
+⚖️
+</div>
+""", unsafe_allow_html=True)
 
-    case_type = st.selectbox(
-        "نوع الدعوى",
-        ["دعوى","استئناف","طعن"]
-    )
+# =========================
+# اللوجو
+# =========================
 
-    court_type = st.selectbox(
-        "المحكمة",
-        [
-            "الابتدائية",
-            "الاستئناف",
-            "النقض",
-            "الإدارية",
-            "القضاء الإداري",
-            "الإدارية العليا"
-        ]
-    )
+st.markdown("""
+<div class="logo">⚖️</div>
+<div class="main-title">إدارة القضايا</div>
+""", unsafe_allow_html=True)
 
-    court_name = st.text_input("اسم المحكمة")
+st.markdown("<br><br>", unsafe_allow_html=True)
 
-    mission = ""
+# =========================
+# الأيقونات
+# =========================
 
-    if case_type == "استئناف":
-        mission = st.text_input("المأمورية")
+c1,c2,c3 = st.columns([2,4,2])
 
-    case_number = st.text_input("رقم الدعوى")
+with c2:
 
-    judicial_year = st.text_input("السنة القضائية")
+    st.button("⚖️ تسجيل القضايا", use_container_width=True)
 
-    circuit = st.text_input("الدائرة")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    case_category = st.text_input("النوع")
+    st.button("📋 الحصر العام", use_container_width=True)
 
-    plaintiff = st.text_input("المدعي / المستأنف / الطاعن")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    defendant = st.text_input("المدعى عليه / المستأنف ضده / المطعون ضده")
+    st.button("🔔 التنبيهات", use_container_width=True)
 
-    subject = st.text_area("موضوع الدعوى")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    first_session_date = st.date_input("تاريخ أول جلسة")
+    st.button("📊 التقارير", use_container_width=True)
 
-    roll_number = st.text_input("الرول")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    first_procedure = st.text_area("سبب الجلسة")
+    st.button("🗄️ الأرشيف", use_container_width=True)
 
-    notes = st.text_area("ملاحظات")
+    st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("💾 حفظ القضية"):
+    st.button("📚 المكتبة القانونية", use_container_width=True)
 
-        cur.execute("""
-        INSERT INTO cases(
-        case_type,
-        court_type,
-        court_name,
-        mission,
-        case_number,
-        judicial_year,
-        circuit,
-        case_category,
-        plaintiff,
-        defendant,
-        subject,
-        notes,
-        first_session_date,
-        roll_number,
-        first_procedure
-        )
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        """,
-        (
-        case_type,
-        court_type,
-        court_name,
-        mission,
-        case_number,
-        judicial_year,
-        circuit,
-        case_category,
-        plaintiff,
-        defendant,
-        subject,
-        notes,
-        str(first_session_date),
-        roll_number,
-        first_procedure
-        ))
+# =========================
+# الشريط السفلي
+# =========================
 
-        conn.commit()
+st.markdown("""
 
-        st.success("تم حفظ القضية")
+<div class="news-bar">
+<div class="news-text">
 
-        st.session_state.page = "inventory"
-        st.rerun()
+<span style="color:#FFD700;">
+مع تحيات / وليد حماد
+</span>
 
-# =====================================
-# الحصر العام
-# =====================================
+<span style="color:white;"> | </span>
 
-elif st.session_state.page == "inventory":
+<span style="color:#00FFFF;">
+الإدارة العامة للشئون القانونية
+</span>
 
-    st.subheader("📋 الحصر العام")
+<span style="color:white;"> | </span>
 
-    rows = cur.execute("""
-    SELECT *
-    FROM cases
-    ORDER BY id DESC
-    """).fetchall()
+<span style="color:#7FFF00;">
+ديوان عام منطقة البحيرة
+</span>
 
-    for row in rows:
+<span style="color:white;"> | </span>
 
-        st.info(
-        f"""
-رقم الدعوى : {row[5]}/{row[6]}
+<span style="color:#FF4500;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
 
-المحكمة : {row[2]}
+</div>
+</div>
 
-الدائرة : {row[7]}
-
-المدعي : {row[9]}
-
-المدعى عليه : {row[10]}
-
-الموضوع : {row[11]}
-
-آخر جلسة : {row[13]}
-
-الإجراء : {row[15]}
-        """
-        )
-
-    if st.button("⬅ العودة للرئيسية"):
-        st.session_state.page = "home"
-        st.rerun()
+""", unsafe_allow_html=True)
