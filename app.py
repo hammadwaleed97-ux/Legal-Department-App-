@@ -137,38 +137,3 @@ with center:
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
-
-# =====================================
-# التوقيع
-# =====================================
-
-st.markdown(
-"""
-<div class='footer'>
-
-<span style="color:#FFD700;">
-مع تحيات / وليد حماد
-</span>
-
-<br>
-
-<span style="color:#00FFFF;">
-الإدارة العامة للشئون القانونية
-</span>
-
-<br>
-
-<span style="color:#7CFC00;">
-ديوان عام منطقة البحيرة
-</span>
-
-<br>
-
-<span style="color:#FF69B4;">
-الهيئة القومية للتأمين الاجتماعى
-</span>
-
-</div>
-""",
-unsafe_allow_html=True
-)
