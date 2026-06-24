@@ -137,3 +137,57 @@ with center:
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
 st.markdown("<br><br><br>", unsafe_allow_html=True)
+# =====================================
+# الشريط السفلي
+# =====================================
+
+st.markdown("""
+<style>
+
+.marquee {
+    width:100%;
+    overflow:hidden;
+    background:#000814;
+    border-top:2px solid gold;
+    padding:8px 0;
+}
+
+.marquee span {
+    display:inline-block;
+    white-space:nowrap;
+    padding-left:100%;
+    animation:marquee 20s linear infinite;
+    font-size:18px;
+    font-weight:bold;
+}
+
+@keyframes marquee {
+    0% {transform: translateX(0);}
+    100% {transform: translateX(-100%);}
+}
+
+</style>
+
+<div class="marquee">
+
+<span>
+
+<font color="#FFD700">مع تحيات / وليد حماد</font>
+
+&nbsp;&nbsp;&nbsp;⚖️&nbsp;&nbsp;&nbsp;
+
+<font color="#00FFFF">الإدارة العامة للشئون القانونية</font>
+
+&nbsp;&nbsp;&nbsp;⚖️&nbsp;&nbsp;&nbsp;
+
+<font color="#7FFF00">ديوان عام منطقة البحيرة</font>
+
+&nbsp;&nbsp;&nbsp;⚖️&nbsp;&nbsp;&nbsp;
+
+<font color="#FF4500">الهيئة القومية للتأمين الاجتماعى</font>
+
+</span>
+
+</div>
+
+""", unsafe_allow_html=True)
