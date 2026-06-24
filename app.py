@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # =====================================
-# تنسيقات البرنامج
+# إخفاء عناصر Streamlit
 # =====================================
 
 st.markdown("""
@@ -31,11 +31,11 @@ header {visibility:hidden;}
     );
 }
 
-html, body{
+html, body, [class*="css"]{
     direction:rtl;
 }
 
-h1,h2,h3,h4,h5,h6,p,label{
+h1,h2,h3,h4,h5,h6,p,label,span{
     color:white !important;
 }
 
@@ -66,23 +66,22 @@ h1,h2,h3,h4,h5,h6,p,label{
 
 .title{
     text-align:center;
-    color:#FFD700 !important;
+    color:gold;
     font-size:42px;
     font-weight:bold;
 }
 
-.bottom-bar{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    background:#000814;
-    border-top:2px solid gold;
-    padding:10px;
+.footer{
     text-align:center;
-    font-size:18px;
+    font-size:24px;
     font-weight:bold;
-    z-index:9999;
+    line-height:2;
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+from{opacity:.4;}
+to{opacity:1;}
 }
 
 </style>
@@ -92,7 +91,8 @@ h1,h2,h3,h4,h5,h6,p,label{
 # اللوجو
 # =====================================
 
-st.markdown("""
+st.markdown(
+"""
 <div class='logo'>
 ⚖️
 </div>
@@ -100,12 +100,14 @@ st.markdown("""
 <div class='title'>
 إدارة القضايا
 </div>
-""", unsafe_allow_html=True)
+""",
+unsafe_allow_html=True
+)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # =====================================
-# القائمة الرئيسية
+# الأزرار في منتصف الصفحة بالطول
 # =====================================
 
 left, center, right = st.columns([2,3,2])
@@ -113,56 +115,60 @@ left, center, right = st.columns([2,3,2])
 with center:
 
     st.button("⚖️ تسجيل القضايا", use_container_width=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.button("📋 الحصر العام", use_container_width=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.button("🔔 التنبيهات", use_container_width=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.button("📊 التقارير", use_container_width=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.button("🗄️ الأرشيف", use_container_width=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
     st.button("📚 المكتبة القانونية", use_container_width=True)
 
-# =====================================
-# مسافة أسفل الصفحة
-# =====================================
-
-st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+st.markdown("<br><br><br>", unsafe_allow_html=True)
 
 # =====================================
-# الشريط السفلي
+# التوقيع
 # =====================================
 
-st.markdown("""
-<div class="bottom-bar" dir="rtl">
+st.markdown(
+"""
+<div class='footer'>
 
 <span style="color:#FFD700;">
 مع تحيات / وليد حماد
 </span>
 
-<span style="color:white;"> ⚖️ </span>
+<br>
 
 <span style="color:#00FFFF;">
 الإدارة العامة للشئون القانونية
 </span>
 
-<span style="color:white;"> ⚖️ </span>
+<br>
 
-<span style="color:#7FFF00;">
+<span style="color:#7CFC00;">
 ديوان عام منطقة البحيرة
 </span>
 
-<span style="color:white;"> ⚖️ </span>
+<br>
 
-<span style="color:#FF4500;">
+<span style="color:#FF69B4;">
 الهيئة القومية للتأمين الاجتماعى
 </span>
 
 </div>
-""", unsafe_allow_html=True)
+""",
+unsafe_allow_html=True
+)
