@@ -543,7 +543,7 @@ text-shadow:0 0 10px gold;'>
             use_container_width=True
         ):
             st.session_state.page = "home"
-            st.rerun()                            (
+            st.rerun()                            
 # =====================================
 # الحصر العام
 # =====================================
