@@ -509,3 +509,74 @@ if st.session_state.page == "cases":
         ):
             st.session_state.page = "home"
             st.rerun()
+# =====================================
+# الحصر العام
+# =====================================
+
+if st.session_state.page == "inventory":
+
+    st.markdown("## 📋 الحصر العام للقضايا")
+
+    cur.execute("""
+    SELECT
+    c.id,
+    c.case_number,
+    c.judicial_year,
+    c.court_name,
+    c.plaintiff,
+    c.defendant,
+    c.subject,
+
+    (
+        SELECT session_date
+        FROM sessions s
+        WHERE s.case_id = c.id
+        ORDER BY session_date DESC
+        LIMIT 1
+    ) AS last_session,
+
+    (
+        SELECT procedure
+        FROM sessions s
+        WHERE s.case_id = c.id
+        ORDER BY session_date DESC
+        LIMIT 1
+    ) AS last_procedure
+
+    FROM cases c
+    ORDER BY c.id DESC
+    """)
+
+    rows = cur.fetchall()
+
+    if not rows:
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        for row in rows:
+
+            st.markdown(f"""
+            ### ⚖️ قضية رقم {row[1]}
+
+            **السنة القضائية:** {row[2]}
+
+            **المحكمة:** {row[3]}
+
+            **المدعي:** {row[4]}
+
+            **المدعى عليه:** {row[5]}
+
+            **الموضوع:** {row[6]}
+
+            **أحدث جلسة:** {row[7]}
+
+            **سبب الجلسة:** {row[8]}
+
+            ---
+            """)
+
+    if st.button("⬅ العودة للرئيسية"):
+
+        st.session_state.page = "home"
+        st.rerun()
