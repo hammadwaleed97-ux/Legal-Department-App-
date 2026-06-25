@@ -296,8 +296,7 @@ st.markdown("""
 # تسجيل القضايا
 # =====================================
 
-elif st.session_state.page == "cases":
-
+if st.session_state.page == "cases":
     st.markdown("## ⚖️ تسجيل قضية جديدة")
 
     col1,col2 = st.columns(2)
