@@ -264,22 +264,6 @@ if st.session_state.page == "home":
         st.button("🗄️ الأرشيف", use_container_width=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
-
-        st.button("📚 المكتبة القانونية", use_container_width=True)
-    st.button("🔔 التنبيهات", use_container_width=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.button("📊 التقارير", use_container_width=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.button("🗄️ الأرشيف", use_container_width=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.button("📚 المكتبة القانونية", use_container_width=True)
-
 # =========================
 # الشريط السفلي
 # =========================
