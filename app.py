@@ -231,6 +231,45 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 # الأيقونات
 # =========================
 # =========================
+# الصفحة الرئيسية
+# =========================
+
+if st.session_state.page == "home":
+
+    c1, c2, c3 = st.columns([2,4,2])
+
+    with c2:
+
+        if st.button("⚖️ تسجيل القضايا", use_container_width=True):
+            st.session_state.page = "cases"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("📋 الحصر العام", use_container_width=True):
+            st.session_state.page = "inventory"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("🔔 التنبيهات", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("📊 التقارير", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("🗄️ الأرشيف", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("📚 المكتبة القانونية", use_container_width=True):
+            pass
+# =========================
 # الشريط السفلي
 # =========================
 
