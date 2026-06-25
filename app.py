@@ -231,22 +231,41 @@ st.markdown("<br><br>", unsafe_allow_html=True)
 # الأيقونات
 # =========================
 
-c1,c2,c3 = st.columns([2,4,2])
+# =========================
+# الصفحة الرئيسية
+# =========================
 
-with c2:
+if st.session_state.page == "home":
 
-    if st.button("⚖️ تسجيل القضايا", use_container_width=True):
-    st.session_state.page = "cases"
-    st.rerun()
+    c1,c2,c3 = st.columns([2,4,2])
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    with c2:
 
-    if st.button("📋 الحصر العام", use_container_width=True):
-    st.session_state.page = "inventory"
-    st.rerun()
+        if st.button("⚖️ تسجيل القضايا", use_container_width=True):
+            st.session_state.page = "cases"
+            st.rerun()
 
-    st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
 
+        if st.button("📋 الحصر العام", use_container_width=True):
+            st.session_state.page = "inventory"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.button("🔔 التنبيهات", use_container_width=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.button("📊 التقارير", use_container_width=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.button("🗄️ الأرشيف", use_container_width=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.button("📚 المكتبة القانونية", use_container_width=True)
     st.button("🔔 التنبيهات", use_container_width=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
