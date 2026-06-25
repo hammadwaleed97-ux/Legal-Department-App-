@@ -241,7 +241,9 @@ with c2:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.button("📋 الحصر العام", use_container_width=True)
+    if st.button("📋 الحصر العام", use_container_width=True):
+    st.session_state.page = "inventory"
+    st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
