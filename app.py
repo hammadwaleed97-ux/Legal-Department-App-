@@ -266,7 +266,7 @@ if st.session_state.page == "home":
         st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
 
-st.button("📚 المكتبة القانونية", use_container_width=True)
+       st.button("📚 المكتبة القانونية", use_container_width=True)
 # =========================
 # الشريط السفلي
 # =========================
@@ -307,8 +307,13 @@ st.markdown("""
 # =====================================
 
 if st.session_state.page == "cases":
-    st.markdown("## ⚖️ تسجيل قضية جديدة")
-
+    st.markdown("""
+<h2 style='color:#FFD700;
+text-align:center;
+text-shadow:0 0 10px gold;'>
+⚖️ تسجيل قضية جديدة
+</h2>
+""", unsafe_allow_html=True)
     col1,col2 = st.columns(2)
 
     with col1:
