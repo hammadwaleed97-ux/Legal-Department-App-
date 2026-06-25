@@ -235,7 +235,9 @@ c1,c2,c3 = st.columns([2,4,2])
 
 with c2:
 
-    st.button("⚖️ تسجيل القضايا", use_container_width=True)
+    if st.button("⚖️ تسجيل القضايا", use_container_width=True):
+    st.session_state.page = "cases"
+    st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
