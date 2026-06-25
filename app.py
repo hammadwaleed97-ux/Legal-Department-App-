@@ -544,3 +544,114 @@ text-shadow:0 0 10px gold;'>
         ):
             st.session_state.page = "home"
             st.rerun()
+# =====================================
+# الحصر العام
+# =====================================
+
+if st.session_state.page == "inventory":
+
+    st.markdown("## 📋 الحصر العام للقضايا")
+
+    cur.execute("""
+    SELECT
+    c.id,
+    c.case_type,
+    c.case_number,
+    c.judicial_year,
+    c.court_name,
+    c.plaintiff,
+    c.defendant,
+    c.subject,
+
+    (
+        SELECT session_date
+        FROM sessions s
+        WHERE s.case_id = c.id
+        ORDER BY session_date DESC
+        LIMIT 1
+    ) AS last_session,
+
+    (
+        SELECT procedure
+        FROM sessions s
+        WHERE s.case_id = c.id
+        ORDER BY session_date DESC
+        LIMIT 1
+    ) AS last_procedure
+
+    FROM cases c
+    ORDER BY c.id DESC
+    """)
+
+    rows = cur.fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        for row in rows:
+
+            if row[1] == "دعوى":
+                party1 = "المدعي"
+                party2 = "المدعى عليه"
+
+            elif row[1] == "استئناف":
+                party1 = "المستأنف"
+                party2 = "المستأنف ضده"
+
+            elif row[1] == "طعن":
+                party1 = "الطاعن"
+                party2 = "المطعون ضده"
+
+            else:
+                party1 = "الطرف الأول"
+                party2 = "الطرف الثاني"
+
+            st.markdown(f"""
+<div style="
+background:#0d47a1;
+padding:15px;
+border-radius:15px;
+border:2px solid gold;
+margin-bottom:15px;
+color:white;
+">
+
+<b>⚖️ رقم القضية :</b> {row[2]} |
+<b>السنة :</b> {row[3]}
+
+<br><br>
+
+<b>🏛 المحكمة :</b> {row[4]}
+
+<br>
+
+<b>👤 {party1} :</b> {row[5]}
+
+<br>
+
+<b>👤 {party2} :</b> {row[6]}
+
+<br>
+
+<b>📄 الموضوع :</b> {row[7]}
+
+<br>
+
+<b>📅 آخر جلسة :</b> {row[8]}
+
+<br>
+
+<b>📝 الإجراء :</b> {row[9]}
+
+</div>
+""", unsafe_allow_html=True)
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+        st.session_state.page = "home"
+        st.rerun()
