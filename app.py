@@ -544,3 +544,57 @@ text-shadow:0 0 10px gold;'>
         ):
             st.session_state.page = "home"
             st.rerun()
+            # =====================================
+# الحصر العام
+# =====================================
+
+if st.session_state.page == "inventory":
+
+    st.markdown("## 📋 الحصر العام للقضايا")
+
+    if "delete_case_id" not in st.session_state:
+        st.session_state.delete_case_id = None
+
+    cur.execute("""
+    SELECT
+        c.id,
+        c.case_type,
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+
+        (
+            SELECT session_date
+            FROM sessions s
+            WHERE s.case_id = c.id
+            ORDER BY session_date DESC
+            LIMIT 1
+        ) AS last_session,
+
+        (
+            SELECT procedure
+            FROM sessions s
+            WHERE s.case_id = c.id
+            ORDER BY session_date DESC
+            LIMIT 1
+        ) AS last_procedure
+
+    FROM cases c
+    ORDER BY c.id DESC
+    """)
+
+    rows = cur.fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+# ===== نهاية الجزء الأول =====
