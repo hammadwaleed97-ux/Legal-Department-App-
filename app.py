@@ -724,3 +724,16 @@ if st.session_state.page == "inventory":
             )
 
 # ===== نهاية الجزء الثالث =====
+# ===== بداية الجزء الرابع =====
+
+    st.markdown("")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "home"
+        st.rerun()
+
+# ===== نهاية الحصر العام =====
