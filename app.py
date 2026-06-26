@@ -719,11 +719,3 @@ else:
                         st.rerun()
 
             st.markdown("────────────────────────────────────────")
-
-          if st.button(
-        "⬅ العودة للرئيسية",
-        use_container_width=True
-    ):
-
-        st.session_state.page = "home"
-        st.rerun()
