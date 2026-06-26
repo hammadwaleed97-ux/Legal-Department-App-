@@ -666,3 +666,62 @@ if st.session_state.page == "inventory":
                     key=f"delete_{case_id}"
                 ):
                     st.session_state.delete_case_id = case_id
+                    if st.session_state.delete_case_id == case_id:
+
+                st.warning("⚠️ هل ترغب فى حذف القضية نهائياً؟")
+
+                d1, d2 = st.columns(2)
+
+                with d1:
+
+                    if st.button(
+                        "✅ تأكيد الحذف",
+                        key=f"confirm_{case_id}"
+                    ):
+
+                        cur.execute(
+                            "DELETE FROM sessions WHERE case_id=?",
+                            (case_id,)
+                        )
+
+                        cur.execute(
+                            "DELETE FROM documents WHERE case_id=?",
+                            (case_id,)
+                        )
+
+                        cur.execute(
+                            "DELETE FROM cases WHERE id=?",
+                            (case_id,)
+                        )
+
+                        conn.commit()
+
+                        st.session_state.delete_case_id = None
+
+                        st.success("تم حذف القضية بنجاح")
+
+                        st.rerun()
+
+                with d2:
+
+                    if st.button(
+                        "❌ إلغاء",
+                        key=f"cancel_{case_id}"
+                    ):
+
+                        st.session_state.delete_case_id = None
+                        st.rerun()
+
+            st.markdown(
+                "────────────────────────────────────────────"
+            )
+
+    st.markdown("")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "home"
+        st.rerun()
