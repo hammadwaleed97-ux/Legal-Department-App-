@@ -594,132 +594,142 @@ if st.session_state.page == "inventory":
     if not rows:
 
         st.warning("لا توجد قضايا مسجلة")
+else:
 
-    else:
+    for row in rows:
 
-        for row in rows:
+        case_id = row[0]
+        case_type = row[1]
 
-            case_id = row[0]
-            case_type = row[1]
+        plaintiff = row[8].replace(
+            "الهيئة القومية للتأمين الاجتماعى",
+            "الهيئة"
+        )
 
-            plaintiff = (
-                row[8]
-                .replace("الهيئة القومية للتأمين الاجتماعى", "الهيئة")
-            )
+        defendant = row[9].replace(
+            "الهيئة القومية للتأمين الاجتماعى",
+            "الهيئة"
+        )
 
-            defendant = (
-                row[9]
-                .replace("الهيئة القومية للتأمين الاجتماعى", "الهيئة")
-            )
+        line = (
+            f"{row[2]} لسنة {row[3]}   "
+            f"دائرة {row[4]}   "
+            f"{row[5]}   "
+            f"{case_type}   "
+            f"{row[6]}"
+        )
 
-            line = (
-                f"{row[2]} لسنة {row[3]} "
-                f"دائرة {row[4]} "
-                f"{row[5]} "
-                f"{case_type} "
-                f"{row[6]} "
-            )
+        if row[7]:
+            line += f"   مأمورية {row[7]}"
 
-            if row[7]:
-                line += f"مأمورية {row[7]} "
+        line += (
+            f"   {plaintiff} ضد {defendant}"
+            f"   {row[10]}"
+            f"   {row[11]}"
+            f"   {row[12]}"
+        )
 
-            line += (
-                f"{plaintiff} ضد {defendant} "
-                f"{row[10]} "
-                f"{row[11]} "
-                f"{row[12]}"
-            )
+        st.markdown(
+            f"""
+            <div style="
+                font-size:18px;
+                font-weight:bold;
+                color:white;
+                padding:6px 0px;
+            ">
+            {line}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-            st.markdown(f"**{line}**")
+        b1, b2, b3, b4 = st.columns([1.2,1.2,1.2,8])
 
-            col1, col2, col3, col4 = st.columns([2,2,2,8])
+        with b1:
+            if st.button(
+                "📂 فتح",
+                key=f"open_{case_id}",
+                use_container_width=True
+            ):
+                st.session_state.selected_case = case_id
+                st.session_state.page = "case_details"
+                st.rerun()
 
-            with col1:
+        with b2:
+            if st.button(
+                "✏️ تعديل",
+                key=f"edit_{case_id}",
+                use_container_width=True
+            ):
+                st.session_state.selected_case = case_id
+                st.session_state.page = "edit_case"
+                st.rerun()
+
+        with b3:
+            if st.button(
+                "🗑 حذف",
+                key=f"delete_{case_id}",
+                use_container_width=True
+            ):
+                st.session_state.delete_case_id = case_id
+
+        if st.session_state.delete_case_id == case_id:
+
+            st.warning("هل ترغب فى حذف القضية نهائياً ؟")
+
+            d1, d2 = st.columns(2)
+
+            with d1:
 
                 if st.button(
-                    "📂 فتح",
-                    key=f"open_{case_id}"
+                    "✅ تأكيد الحذف",
+                    key=f"confirm_{case_id}"
                 ):
-                    st.session_state.selected_case = case_id
-                    st.session_state.page = "case_details"
+
+                    cur.execute(
+                        "DELETE FROM sessions WHERE case_id=?",
+                        (case_id,)
+                    )
+
+                    cur.execute(
+                        "DELETE FROM documents WHERE case_id=?",
+                        (case_id,)
+                    )
+
+                    cur.execute(
+                        "DELETE FROM cases WHERE id=?",
+                        (case_id,)
+                    )
+
+                    conn.commit()
+
+                    st.session_state.delete_case_id = None
+
+                    st.success("تم حذف القضية بنجاح")
+
                     st.rerun()
 
-            with col2:
+            with d2:
 
                 if st.button(
-                    "✏️ تعديل",
-                    key=f"edit_{case_id}"
+                    "❌ إلغاء",
+                    key=f"cancel_{case_id}"
                 ):
-                    st.session_state.selected_case = case_id
-                    st.session_state.page = "edit_case"
+
+                    st.session_state.delete_case_id = None
                     st.rerun()
 
-            with col3:
+        st.markdown(
+            "<hr style='margin-top:6px;margin-bottom:10px;'>",
+            unsafe_allow_html=True
+        )
 
-                if st.button(
-                    "🗑 حذف",
-                    key=f"delete_{case_id}"
-                ):
-                    st.session_state.delete_case_id = case_id
+if st.button(
+    "⬅ العودة للرئيسية",
+    use_container_width=True
+):
 
-            if st.session_state.delete_case_id == case_id:
-
-                st.warning(
-                    "هل ترغب فى حذف القضية نهائياً ؟"
-                )
-
-                d1, d2 = st.columns(2)
-
-                with d1:
-
-                    if st.button(
-                        "✅ تأكيد الحذف",
-                        key=f"confirm_{case_id}"
-                    ):
-
-                        cur.execute(
-                            "DELETE FROM sessions WHERE case_id=?",
-                            (case_id,)
-                        )
-
-                        cur.execute(
-                            "DELETE FROM documents WHERE case_id=?",
-                            (case_id,)
-                        )
-
-                        cur.execute(
-                            "DELETE FROM cases WHERE id=?",
-                            (case_id,)
-                        )
-
-                        conn.commit()
-
-                        st.session_state.delete_case_id = None
-
-                        st.success(
-                            "تم حذف القضية بنجاح"
-                        )
-
-                        st.rerun()
-
-                with d2:
-
-                    if st.button(
-                        "❌ إلغاء",
-                        key=f"cancel_{case_id}"
-                    ):
-
-                        st.session_state.delete_case_id = None
-                        st.rerun()
-
-            st.markdown(
-                "────────────────────────────────────"
-            )
-
-    if st.button(
-        "⬅ العودة للرئيسية",
-        use_container_width=True
-    ):
-
-        st.session_state.page = "home"
-        st.rerun()
+    st.session_state.page = "home"
+    st.rerun()
+    
+                        
