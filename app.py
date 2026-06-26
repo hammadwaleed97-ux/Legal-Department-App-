@@ -1,4 +1,4 @@
-import streamlit as st
+فيimport streamlit as st
 import sqlite3
 from datetime import datetime
 
@@ -718,10 +718,3 @@ else:
                         st.session_state.delete_case_id = None
                         st.rerun()
 st.markdown("────────────────────────────────────────")
-
-    if st.button(
-        "⬅ العودة للرئيسية",
-        use_container_width=True
-    ):
-        st.session_state.page = "home"
-        st.rerun()
