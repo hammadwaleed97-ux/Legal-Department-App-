@@ -544,3 +544,125 @@ text-shadow:0 0 10px gold;'>
         ):
             st.session_state.page = "home"
             st.rerun()
+            # =====================================
+# الحصر العام
+# =====================================
+
+if st.session_state.page == "inventory":
+
+    st.markdown("## 📋 الحصر العام للقضايا")
+
+    if "delete_case_id" not in st.session_state:
+        st.session_state.delete_case_id = None
+
+    cur.execute("""
+    SELECT
+        c.id,
+        c.case_type,
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+
+        (
+            SELECT session_date
+            FROM sessions s
+            WHERE s.case_id = c.id
+            ORDER BY session_date DESC
+            LIMIT 1
+        ) AS last_session,
+
+        (
+            SELECT procedure
+            FROM sessions s
+            WHERE s.case_id = c.id
+            ORDER BY session_date DESC
+            LIMIT 1
+        ) AS last_procedure
+
+    FROM cases c
+    ORDER BY c.id DESC
+    """)
+
+    rows = cur.fetchall()
+
+    if not rows:
+
+        st.warning("لا توجد قضايا مسجلة")
+
+    else:
+
+        for row in rows:
+
+            case_id = row[0]
+            case_type = row[1]
+
+            plaintiff = row[8].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
+
+            defendant = row[9].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
+
+            line1 = (
+                f"{case_type} "
+                f"{row[2]} لسنة {row[3]} "
+                f"دائرة {row[4]} "
+                f"{row[5]} "
+                f"{row[6]}"
+            )
+
+            if row[7]:
+                line1 += f" مأمورية {row[7]}"
+
+            line2 = f"{plaintiff} ضد {defendant}"
+
+            line3 = f"{row[10]}"
+
+            if row[11]:
+                line3 += f" | {row[11]}"
+
+            if row[12]:
+                line3 += f" | {row[12]}"
+
+            st.markdown(f"**{line1}**")
+            st.caption(line2)
+            st.caption(line3)
+
+            c1, c2, c3 = st.columns([1,1,1])
+
+            with c1:
+
+                if st.button(
+                    "📂 فتح",
+                    key=f"open_{case_id}"
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "case_details"
+                    st.rerun()
+
+            with c2:
+
+                if st.button(
+                    "✏️ تعديل",
+                    key=f"edit_{case_id}"
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "edit_case"
+                    st.rerun()
+
+            with c3:
+
+                if st.button(
+                    "🗑 حذف",
+                    key=f"delete_{case_id}"
+                ):
+                    st.session_state.delete_case_id = case_id
