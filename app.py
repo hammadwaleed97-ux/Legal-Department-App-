@@ -717,11 +717,3 @@ else:
 
                         st.session_state.delete_case_id = None
                         st.rerun()
-
-            st.markdown("────────────────────────────────────────")
-if st.button(
-        "⬅ العودة للرئيسية",
-        use_container_width=True
-    ):
-        st.session_state.page = "home"
-        st.rerun()
