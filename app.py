@@ -720,7 +720,7 @@ else:
 
             st.markdown("────────────────────────────────────────")
 
-    if st.button(
+         if st.button(
         "⬅ العودة للرئيسية",
         use_container_width=True
     ):
