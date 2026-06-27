@@ -290,12 +290,7 @@ if st.session_state.page == "home":
         if st.button("📋 الحصر العام", use_container_width=True):
             st.session_state.page = "inventory"
             st.rerun()
-            st.markdown("<br>", unsafe_allow_html=True)
-
-if st.button("🔍 البحث عن قضية", use_container_width=True):
-    st.session_state.page = "search_case"
-    st.rerun()
-
+            
         st.markdown("<br>", unsafe_allow_html=True)
 
         if st.button("🔔 التنبيهات", use_container_width=True):
