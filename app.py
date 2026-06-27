@@ -1366,3 +1366,79 @@ if st.session_state.page == "reports":
 # ==========================================================
 # نهاية صفحة التقارير
 # ==========================================================
+# ==========================================================
+# بداية صفحة الأرشيف
+# ==========================================================
+
+# =====================================
+# أرشيف القضايا
+# =====================================
+
+if st.session_state.page == "archive":
+
+    st.markdown("## 🗄️ أرشيف القضايا")
+
+    search = st.text_input("🔍 البحث")
+
+    cur.execute("""
+        SELECT
+            id,
+            case_type,
+            case_number,
+            judicial_year,
+            court_name,
+            plaintiff,
+            defendant,
+            subject
+        FROM cases
+        ORDER BY id DESC
+    """)
+
+    rows = cur.fetchall()
+
+    found = False
+
+    for row in rows:
+
+        text = " ".join([str(x) for x in row])
+
+        if search.strip():
+
+            if search not in text:
+                continue
+
+        found = True
+
+        st.markdown(
+            f"""
+**{row[1]} رقم {row[2]} لسنة {row[3]}**
+
+🏛 {row[4]}
+
+👤 {row[5]}
+
+ضد
+
+👤 {row[6]}
+
+📄 {row[7]}
+"""
+        )
+
+        st.markdown("────────────────────────")
+
+    if not found:
+
+        st.warning("لا توجد نتائج")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "home"
+        st.rerun()
+
+# ==========================================================
+# نهاية صفحة الأرشيف
+# ==========================================================
