@@ -1130,3 +1130,74 @@ if st.session_state.page == "add_session":
 # ==========================================================
 # نهاية صفحة إضافة جلسة
 # ==========================================================
+# ==========================================================
+# بداية صفحة المستندات
+# ==========================================================
+
+# =====================================
+# مستندات القضية
+# =====================================
+
+if st.session_state.page == "documents":
+
+    case_id = st.session_state.selected_case
+
+    st.markdown("## 📂 مستندات القضية")
+
+    uploaded_file = st.file_uploader(
+        "اختر مستنداً"
+    )
+
+    document_type = st.text_input(
+        "نوع المستند"
+    )
+
+    document_description = st.text_area(
+        "وصف المستند",
+        height=100
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        if st.button(
+            "💾 حفظ المستند",
+            use_container_width=True
+        ):
+
+            if uploaded_file is not None:
+
+                file_name = uploaded_file.name
+
+                cur.execute("""
+                INSERT INTO documents(
+                    case_id,
+                    document_type,
+                    document_description,
+                    file_name,
+                    file_path,
+                    uploaded_at
+                )
+                VALUES(?,?,?,?,?,?)
+                """,
+                (
+                    case_id,
+                    document_type,
+                    document_description,
+                    file_name,
+                    "",
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                ))
+
+                conn.commit()
+
+                st.success("تم حفظ المستند")
+
+                st.rerun()
+
+# ==========================================================
+# نهاية الجزء الأول من صفحة المستندات
+# ==========================================================
