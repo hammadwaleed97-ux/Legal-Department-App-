@@ -277,3 +277,77 @@ if st.session_state.page == "inventory":
                (SELECT session_date FROM sessions s WHERE s.case_id = c.id ORDER BY session_date DESC LIMIT 1) as last_session,
                (SELECT procedure FROM sessions s WHERE s.case_id = c.id ORDER BY session_date DESC LIMIT 1) as last_procedure
         FROM cases c
+        ORDER BY c.id DESC
+    """)
+    rows = cur.fetchall()
+
+    if not rows:
+        st.warning("لا توجد قضايا مسجلة")
+    else:
+        for row in rows:
+            case_id = row[0]
+            case_type = row[1]
+            plaintiff = row[8].replace("الهيئة القومية للتأمين الاجتماعى", "الهيئة")
+            defendant = row[9].replace("الهيئة القومية للتأمين الاجتماعى", "الهيئة")
+
+            line = f"{case_type} {row[4]} لسنة {row[5]} دائرة {row[6]} {row[7]} {row[3]} {plaintiff} ضد {defendant} {row[10]}"
+
+            if row[13]:  # last_session
+                line += f" - آخر جلسة: {row[13]}"
+
+            st.markdown(f"**{line}**")
+
+            c1, c2, c3 = st.columns([1,1,1])
+            with c1:
+                if st.button("📂 فتح", key=f"open_{case_id}"):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "case_details"
+                    st.rerun()
+            with c2:
+                if st.button("✏️ تعديل", key=f"edit_{case_id}"):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "edit_case"
+                    st.rerun()
+            with c3:
+                if st.button("🗑 حذف", key=f"delete_{case_id}"):
+                    st.session_state.delete_case_id = case_id
+
+            if st.session_state.delete_case_id == case_id:
+                st.warning("⚠️ هل ترغب في حذف القضية نهائياً؟")
+                d1, d2 = st.columns(2)
+                with d1:
+                    if st.button("✅ تأكيد الحذف", key=f"confirm_{case_id}"):
+                        cur.execute("DELETE FROM sessions WHERE case_id=?", (case_id,))
+                        cur.execute("DELETE FROM documents WHERE case_id=?", (case_id,))
+                        cur.execute("DELETE FROM cases WHERE id=?", (case_id,))
+                        conn.commit()
+                        st.success("تم الحذف")
+                        st.session_state.delete_case_id = None
+                        st.rerun()
+                with d2:
+                    if st.button("❌ إلغاء", key=f"cancel_{case_id}"):
+                        st.session_state.delete_case_id = None
+                        st.rerun()
+
+            st.markdown("---")
+
+    if st.button("⬅ العودة للرئيسية", use_container_width=True):
+        st.session_state.page = "home"
+        st.rerun()
+
+# =====================================
+# صفحات إضافية (أساسية)
+# =====================================
+if st.session_state.page == "case_details" and st.session_state.selected_case:
+    st.title("تفاصيل القضية")
+    st.info("صفحة التفاصيل تحت التطوير - سيتم توسيعها لاحقاً")
+    if st.button("عودة"):
+        st.session_state.page = "inventory"
+        st.rerun()
+
+if st.session_state.page == "edit_case" and st.session_state.selected_case:
+    st.title("تعديل القضية")
+    st.info("صفحة التعديل تحت التطوير")
+    if st.button("عودة"):
+        st.session_state.page = "inventory"
+        st.rerun()
