@@ -798,3 +798,66 @@ if st.session_state.page == "case_details":
 # ==========================================================
 # نهاية الجزء الأول من صفحة فتح القضية
 # ==========================================================
+# ==========================================================
+# بداية الجزء الثانى من صفحة فتح القضية
+# ==========================================================
+
+        if case[12]:
+            st.write(f"**الملاحظات :** {case[12]}")
+
+        st.markdown("---")
+
+        st.markdown("### 📅 الجلسات")
+
+        cur.execute("""
+            SELECT
+                session_date,
+                roll_number,
+                procedure
+            FROM sessions
+            WHERE case_id=?
+            ORDER BY session_date DESC
+        """, (case_id,))
+
+        sessions = cur.fetchall()
+
+        if sessions:
+
+            for s in sessions:
+
+                st.info(
+                    f"📅 تاريخ الجلسة : {s[0]}\n\n"
+                    f"📌 الرول : {s[1]}\n\n"
+                    f"⚖️ الإجراء : {s[2]}"
+                )
+
+        else:
+
+            st.warning("لا توجد جلسات مسجلة")
+
+        st.markdown("---")
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+
+            if st.button(
+                "✏️ تعديل القضية",
+                use_container_width=True
+            ):
+                st.session_state.selected_case = case_id
+                st.session_state.page = "edit_case"
+                st.rerun()
+
+        with c2:
+
+            if st.button(
+                "⬅ العودة للحصر العام",
+                use_container_width=True
+            ):
+                st.session_state.page = "inventory"
+                st.rerun()
+
+# ==========================================================
+# نهاية صفحة فتح القضية
+# ==========================================================
