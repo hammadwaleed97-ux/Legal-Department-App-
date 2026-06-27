@@ -975,3 +975,57 @@ if st.session_state.page == "edit_case":
 # ==========================================================
 # نهاية الجزء الثانى من صفحة تعديل القضية
 # ==========================================================
+# ==========================================================
+# بداية الجزء الثالث من صفحة تعديل القضية
+# ==========================================================
+
+        with b1:
+
+            if st.button(
+                "💾 حفظ التعديلات",
+                use_container_width=True
+            ):
+
+                cur.execute("""
+                UPDATE cases
+                SET
+                    case_type=?,
+                    court_type=?,
+                    court_name=?,
+                    mission=?,
+                    case_number=?,
+                    judicial_year=?,
+                    circuit=?,
+                    case_category=?,
+                    plaintiff=?,
+                    defendant=?,
+                    subject=?,
+                    notes=?
+                WHERE id=?
+                """,
+                (
+                    case_type,
+                    court_type,
+                    court_name,
+                    mission,
+                    case_number,
+                    judicial_year,
+                    circuit,
+                    case_category,
+                    plaintiff,
+                    defendant,
+                    subject,
+                    notes,
+                    case_id
+                ))
+
+                conn.commit()
+
+                st.success("تم حفظ التعديلات بنجاح")
+
+                st.session_state.page = "inventory"
+                st.rerun()
+
+# ==========================================================
+# نهاية الجزء الثالث من صفحة تعديل القضية
+# ==========================================================
