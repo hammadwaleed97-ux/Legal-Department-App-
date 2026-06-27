@@ -1494,3 +1494,77 @@ if st.session_state.page == "library":
 # ==========================================================
 # نهاية صفحة المكتبة القانونية
 # ==========================================================
+# ==========================================================
+# صفحة البحث عن قضية
+# ==========================================================
+
+if st.session_state.page == "search_case":
+
+    st.markdown("## 🔍 البحث عن قضية")
+
+    search = st.text_input(
+        "اكتب رقم القضية أو السنة أو اسم المدعى"
+    )
+
+    if search:
+
+        cur.execute("""
+        SELECT
+            id,
+            case_type,
+            case_number,
+            judicial_year,
+            plaintiff,
+            defendant,
+            court_name
+        FROM cases
+        WHERE
+            case_number LIKE ?
+            OR judicial_year LIKE ?
+            OR plaintiff LIKE ?
+        ORDER BY id DESC
+        """,
+        (
+            f"%{search}%",
+            f"%{search}%",
+            f"%{search}%"
+        ))
+
+        rows = cur.fetchall()
+
+        if rows:
+
+            for row in rows:
+
+                st.markdown(
+                    f"**{row[1]} رقم {row[2]} لسنة {row[3]}**"
+                )
+
+                st.write(
+                    f"{row[4]} ضد {row[5]}"
+                )
+
+                st.write(
+                    f"المحكمة : {row[6]}"
+                )
+
+                if st.button(
+                    "📂 فتح",
+                    key=f"search_open_{row[0]}"
+                ):
+                    st.session_state.selected_case = row[0]
+                    st.session_state.page = "case_details"
+                    st.rerun()
+
+                st.markdown("────────────────────────")
+
+        else:
+
+            st.warning("لا توجد نتائج")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+        st.session_state.page = "home"
+        st.rerun()
