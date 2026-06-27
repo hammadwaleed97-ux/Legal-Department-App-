@@ -130,10 +130,9 @@ for p, title in pages.items():
         if st.button("⬅ العودة"): st.session_state.page = "home"; st.rerun()
 
 st.caption(" ")
-# ====================== تسجيل قضية جديدة ======================
 if st.session_state.page == "cases":
     st.markdown("""
-    <h1 style='text-align:center; color:#FFD700; text-shadow:0 0 25px gold; margin:30px 0 40px 0;'>
+    <h1 style='text-align:center; color:#FFD700; text-shadow:0 0 30px gold; margin:20px 0 40px 0;'>
         تسجيل قضية جديدة ⚖️
     </h1>
     """, unsafe_allow_html=True)
@@ -152,9 +151,6 @@ if st.session_state.page == "cases":
         
         st.markdown("**رقم الدعوى**")
         case_number = st.text_input(" ", placeholder="رقم الدعوى")
-        
-        st.markdown("**السنة القضائية**")
-        judicial_year = st.text_input(" ", placeholder="السنة القضائية")
 
     with col2:
         st.markdown("**المدعي**")
@@ -164,24 +160,22 @@ if st.session_state.page == "cases":
         defendant = st.text_input(" ", placeholder="اسم المدعى عليه")
         
         st.markdown("**موضوع الدعوى**")
-        subject = st.text_area(" ", height=140, placeholder="اكتب موضوع الدعوى")
+        subject = st.text_area(" ", height=150, placeholder="موضوع الدعوى")
         
         st.markdown("**تاريخ أول جلسة**")
         first_session_date = st.date_input(" ")
-        
-        st.markdown("**ملاحظات**")
-        notes = st.text_area(" ", height=100, placeholder="ملاحظات")
 
     st.markdown("---")
+
     whatsapp_enabled = st.checkbox("تفعيل التنبيهات عبر واتساب")
     whatsapp_number = st.text_input("رقم الواتساب") if whatsapp_enabled else ""
 
-    uploaded_file = st.file_uploader("تحميل صحيفة الدعوى", type=["pdf", "docx", "jpg", "png"])
+    uploaded_file = st.file_uploader("تحميل صحيفة الدعوى")
 
     col_save, col_cancel = st.columns(2)
     with col_save:
         if st.button("💾 حفظ القضية", type="primary", use_container_width=True):
-            st.success("✅ تم حفظ القضية بنجاح!")
+            st.success("✅ تم الحفظ بنجاح!")
             st.balloons()
             st.session_state.page = "inventory"
             st.rerun()
