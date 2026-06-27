@@ -641,3 +641,64 @@ if st.session_state.page == "inventory":
 # ==========================================================
 # نهاية الجزء الأول
 # ==========================================================
+# ==========================================================
+# بداية الجزء الثانى
+# ==========================================================
+
+            with c1:
+
+                if st.button(
+                    "📂 فتح",
+                    key=f"open_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "case_details"
+                    st.rerun()
+
+            with c2:
+
+                if st.button(
+                    "✏️ تعديل",
+                    key=f"edit_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "edit_case"
+                    st.rerun()
+
+            with c3:
+
+                if st.button(
+                    "🗑 حذف",
+                    key=f"delete_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.delete_case_id = case_id
+
+            if st.session_state.delete_case_id == case_id:
+
+                st.warning("⚠️ هل ترغب فى حذف القضية نهائياً؟")
+
+                d1, d2 = st.columns(2)
+
+                with d1:
+
+                    if st.button(
+                        "✅ تأكيد الحذف",
+                        key=f"confirm_{case_id}"
+                    ):
+
+                        cur.execute(
+                            "DELETE FROM sessions WHERE case_id=?",
+                            (case_id,)
+                        )
+
+                        cur.execute(
+                            "DELETE FROM documents WHERE case_id=?",
+                            (case_id,)
+                        )
+
+# ==========================================================
+# نهاية الجزء الثانى
+# ==========================================================
