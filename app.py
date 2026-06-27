@@ -130,10 +130,10 @@ for p, title in pages.items():
         if st.button("⬅ العودة"): st.session_state.page = "home"; st.rerun()
 
 st.caption(" ")
-# ====================== تسجيل قضية جديدة (مضبوط ومنسق) ======================
+# ====================== تسجيل قضية جديدة (مضبوط) ======================
 if st.session_state.page == "cases":
     st.markdown("""
-    <h2 style='text-align:center; color:#FFD700; text-shadow: 0 0 15px gold;'>
+    <h2 style='text-align:center; color:#FFD700; text-shadow: 0 0 15px gold; margin-bottom:30px;'>
         تسجيل قضية جديدة ⚖️
     </h2>
     """, unsafe_allow_html=True)
@@ -153,7 +153,7 @@ if st.session_state.page == "cases":
     with col2:
         plaintiff = st.text_input("المدعي / المستأنف / الطاعن")
         defendant = st.text_input("المدعى عليه / المستأنف ضده")
-        subject = st.text_area("موضوع الدعوى / الاستئناف", height=130)
+        subject = st.text_area("موضوع الدعوى", height=130)
         first_session_date = st.date_input("تاريخ أول جلسة")
         roll_number = st.text_input("الرول")
         first_procedure = st.text_area("سبب الجلسة", height=100)
@@ -162,7 +162,6 @@ if st.session_state.page == "cases":
     st.markdown("---")
     whatsapp_enabled = st.checkbox("تفعيل التنبيهات عبر واتساب")
     whatsapp_number = st.text_input("رقم الواتساب") if whatsapp_enabled else ""
-    
     uploaded_file = st.file_uploader("تحميل صحيفة الدعوى أو المستندات", type=["pdf", "docx", "jpg", "png"])
 
     col_save, col_cancel = st.columns(2)
@@ -180,7 +179,6 @@ if st.session_state.page == "cases":
                 conn.commit()
                 case_id = cur.lastrowid
 
-                # حفظ الجلسة الأولى
                 cur.execute("""
                     INSERT INTO sessions VALUES (NULL,?,?,?,?,?,?)
                 """, (
@@ -194,7 +192,7 @@ if st.session_state.page == "cases":
                 st.session_state.page = "inventory"
                 st.rerun()
             except Exception as e:
-                st.error(f"خطأ أثناء الحفظ: {e}")
+                st.error(f"خطأ: {e}")
 
     with col_cancel:
         if st.button("⬅ العودة للرئيسية", use_container_width=True):
