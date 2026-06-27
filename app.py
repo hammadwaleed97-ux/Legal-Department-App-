@@ -1201,3 +1201,52 @@ if st.session_state.page == "documents":
 # ==========================================================
 # نهاية الجزء الأول من صفحة المستندات
 # ==========================================================
+# ==========================================================
+# بداية الجزء الثانى من صفحة المستندات
+# ==========================================================
+
+    cur.execute("""
+        SELECT
+            id,
+            document_type,
+            document_description,
+            file_name,
+            uploaded_at
+        FROM documents
+        WHERE case_id=?
+        ORDER BY id DESC
+    """, (case_id,))
+
+    docs = cur.fetchall()
+
+    st.markdown("---")
+    st.markdown("### 📑 المستندات المسجلة")
+
+    if docs:
+
+        for doc in docs:
+
+            st.info(
+                f"📄 {doc[1]}\n\n"
+                f"📝 {doc[2]}\n\n"
+                f"📎 {doc[3]}\n\n"
+                f"📅 {doc[4]}"
+            )
+
+    else:
+
+        st.warning("لا توجد مستندات لهذه القضية")
+
+    st.markdown("---")
+
+    if st.button(
+        "⬅ العودة لبيانات القضية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "case_details"
+        st.rerun()
+
+# ==========================================================
+# نهاية صفحة المستندات
+# ==========================================================
