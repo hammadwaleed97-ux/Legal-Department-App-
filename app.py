@@ -1046,3 +1046,70 @@ if st.session_state.page == "edit_case":
 # ==========================================================
 # نهاية صفحة تعديل القضية
 # ==========================================================
+# ==========================================================
+# بداية صفحة إضافة جلسة - الجزء الأول
+# ==========================================================
+
+# =====================================
+# إضافة جلسة
+# =====================================
+
+if st.session_state.page == "add_session":
+
+    case_id = st.session_state.selected_case
+
+    st.markdown("## ➕ إضافة جلسة جديدة")
+
+    session_date = st.date_input(
+        "تاريخ الجلسة"
+    )
+
+    roll_number = st.text_input(
+        "الرول"
+    )
+
+    procedure = st.text_area(
+        "الإجراء / سبب التأجيل",
+        height=120
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        if st.button(
+            "💾 حفظ الجلسة",
+            use_container_width=True
+        ):
+
+            cur.execute("""
+            INSERT INTO sessions(
+                case_id,
+                session_date,
+                roll_number,
+                procedure,
+                created_at
+            )
+            VALUES(?,?,?,?,?)
+            """,
+            (
+                case_id,
+                str(session_date),
+                roll_number,
+                procedure,
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            ))
+
+            conn.commit()
+
+            st.success("تم إضافة الجلسة بنجاح")
+
+            st.session_state.page = "case_details"
+
+            st.rerun()
+
+# ==========================================================
+# نهاية الجزء الأول من صفحة إضافة جلسة
+# ==========================================================
