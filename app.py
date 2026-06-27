@@ -861,3 +861,72 @@ if st.session_state.page == "case_details":
 # ==========================================================
 # نهاية صفحة فتح القضية
 # ==========================================================
+# ==========================================================
+# بداية صفحة تعديل القضية - الجزء الأول
+# ==========================================================
+
+# =====================================
+# تعديل القضية
+# =====================================
+
+if st.session_state.page == "edit_case":
+
+    case_id = st.session_state.selected_case
+
+    cur.execute(
+        "SELECT * FROM cases WHERE id=?",
+        (case_id,)
+    )
+
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("القضية غير موجودة")
+
+        if st.button("⬅ العودة"):
+            st.session_state.page = "inventory"
+            st.rerun()
+
+    else:
+
+        st.markdown("## ✏️ تعديل القضية")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            case_type = st.selectbox(
+                "نوع الدعوى",
+                ["دعوى","استئناف","طعن"],
+                index=["دعوى","استئناف","طعن"].index(case[1])
+            )
+
+            court_type = st.text_input(
+                "نوع المحكمة",
+                value=case[2]
+            )
+
+            court_name = st.text_input(
+                "اسم المحكمة",
+                value=case[3]
+            )
+
+            mission = st.text_input(
+                "المأمورية",
+                value=case[4]
+            )
+
+            case_number = st.text_input(
+                "رقم القضية",
+                value=case[5]
+            )
+
+            judicial_year = st.text_input(
+                "السنة القضائية",
+                value=case[6]
+            )
+
+# ==========================================================
+# نهاية الجزء الأول من صفحة تعديل القضية
+# ==========================================================
