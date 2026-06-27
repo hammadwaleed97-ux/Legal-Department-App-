@@ -1,286 +1,998 @@
 import streamlit as st
 import sqlite3
-import pandas as pd
 from datetime import datetime
 
 # =====================================
-# إعداد الصفحة
+# قاعدة البيانات
 # =====================================
+
+conn = sqlite3.connect(
+    "cases.db",
+    check_same_thread=False
+)
+
+cur = conn.cursor()
+
+# =====================================
+# جدول القضايا
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS cases(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_type TEXT,
+
+court_type TEXT,
+
+court_name TEXT,
+
+mission TEXT,
+
+case_number TEXT,
+
+judicial_year TEXT,
+
+circuit TEXT,
+
+case_category TEXT,
+
+plaintiff TEXT,
+
+defendant TEXT,
+
+subject TEXT,
+
+notes TEXT,
+
+whatsapp_enabled INTEGER,
+
+whatsapp_number TEXT,
+
+created_at TEXT
+
+)
+""")
+
+# =====================================
+# جدول الجلسات
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS sessions(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+session_date TEXT,
+
+roll_number TEXT,
+
+procedure TEXT,
+
+created_at TEXT
+
+)
+""")
+
+# =====================================
+# جدول المستندات
+# =====================================
+
+cur.execute("""
+CREATE TABLE IF NOT EXISTS documents(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+document_type TEXT,
+
+document_description TEXT,
+
+file_name TEXT,
+
+file_path TEXT,
+
+uploaded_at TEXT
+
+)
+""")
+
+conn.commit()
+# =====================================
+# الصفحات
+# =====================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "home"
 st.set_page_config(
-    page_title="نظام القضايا PRO",
+    page_title="",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# =====================================
-# Session State
-# =====================================
-for k,v in {
-    "page":"home",
-    "selected_case":None
-}.items():
-    if k not in st.session_state:
-        st.session_state[k] = v
+# =========================
+# CSS
+# =========================
+st.markdown("""
+<style>
 
-def go(page):
-    st.session_state.page = page
-    st.rerun()
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
 
-# =====================================
-# DB
-# =====================================
-conn = sqlite3.connect("cases.db", check_same_thread=False)
-cur = conn.cursor()
+.stApp{
+    background: linear-gradient(
+        180deg,
+        #00152d,
+        #002b5c,
+        #00152d
+    );
+}
 
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases(
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-case_type TEXT,
-court_type TEXT,
-court_name TEXT,
-mission TEXT,
-case_number TEXT,
-judicial_year TEXT,
-circuit TEXT,
-case_category TEXT,
-plaintiff TEXT,
-defendant TEXT,
-subject TEXT,
-notes TEXT,
-created_at TEXT
-)
-""")
-conn.commit()
+html, body, [class*="css"]{
+    direction:rtl;
+}
 
-# =====================================
-# HOME
-# =====================================
+.main-title{
+    text-align:center;
+    font-size:55px;
+    font-weight:bold;
+    color:#FFD700;
+    text-shadow:0 0 20px gold;
+}
+
+.logo{
+    text-align:center;
+    font-size:110px;
+}
+
+.watermark{
+    position:fixed;
+    top:35%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-size:280px;
+    opacity:0.05;
+    z-index:0;
+}
+
+/* ===== إصلاح ظهور أسماء الحقول ===== */
+
+label{
+    color:white !important;
+    font-size:20px !important;
+    font-weight:bold !important;
+    opacity:1 !important;
+}
+
+[data-testid="stWidgetLabel"]{
+    color:white !important;
+    font-size:20px !important;
+    font-weight:bold !important;
+    opacity:1 !important;
+}
+
+.stSelectbox label,
+.stTextInput label,
+.stTextArea label,
+.stDateInput label,
+.stFileUploader label{
+    color:white !important;
+    font-size:20px !important;
+    font-weight:bold !important;
+}
+
+p,h1,h2,h3,h4,h5,h6,span{
+    color:white !important;
+}
+
+/* ===== الأزرار ===== */
+
+.stButton > button{
+    width:100%;
+    height:95px;
+    font-size:28px;
+    font-weight:bold;
+    border-radius:25px;
+    border:3px solid gold;
+    background:linear-gradient(
+        135deg,
+        #0d47a1,
+        #1565c0
+    );
+    color:white !important;
+    box-shadow:0 0 25px rgba(255,215,0,.6);
+}
+
+.stButton > button:hover{
+    transform:scale(1.03);
+}
+
+/* ===== الشريط السفلي ===== */
+
+.news-bar{
+    position:fixed;
+    bottom:0;
+    right:0;
+    width:100%;
+    height:42px;
+    background:#000814;
+    border-top:2px solid gold;
+    overflow:hidden;
+    z-index:999999;
+}
+
+.news-text{
+    position:absolute;
+    white-space:nowrap;
+    font-size:20px;
+    font-weight:bold;
+    line-height:42px;
+    animation:scrollText 25s linear infinite;
+}
+
+@keyframes scrollText{
+0%{
+transform:translateX(-100%);
+}
+100%{
+transform:translateX(100vw);
+}
+}
+
+</style>
+""", unsafe_allow_html=True)
+# =========================
+# خلفية ميزان شفافة
+# =========================
+
+st.markdown("""
+<div class="watermark">
+⚖️
+</div>
+""", unsafe_allow_html=True)
+
+# =========================
+# اللوجو
+# =========================
+
+st.markdown("""
+<div class="logo">⚖️</div>
+<div class="main-title">إدارة القضايا</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# =========================
+# الأيقونات
+# =========================
+# =========================
+# الصفحة الرئيسية
+# =========================
+
 if st.session_state.page == "home":
 
-    st.title("⚖️ نظام إدارة القضايا")
-
-    c1,c2,c3 = st.columns(3)
-
-    with c1:
-        if st.button("📋 الحصر العام"):
-            go("inventory")
+    c1, c2, c3 = st.columns([2,4,2])
 
     with c2:
-        if st.button("📊 التقارير"):
-            go("reports")
 
-    with c3:
-        if st.button("➕ تسجيل قضية"):
-            go("add")
+        if st.button("⚖️ تسجيل القضايا", use_container_width=True):
+            st.session_state.page = "cases"
+            st.rerun()
 
+        st.markdown("<br>", unsafe_allow_html=True)
 
+        if st.button("📋 الحصر العام", use_container_width=True):
+            st.session_state.page = "inventory"
+            st.rerun()
+            
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("🔔 التنبيهات", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("📊 التقارير", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("🗄️ الأرشيف", use_container_width=True):
+            pass
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button("📚 المكتبة القانونية", use_container_width=True):
+            pass
+            st.markdown("<br>", unsafe_allow_html=True)
+
+if st.button("🔍 البحث عن قضية", use_container_width=True):
+    st.session_state.page = "search_case"
+    st.rerun()
+
+st.markdown("<br>", unsafe_allow_html=True)
+# =========================
+# الشريط السفلي
+# =========================
+
+st.markdown("""
+
+<div class="news-bar">
+<div class="news-text">
+
+<span style="color:#FFD700;">
+مع تحيات / وليد حماد
+</span>
+
+<span style="color:white;"> | </span>
+
+<span style="color:#00FFFF;">
+الإدارة العامة للشئون القانونية
+</span>
+
+<span style="color:white;"> | </span>
+
+<span style="color:#7FFF00;">
+ديوان عام منطقة البحيرة
+</span>
+
+<span style="color:white;"> | </span>
+
+<span style="color:#FF4500;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
+
+</div>
+</div>
+
+""", unsafe_allow_html=True)
 # =====================================
-# ADD CASE
+# تسجيل القضايا
 # =====================================
-elif st.session_state.page == "add":
 
-    st.subheader("➕ تسجيل قضية")
+if st.session_state.page == "cases":
+    st.markdown("""
+<h2 style='color:#FFD700;
+text-align:center;
+text-shadow:0 0 10px gold;'>
+⚖️ تسجيل قضية جديدة
+</h2>
+""", unsafe_allow_html=True)
+    col1,col2 = st.columns(2)
 
-    case_type = st.selectbox("النوع", ["دعوى","استئناف","طعن"])
-    court_type = st.text_input("المحكمة")
-    court_name = st.text_input("اسم المحكمة")
-    mission = st.text_input("المأمورية")
+    with col1:
 
-    case_number = st.text_input("رقم القضية")
-    judicial_year = st.text_input("السنة")
-
-    circuit = st.text_input("الدائرة")
-    case_category = st.text_input("النوع")
-
-    plaintiff = st.text_input("المدعي")
-    defendant = st.text_input("المدعى عليه")
-
-    subject = st.text_area("الموضوع")
-    notes = st.text_area("ملاحظات")
-
-    if st.button("💾 حفظ"):
-        cur.execute("""
-        INSERT INTO cases VALUES(
-        NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+        case_type = st.selectbox(
+            "نوع الدعوى",
+            ["دعوى","استئناف","طعن"]
         )
-        """,(
-        case_type,court_type,court_name,mission,
-        case_number,judicial_year,circuit,
-        case_category,plaintiff,defendant,
-        subject,notes,datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        ))
-        conn.commit()
-        go("inventory")
 
+        court_type = st.selectbox(
+            "المحكمة",
+            [
+                "الابتدائية",
+                "الاستئناف",
+                "النقض",
+                "الإدارية",
+                "القضاء الإداري",
+                "الإدارية العليا"
+            ]
+        )
 
+        court_name = st.text_input("اسم المحكمة")
+
+        mission = ""
+
+        if case_type == "استئناف":
+            mission = st.text_input("المأمورية")
+
+        case_number = st.text_input(
+            "رقم الدعوى / الاستئناف / الطعن"
+        )
+
+        judicial_year = st.text_input(
+            "السنة القضائية"
+        )
+
+        circuit = st.text_input(
+            "الدائرة"
+        )
+
+        case_category = st.text_input(
+            "النوع"
+        )
+
+    with col2:
+
+        plaintiff = st.text_input(
+            "المدعي / المستأنف / الطاعن"
+        )
+
+        defendant = st.text_input(
+            "المدعى عليه / المستأنف ضده / المطعون ضده"
+        )
+
+        subject = st.text_area(
+            "موضوع الدعوى",
+            height=120
+        )
+
+        first_session_date = st.date_input(
+            "تاريخ أول جلسة"
+        )
+
+        roll_number = st.text_input(
+            "الرول"
+        )
+
+        first_procedure = st.text_area(
+            "سبب الجلسة",
+            height=100
+        )
+
+        notes = st.text_area(
+            "ملاحظات",
+            height=100
+        )
+
+    st.markdown("---")
+
+    whatsapp_enabled = st.checkbox(
+        "تفعيل التنبيهات عبر واتساب"
+    )
+
+    whatsapp_number = ""
+
+    if whatsapp_enabled:
+
+        whatsapp_number = st.text_input(
+            "رقم واتساب"
+        )
+
+    st.markdown("---")
+
+    uploaded_file = st.file_uploader(
+        "تحميل صحيفة الدعوى / الاستئناف / الطعن"
+    )
+
+    col_save,col_cancel = st.columns(2)
+
+    with col_save:
+
+        if st.button(
+            "💾 حفظ القضية",
+            use_container_width=True
+        ):
+
+            cur.execute("""
+            INSERT INTO cases(
+            case_type,
+            court_type,
+            court_name,
+            mission,
+            case_number,
+            judicial_year,
+            circuit,
+            case_category,
+            plaintiff,
+            defendant,
+            subject,
+            notes,
+            whatsapp_enabled,
+            whatsapp_number,
+            created_at
+            )
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """,
+            (
+            case_type,
+            court_type,
+            court_name,
+            mission,
+            case_number,
+            judicial_year,
+            circuit,
+            case_category,
+            plaintiff,
+            defendant,
+            subject,
+            notes,
+            int(whatsapp_enabled),
+            whatsapp_number,
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            ))
+
+            conn.commit()
+
+            case_id = cur.lastrowid
+
+            cur.execute("""
+            INSERT INTO sessions(
+            case_id,
+            session_date,
+            roll_number,
+            procedure,
+            created_at
+            )
+            VALUES(?,?,?,?,?)
+            """,
+            (
+            case_id,
+            str(first_session_date),
+            roll_number,
+            first_procedure,
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            ))
+
+            conn.commit()
+
+            st.success(
+                "تم حفظ القضية بنجاح"
+            )
+
+            st.session_state.page = "inventory"
+            st.rerun()
+
+    with col_cancel:
+
+        if st.button(
+            "⬅ العودة للرئيسية",
+            use_container_width=True
+        ):
+            st.session_state.page = "home"
+            st.rerun()
+            # =====================================
+# الحصر العام
 # =====================================
-# INVENTORY (🔥 TABLE MODE)
-# =====================================
-elif st.session_state.page == "inventory":
 
-    st.subheader("📋 الحصر العام (جدول احترافي)")
+if st.session_state.page == "inventory":
 
-    search = st.text_input("🔍 بحث")
+    st.markdown("## 📋 الحصر العام للقضايا")
 
-    if search:
-        cur.execute("""
-        SELECT * FROM cases
-        WHERE case_number LIKE ?
-        OR plaintiff LIKE ?
-        OR defendant LIKE ?
-        ORDER BY id DESC
-        """,(f"%{search}%",f"%{search}%",f"%{search}%"))
-    else:
-        cur.execute("SELECT * FROM cases ORDER BY id DESC")
+    if "delete_case_id" not in st.session_state:
+        st.session_state.delete_case_id = None
+
+    cur.execute("""
+        SELECT
+            c.id,
+            c.case_type,
+            c.case_number,
+            c.judicial_year,
+            c.circuit,
+            c.case_category,
+            c.court_name,
+            c.mission,
+            c.plaintiff,
+            c.defendant,
+            c.subject,
+
+            (
+                SELECT session_date
+                FROM sessions s
+                WHERE s.case_id = c.id
+                ORDER BY session_date DESC
+                LIMIT 1
+            ) AS last_session,
+
+            (
+                SELECT procedure
+                FROM sessions s
+                WHERE s.case_id = c.id
+                ORDER BY session_date DESC
+                LIMIT 1
+            ) AS last_procedure
+
+        FROM cases c
+        ORDER BY c.id DESC
+    """)
 
     rows = cur.fetchall()
 
     if not rows:
-        st.warning("لا توجد قضايا")
-        if st.button("⬅ رجوع"):
-            go("home")
+
+        st.warning("لا توجد قضايا مسجلة")
+
     else:
 
-        df = pd.DataFrame(rows, columns=[
-            "ID","النوع","المحكمة","اسم المحكمة","المأمورية",
-            "رقم القضية","السنة","الدائرة","النوع","المدعي",
-            "المدعى عليه","الموضوع","ملاحظات","التاريخ"
-        ])
+        for row in rows:
 
-        st.dataframe(df, use_container_width=True)
+            case_id = row[0]
+            case_type = row[1]
 
-        st.markdown("### 🎯 اختيار قضية")
+            plaintiff = row[8].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
 
-        case_id = st.selectbox("اختر رقم القضية", df["ID"])
+            defendant = row[9].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
 
-        c1,c2,c3 = st.columns(3)
+            line = (
+                f"{case_type} "
+                f"{row[2]} لسنة {row[3]} "
+                f"دائرة {row[4]} "
+                f"{row[5]} "
+                f"{row[6]}"
+            )
+
+            if row[7]:
+                line += f" مأمورية {row[7]}"
+
+            line += (
+                f" {plaintiff} ضد {defendant} "
+                f"{row[10]}"
+            )
+
+            if row[11]:
+                line += f" {row[11]}"
+
+            if row[12]:
+                line += f" {row[12]}"
+
+            st.markdown(f"**{line}**")
+
+            c1, c2, c3 = st.columns([1,1,1])
+
+# ==========================================================
+# نهاية الجزء الأول
+# ==========================================================
+# ==========================================================
+# بداية الجزء الثانى
+# ==========================================================
+
+            with c1:
+
+                if st.button(
+                    "📂 فتح",
+                    key=f"open_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "case_details"
+                    st.rerun()
+
+            with c2:
+
+                if st.button(
+                    "✏️ تعديل",
+                    key=f"edit_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.selected_case = case_id
+                    st.session_state.page = "edit_case"
+                    st.rerun()
+
+            with c3:
+
+                if st.button(
+                    "🗑 حذف",
+                    key=f"delete_{case_id}",
+                    use_container_width=True
+                ):
+                    st.session_state.delete_case_id = case_id
+
+            if st.session_state.delete_case_id == case_id:
+
+                st.warning("⚠️ هل ترغب فى حذف القضية نهائياً؟")
+
+                d1, d2 = st.columns(2)
+
+                with d1:
+
+                    if st.button(
+                        "✅ تأكيد الحذف",
+                        key=f"confirm_{case_id}"
+                    ):
+
+                        cur.execute(
+                            "DELETE FROM sessions WHERE case_id=?",
+                            (case_id,)
+                        )
+
+                        cur.execute(
+                            "DELETE FROM documents WHERE case_id=?",
+                            (case_id,)
+                        )
+
+# ==========================================================
+# نهاية الجزء الثانى
+# ==========================================================
+# ==========================================================
+# بداية الجزء الثالث
+# ==========================================================
+
+                        cur.execute(
+                            "DELETE FROM cases WHERE id=?",
+                            (case_id,)
+                        )
+
+                        conn.commit()
+
+                        st.session_state.delete_case_id = None
+
+                        st.success(
+                            "تم حذف القضية بنجاح"
+                        )
+
+                        st.rerun()
+
+                with d2:
+
+                    if st.button(
+                        "❌ إلغاء",
+                        key=f"cancel_{case_id}"
+                    ):
+
+                        st.session_state.delete_case_id = None
+                        st.rerun()
+
+            st.markdown(
+                "────────────────────────────────────────"
+            )
+
+    st.markdown("")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "home"
+        st.rerun()
+
+# ==========================================================
+# نهاية الحصر العام
+# ==========================================================
+# ==========================================================
+# =====================================
+# ملف القضية (واجهة احترافية)
+# =====================================
+
+if st.session_state.page == "case_details":
+
+    case_id = st.session_state.selected_case
+
+    cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,))
+
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("القضية غير موجودة")
+
+        if st.button("⬅ العودة"):
+            st.session_state.page="inventory"
+            st.rerun()
+
+    else:
+
+        st.markdown("""
+        <div style="
+        background:#0b3d91;
+        color:white;
+        padding:15px;
+        border-radius:15px;
+        border:2px solid gold;
+        text-align:center;
+        font-size:30px;
+        font-weight:bold;">
+        ⚖️ ملف القضية
+        </div>
+        """,unsafe_allow_html=True)
+
+        st.markdown("")
+
+        c1,c2=st.columns(2)
 
         with c1:
-            if st.button("📂 فتح"):
-                st.session_state.selected_case = case_id
-                go("case")
+
+            st.info(f"""
+📄 **رقم القضية**
+
+{case[5]}
+""")
 
         with c2:
-            if st.button("✏️ تعديل"):
-                st.session_state.selected_case = case_id
-                go("edit")
+
+            st.info(f"""
+📅 **السنة القضائية**
+
+{case[6]}
+""")
+
+        c3,c4=st.columns(2)
 
         with c3:
-            if st.button("🗑 حذف"):
-                cur.execute("DELETE FROM cases WHERE id=?", (case_id,))
-                conn.commit()
+
+            st.info(f"""
+🏛 **المحكمة**
+
+{case[3]}
+""")
+
+        with c4:
+
+            st.info(f"""
+👨‍⚖️ **الدائرة**
+
+{case[7]}
+""")
+
+        st.info(f"""
+⚖️ **نوع الدعوى**
+
+{case[1]}
+""")
+
+        if case[4]:
+
+            st.info(f"""
+📍 **المأمورية**
+
+{case[4]}
+""")
+
+        st.success(f"""
+👤 **المدعى**
+
+{case[9]}
+""")
+
+        st.error(f"""
+👤 **المدعى عليه**
+
+{case[10]}
+""")
+
+        st.warning(f"""
+📄 **موضوع الدعوى**
+
+{case[11]}
+""")
+
+        if case[12]:
+
+            st.info(f"""
+📝 **ملاحظات**
+
+{case[12]}
+""")
+
+        st.markdown("---")
+
+        st.subheader("📅 الجلسات")
+
+        cur.execute("""
+        SELECT
+            session_date,
+            roll_number,
+            procedure
+        FROM sessions
+        WHERE case_id=?
+        ORDER BY session_date DESC
+        """,(case_id,))
+
+        sessions=cur.fetchall()
+
+        if sessions:
+
+            for s in sessions:
+
+                st.container(border=True)
+
+                st.write(
+                    f"📅 {s[0]}"
+                )
+
+                st.write(
+                    f"🔢 الرول : {s[1]}"
+                )
+
+                st.write(
+                    f"⚖️ {s[2]}"
+                )
+
+                st.markdown("---")
+
+        else:
+
+            st.warning("لا توجد جلسات")
+
+        b1,b2,b3,b4=st.columns(4)
+
+        with b1:
+
+            if st.button("✏️ تعديل"):
+                st.session_state.page="edit_case"
                 st.rerun()
 
-        if st.button("⬅ رجوع"):
-            go("home")
+        with b2:
 
+            if st.button("➕ جلسة"):
+                st.session_state.page="add_session"
+                st.rerun()
+
+        with b3:
+
+            if st.button("📎 مستندات"):
+                st.session_state.page="documents"
+                st.rerun()
+
+        with b4:
+
+            if st.button("⬅ رجوع"):
+                st.session_state.page="inventory"
+                st.rerun()
+# ==========================================================
+# بداية صفحة تعديل القضية - الجزء الأول
+# ==========================================================
 
 # =====================================
-# CASE DETAILS
+# تعديل القضية
 # =====================================
-elif st.session_state.page == "case":
+
+if st.session_state.page == "edit_case":
 
     case_id = st.session_state.selected_case
 
-    cur.execute("SELECT * FROM cases WHERE id=?", (case_id,))
-    c = cur.fetchone()
+    cur.execute(
+        "SELECT * FROM cases WHERE id=?",
+        (case_id,)
+    )
 
-    if not c:
-        st.error("غير موجود")
-        go("inventory")
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("القضية غير موجودة")
+
+        if st.button("⬅ العودة"):
+            st.session_state.page = "inventory"
+            st.rerun()
+
     else:
 
-        st.subheader("⚖️ ملف القضية")
+        st.markdown("## ✏️ تعديل القضية")
 
-        st.write(f"رقم: {c[5]}")
-        st.write(f"سنة: {c[6]}")
-        st.write(f"محكمة: {c[3]}")
-        st.write(f"دائرة: {c[7]}")
-        st.write(f"مدعي: {c[9]}")
-        st.write(f"مدعى عليه: {c[10]}")
-        st.write(f"موضوع: {c[11]}")
+        col1, col2 = st.columns(2)
 
-        if st.button("⬅ رجوع"):
-            go("inventory")
+        with col1:
 
+            case_type = st.selectbox(
+                "نوع الدعوى",
+                ["دعوى","استئناف","طعن"],
+                index=["دعوى","استئناف","طعن"].index(case[1])
+            )
 
-# =====================================
-# EDIT
-# =====================================
-elif st.session_state.page == "edit":
+            court_type = st.text_input(
+                "نوع المحكمة",
+                value=case[2]
+            )
 
-    case_id = st.session_state.selected_case
+            court_name = st.text_input(
+                "اسم المحكمة",
+                value=case[3]
+            )
 
-    cur.execute("SELECT * FROM cases WHERE id=?", (case_id,))
-    c = cur.fetchone()
+            mission = st.text_input(
+                "المأمورية",
+                value=case[4]
+            )
 
-    if not c:
-        st.error("غير موجود")
-        go("inventory")
-    else:
-
-        st.subheader("✏️ تعديل")
-
-        case_type = st.selectbox("نوع", ["دعوى","استئناف","طعن"],
-                                 index=["دعوى","استئناف","طعن"].index(c[1]) if c[1] in ["دعوى","استئناف","طعن"] else 0)
-
-        court_type = st.text_input("المحكمة", value=c[2])
-        court_name = st.text_input("اسم المحكمة", value=c[3])
-        mission = st.text_input("المأمورية", value=c[4])
-        case_number = st.text_input("رقم القضية", value=c[5])
-        judicial_year = st.text_input("السنة", value=c[6])
-        circuit = st.text_input("الدائرة", value=c[7])
-        case_category = st.text_input("النوع", value=c[8])
-        plaintiff = st.text_input("مدعي", value=c[9])
-        defendant = st.text_input("مدعى عليه", value=c[10])
-        subject = st.text_area("موضوع", value=c[11])
-        notes = st.text_area("ملاحظات", value=c[12])
-
-        if st.button("💾 حفظ التعديل"):
-            cur.execute("""
-            UPDATE cases SET
-            case_type=?,court_type=?,court_name=?,mission=?,
-            case_number=?,judicial_year=?,circuit=?,case_category=?,
-            plaintiff=?,defendant=?,subject=?,notes=?
-            WHERE id=?
-            """,(
-            case_type,court_type,court_name,mission,
-            case_number,judicial_year,circuit,case_category,
-            plaintiff,defendant,subject,notes,case_id
-            ))
-            conn.commit()
-            go("inventory")
-
-
-# =====================================
-# REPORTS (🔥 STRONG)
-# =====================================
-elif st.session_state.page == "reports":
-
-    st.subheader("📊 التقارير")
-
-    cur.execute("SELECT * FROM cases ORDER BY id DESC")
-    rows = cur.fetchall()
-
-    st.success(f"إجمالي القضايا: {len(rows)}")
-
-    if rows:
-
-        df = pd.DataFrame(rows, columns=[
-            "ID","النوع","المحكمة","اسم المحكمة","المأمورية",
-            "رقم القضية","السنة","الدائرة","النوع","المدعي",
-            "المدعى عليه","الموضوع","ملاحظات","التاريخ"
-        ])
-
-        st.dataframe(df, use_container_width=True)
-
-        st.download_button(
-            "⬇ تحميل Excel/CSV",
-            df.to_csv(index=False).encode("utf-8-sig"),
-            "cases_report.csv",
-            "text/csv"
-        )
-
-    if st.button("⬅ رجوع"):
-        go("home")
+            case_number = st.text_inpu
