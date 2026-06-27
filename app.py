@@ -1250,3 +1250,57 @@ if st.session_state.page == "documents":
 # ==========================================================
 # نهاية صفحة المستندات
 # ==========================================================
+# ==========================================================
+# بداية صفحة التنبيهات
+# ==========================================================
+
+# =====================================
+# التنبيهات
+# =====================================
+
+if st.session_state.page == "alerts":
+
+    st.markdown("## 🔔 التنبيهات")
+
+    cur.execute("""
+        SELECT
+            c.case_type,
+            c.case_number,
+            c.judicial_year,
+            s.session_date,
+            s.procedure
+        FROM cases c
+        JOIN sessions s
+            ON c.id = s.case_id
+        ORDER BY s.session_date ASC
+    """)
+
+    alerts = cur.fetchall()
+
+    if alerts:
+
+        for alert in alerts:
+
+            st.info(
+                f"⚖️ {alert[0]} رقم {alert[1]} لسنة {alert[2]}\n\n"
+                f"📅 الجلسة : {alert[3]}\n\n"
+                f"📌 الإجراء : {alert[4]}"
+            )
+
+    else:
+
+        st.warning("لا توجد تنبيهات")
+
+    st.markdown("---")
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+
+        st.session_state.page = "home"
+        st.rerun()
+
+# ==========================================================
+# نهاية صفحة التنبيهات
+# ==========================================================
