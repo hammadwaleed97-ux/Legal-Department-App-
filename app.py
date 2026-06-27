@@ -130,75 +130,56 @@ for p, title in pages.items():
         if st.button("⬅ العودة"): st.session_state.page = "home"; st.rerun()
 
 st.caption(" ")
-# ====================== تسجيل قضية جديدة (نسخة نهائية) ======================
 if st.session_state.page == "cases":
-    st.markdown("""
-    <h1 style='text-align:center; color:#FFD700; text-shadow: 0 0 25px gold; margin:25px 0 35px 0;'>
-        تسجيل قضية جديدة ⚖️
-    </h1>
-    """, unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; color:#FFD700; text-shadow:0 0 25px gold;'>تسجيل قضية جديدة ⚖️</h1>", unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("**نوع الدعوى**")
-        case_type = st.selectbox("", ["دعوى", "استئناف", "طعن"], label_visibility="collapsed")
+        case_type = st.selectbox(" ", ["دعوى", "استئناف", "طعن"], label_visibility="collapsed")
         
         st.markdown("**المحكمة**")
-        court_type = st.selectbox("", ["الابتدائية", "الاستئناف", "النقض", "الإدارية", "القضاء الإداري", "الإدارية العليا"], label_visibility="collapsed")
+        court_type = st.selectbox(" ", ["الابتدائية", "الاستئناف", "النقض", "الإدارية", "القضاء الإداري", "الإدارية العليا"], label_visibility="collapsed")
         
         st.markdown("**اسم المحكمة**")
-        court_name = st.text_input("", placeholder="اكتب اسم المحكمة", key="court_name")
-        
-        st.markdown("**المأمورية**")
-        mission = st.text_input("", placeholder="اكتب المأمورية", key="mission") if case_type == "استئناف" else st.empty()
-        
+        court_name = st.text_input(" ", placeholder="اسم المحكمة")
+
         st.markdown("**رقم الدعوى**")
-        case_number = st.text_input("", placeholder="رقم الدعوى", key="case_number")
-        
+        case_number = st.text_input(" ", placeholder="رقم الدعوى")
+
         st.markdown("**السنة القضائية**")
-        judicial_year = st.text_input("", placeholder="السنة القضائية", key="year")
-        
-        st.markdown("**الدائرة**")
-        circuit = st.text_input("", placeholder="الدائرة", key="circuit")
+        judicial_year = st.text_input(" ", placeholder="السنة القضائية")
 
     with col2:
-        st.markdown("**المدعي / المستأنف**")
-        plaintiff = st.text_input("", placeholder="اسم المدعي", key="plaintiff")
-        
+        st.markdown("**المدعي**")
+        plaintiff = st.text_input(" ", placeholder="اسم المدعي")
+
         st.markdown("**المدعى عليه**")
-        defendant = st.text_input("", placeholder="اسم المدعى عليه", key="defendant")
-        
+        defendant = st.text_input(" ", placeholder="اسم المدعى عليه")
+
         st.markdown("**موضوع الدعوى**")
-        subject = st.text_area("", height=130, placeholder="اكتب موضوع الدعوى", key="subject")
-        
+        subject = st.text_area(" ", height=150, placeholder="موضوع الدعوى")
+
         st.markdown("**تاريخ أول جلسة**")
-        first_session_date = st.date_input("", key="date")
-        
-        st.markdown("**الرول**")
-        roll_number = st.text_input("", placeholder="الرول", key="roll")
-        
-        st.markdown("**سبب الجلسة**")
-        first_procedure = st.text_area("", height=100, placeholder="سبب الجلسة", key="procedure")
-        
+        first_session_date = st.date_input(" ")
+
         st.markdown("**ملاحظات**")
-        notes = st.text_area("", height=100, placeholder="ملاحظات إضافية", key="notes")
+        notes = st.text_area(" ", height=100, placeholder="ملاحظات")
 
     st.markdown("---")
-    whatsapp_enabled = st.checkbox("تفعيل التنبيهات عبر واتساب")
+    whatsapp_enabled = st.checkbox("تفعيل واتساب")
     whatsapp_number = st.text_input("رقم الواتساب") if whatsapp_enabled else ""
 
-    uploaded_file = st.file_uploader("تحميل صحيفة الدعوى", type=["pdf", "docx", "jpg", "png"])
+    uploaded_file = st.file_uploader("تحميل المستند")
 
-    col_save, col_cancel = st.columns(2)
-    with col_save:
+    c1, c2 = st.columns(2)
+    with c1:
         if st.button("💾 حفظ القضية", type="primary", use_container_width=True):
-            st.success("✅ تم الحفظ بنجاح!")
-            st.balloons()
+            st.success("تم الحفظ بنجاح!")
             st.session_state.page = "inventory"
             st.rerun()
-
-    with col_cancel:
-        if st.button("⬅ العودة للرئيسية", use_container_width=True):
+    with c2:
+        if st.button("⬅ العودة", use_container_width=True):
             st.session_state.page = "home"
             st.rerun()
