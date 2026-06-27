@@ -130,3 +130,61 @@ for p, title in pages.items():
         if st.button("⬅ العودة"): st.session_state.page = "home"; st.rerun()
 
 st.caption(" ")
+# ====================== تسجيل قضية جديدة ======================
+if st.session_state.page == "cases":
+    st.subheader("⚖️ تسجيل قضية جديدة")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        case_type = st.selectbox("نوع الدعوى", ["دعوى", "استئناف", "طعن"])
+        court_type = st.selectbox("المحكمة", ["الابتدائية","الاستئناف","النقض","الإدارية","القضاء الإداري","الإدارية العليا"])
+        court_name = st.text_input("اسم المحكمة")
+        mission = st.text_input("المأمورية") if case_type == "استئناف" else ""
+        case_number = st.text_input("رقم الدعوى")
+        judicial_year = st.text_input("السنة القضائية")
+        circuit = st.text_input("الدائرة")
+        case_category = st.text_input("النوع")
+
+    with col2:
+        plaintiff = st.text_input("المدعي / المستأنف")
+        defendant = st.text_input("المدعى عليه")
+        subject = st.text_area("موضوع الدعوى", height=120)
+        first_session_date = st.date_input("تاريخ أول جلسة")
+        roll_number = st.text_input("الرول")
+        first_procedure = st.text_area("سبب الجلسة", height=100)
+        notes = st.text_area("ملاحظات", height=100)
+
+    whatsapp_enabled = st.checkbox("تفعيل التنبيهات عبر واتساب")
+    whatsapp_number = st.text_input("رقم الواتساب") if whatsapp_enabled else ""
+    uploaded_file = st.file_uploader("تحميل صحيفة الدعوى", type=["pdf","docx","jpg","png"])
+
+    col_save, col_cancel = st.columns(2)
+    with col_save:
+        if st.button("💾 حفظ القضية", type="primary", use_container_width=True):
+            try:
+                cur.execute("""
+                    INSERT INTO cases VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    case_type, court_type, court_name, mission, case_number,
+                    judicial_year, circuit, case_category, plaintiff, defendant,
+                    subject, notes, int(whatsapp_enabled), whatsapp_number,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+                conn.commit()
+                case_id = cur.lastrowid
+
+                cur.execute("""
+                    INSERT INTO sessions VALUES (NULL,?,?,?,?,?,?)
+                """, (case_id, str(first_session_date), roll_number, first_procedure, "", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                conn.commit()
+
+                st.success("✅ تم حفظ القضية بنجاح!")
+                st.session_state.page = "inventory"
+                st.rerun()
+            except Exception as e:
+                st.error(f"خطأ: {e}")
+
+    with col_cancel:
+        if st.button("⬅ العودة", use_container_width=True):
+            st.session_state.page = "home"
+            st.rerun()
