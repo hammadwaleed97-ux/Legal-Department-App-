@@ -756,6 +756,189 @@ if st.session_state.page == "inventory":
 # نهاية الحصر العام
 # ==========================================================
 # ==========================================================
+# =====================================
+# ملف القضية (واجهة احترافية)
+# =====================================
+
+if st.session_state.page == "case_details":
+
+    case_id = st.session_state.selected_case
+
+    cur.execute("""
+        SELECT *
+        FROM cases
+        WHERE id=?
+    """,(case_id,))
+
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("القضية غير موجودة")
+
+        if st.button("⬅ العودة"):
+            st.session_state.page="inventory"
+            st.rerun()
+
+    else:
+
+        st.markdown("""
+        <div style="
+        background:#0b3d91;
+        color:white;
+        padding:15px;
+        border-radius:15px;
+        border:2px solid gold;
+        text-align:center;
+        font-size:30px;
+        font-weight:bold;">
+        ⚖️ ملف القضية
+        </div>
+        """,unsafe_allow_html=True)
+
+        st.markdown("")
+
+        c1,c2=st.columns(2)
+
+        with c1:
+
+            st.info(f"""
+📄 **رقم القضية**
+
+{case[5]}
+""")
+
+        with c2:
+
+            st.info(f"""
+📅 **السنة القضائية**
+
+{case[6]}
+""")
+
+        c3,c4=st.columns(2)
+
+        with c3:
+
+            st.info(f"""
+🏛 **المحكمة**
+
+{case[3]}
+""")
+
+        with c4:
+
+            st.info(f"""
+👨‍⚖️ **الدائرة**
+
+{case[7]}
+""")
+
+        st.info(f"""
+⚖️ **نوع الدعوى**
+
+{case[1]}
+""")
+
+        if case[4]:
+
+            st.info(f"""
+📍 **المأمورية**
+
+{case[4]}
+""")
+
+        st.success(f"""
+👤 **المدعى**
+
+{case[9]}
+""")
+
+        st.error(f"""
+👤 **المدعى عليه**
+
+{case[10]}
+""")
+
+        st.warning(f"""
+📄 **موضوع الدعوى**
+
+{case[11]}
+""")
+
+        if case[12]:
+
+            st.info(f"""
+📝 **ملاحظات**
+
+{case[12]}
+""")
+
+        st.markdown("---")
+
+        st.subheader("📅 الجلسات")
+
+        cur.execute("""
+        SELECT
+            session_date,
+            roll_number,
+            procedure
+        FROM sessions
+        WHERE case_id=?
+        ORDER BY session_date DESC
+        """,(case_id,))
+
+        sessions=cur.fetchall()
+
+        if sessions:
+
+            for s in sessions:
+
+                st.container(border=True)
+
+                st.write(
+                    f"📅 {s[0]}"
+                )
+
+                st.write(
+                    f"🔢 الرول : {s[1]}"
+                )
+
+                st.write(
+                    f"⚖️ {s[2]}"
+                )
+
+                st.markdown("---")
+
+        else:
+
+            st.warning("لا توجد جلسات")
+
+        b1,b2,b3,b4=st.columns(4)
+
+        with b1:
+
+            if st.button("✏️ تعديل"):
+                st.session_state.page="edit_case"
+                st.rerun()
+
+        with b2:
+
+            if st.button("➕ جلسة"):
+                st.session_state.page="add_session"
+                st.rerun()
+
+        with b3:
+
+            if st.button("📎 مستندات"):
+                st.session_state.page="documents"
+                st.rerun()
+
+        with b4:
+
+            if st.button("⬅ رجوع"):
+                st.session_state.page="inventory"
+                st.rerun()
 # ==========================================================
 # بداية صفحة تعديل القضية - الجزء الأول
 # ==========================================================
