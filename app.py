@@ -130,3 +130,97 @@ for p, title in pages.items():
         if st.button("⬅ العودة"): st.session_state.page = "home"; st.rerun()
 
 st.caption(" ")
+# ====================== تسجيل قضية جديدة (نسخة نظيفة جداً) ======================
+if st.session_state.page == "cases":
+    st.markdown("""
+    <h1 style='text-align:center; color:#FFD700; text-shadow: 0 0 25px gold; margin:30px 0;'>
+        تسجيل قضية جديدة ⚖️
+    </h1>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("**نوع الدعوى**")
+        case_type = st.selectbox("", ["دعوى", "استئناف", "طعن"], label_visibility="collapsed")
+        
+        st.markdown("**المحكمة**")
+        court_type = st.selectbox("", ["الابتدائية", "الاستئناف", "النقض", "الإدارية", "القضاء الإداري", "الإدارية العليا"], label_visibility="collapsed")
+        
+        st.markdown("**اسم المحكمة**")
+        court_name = st.text_input("", key="court_name")
+        
+        st.markdown("**المأمورية**")
+        mission = st.text_input("", key="mission") if case_type == "استئناف" else ""
+
+        st.markdown("**رقم الدعوى**")
+        case_number = st.text_input("", key="case_number")
+        
+        st.markdown("**السنة القضائية**")
+        judicial_year = st.text_input("", key="judicial_year")
+        
+        st.markdown("**الدائرة**")
+        circuit = st.text_input("", key="circuit")
+
+    with col2:
+        st.markdown("**المدعي / المستأنف**")
+        plaintiff = st.text_input("", key="plaintiff")
+        
+        st.markdown("**المدعى عليه**")
+        defendant = st.text_input("", key="defendant")
+        
+        st.markdown("**موضوع الدعوى**")
+        subject = st.text_area("", height=120, key="subject")
+        
+        st.markdown("**تاريخ أول جلسة**")
+        first_session_date = st.date_input("", key="session_date")
+        
+        st.markdown("**الرول**")
+        roll_number = st.text_input("", key="roll")
+        
+        st.markdown("**سبب الجلسة**")
+        first_procedure = st.text_area("", height=100, key="procedure")
+        
+        st.markdown("**ملاحظات**")
+        notes = st.text_area("", height=100, key="notes")
+
+    st.markdown("---")
+    whatsapp_enabled = st.checkbox("تفعيل التنبيهات عبر واتساب")
+    if whatsapp_enabled:
+        whatsapp_number = st.text_input("رقم الواتساب")
+    else:
+        whatsapp_number = ""
+
+    uploaded_file = st.file_uploader("تحميل صحيفة الدعوى أو المستند", type=["pdf","docx","jpg","png"])
+
+    col_save, col_cancel = st.columns(2)
+    with col_save:
+        if st.button("💾 حفظ القضية", type="primary", use_container_width=True):
+            # (كود الحفظ نفسه)
+            try:
+                cur.execute("""
+                    INSERT INTO cases VALUES (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    case_type, court_type, court_name, mission, case_number,
+                    judicial_year, circuit, "", plaintiff, defendant,
+                    subject, notes, int(whatsapp_enabled), whatsapp_number,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                ))
+                conn.commit()
+                case_id = cur.lastrowid
+
+                cur.execute("INSERT INTO sessions VALUES (NULL,?,?,?,?,?,?)", 
+                    (case_id, str(first_session_date), roll_number, first_procedure, "", datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                conn.commit()
+
+                st.success("✅ تم حفظ القضية بنجاح!")
+                st.balloons()
+                st.session_state.page = "inventory"
+                st.rerun()
+            except Exception as e:
+                st.error(f"خطأ: {e}")
+
+    with col_cancel:
+        if st.button("⬅ العودة للرئيسية", use_container_width=True):
+            st.session_state.page = "home"
+            st.rerun()
