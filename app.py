@@ -879,3 +879,80 @@ elif st.session_state.page == "cases":
         ):
 
             st.rerun()
+            # =====================================
+            # إنشاء مجلد المستندات
+            # =====================================
+
+            if uploaded_file is not None:
+
+                documents_folder = "Documents"
+
+                if not os.path.exists(documents_folder):
+                    os.mkdir(documents_folder)
+
+                case_folder = os.path.join(
+                    documents_folder,
+                    f"{case_number}-{judicial_year}"
+                )
+
+                if not os.path.exists(case_folder):
+                    os.mkdir(case_folder)
+
+                file_path = os.path.join(
+                    case_folder,
+                    uploaded_file.name
+                )
+
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+
+                cur.execute("""
+
+                INSERT INTO documents(
+
+                case_id,
+                document_type,
+                document_description,
+                file_name,
+                file_path,
+                uploaded_at
+
+                )
+
+                VALUES(
+
+                ?,?,?,?,?,?
+
+                )
+
+                """,
+
+                (
+
+                case_id,
+
+                document_type,
+
+                f"{document_type} رقم {case_number}",
+
+                uploaded_file.name,
+
+                file_path,
+
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                )
+
+                )
+
+                conn.commit()
+
+            st.success("✅ تم حفظ القضية وجميع البيانات بنجاح")
+
+            st.balloons()
+
+            st.session_state.page = "inventory"
+
+            st.rerun()
