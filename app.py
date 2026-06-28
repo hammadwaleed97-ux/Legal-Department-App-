@@ -1916,3 +1916,272 @@ elif st.session_state.page == "case_details":
         uploaded_document = st.file_uploader(
             "رفع المستند"
             )
+        # =====================================
+        # حفظ المستند
+        # =====================================
+
+        if st.button(
+            "💾 حفظ المستند",
+            use_container_width=True
+        ):
+
+            if uploaded_document is None:
+
+                st.error("يرجى اختيار مستند")
+
+            else:
+
+                import os
+
+                upload_folder = "documents"
+
+                os.makedirs(
+                    upload_folder,
+                    exist_ok=True
+                )
+
+                file_path = os.path.join(
+                    upload_folder,
+                    uploaded_document.name
+                )
+
+                with open(
+                    file_path,
+                    "wb"
+                ) as f:
+
+                    f.write(
+                        uploaded_document.getbuffer()
+                    )
+
+                cur.execute("""
+
+                INSERT INTO documents(
+
+                case_id,
+                document_type,
+                document_description,
+                file_name,
+                file_path,
+                uploaded_at
+
+                )
+
+                VALUES(?,?,?,?,?,?)
+
+                """,
+
+                (
+
+                case_id,
+
+                document_type,
+
+                document_description,
+
+                uploaded_document.name,
+
+                file_path,
+
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                )
+
+                )
+
+                conn.commit()
+
+                st.success("تم حفظ المستند بنجاح")
+
+                st.rerun()
+
+        st.markdown("---")
+
+        # =====================================
+        # عرض مستندات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📂 المستندات المحفوظة
+        </h3>
+        """, unsafe_allow_html=True)
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        document_type,
+        document_description,
+        file_name,
+        file_path
+
+        FROM documents
+
+        WHERE case_id=?
+
+        ORDER BY uploaded_at DESC
+
+        """,(case_id,))
+
+        docs = cur.fetchall()
+
+        if docs:
+
+            for doc in docs:
+
+                with st.expander(
+                    f"📄 {doc[1]}"
+                ):
+
+                    st.write(
+                        f"**البيان :** {doc[2]}"
+                    )
+
+                    st.write(
+                        f"**اسم الملف :** {doc[3]}"
+                    )
+
+                    try:
+
+                        with open(
+                            doc[4],
+                            "rb"
+                        ) as f:
+
+                            st.download_button(
+
+                                "⬇ تحميل المستند",
+
+                                f,
+
+                                file_name=doc[3],
+
+                                use_container_width=True,
+
+                                key=f"download_{doc[0]}"
+
+                            )
+
+                    except:
+
+                        st.error(
+                            "الملف غير موجود"
+                        )
+
+        else:
+
+            st.info(
+                "لا توجد مستندات"
+            )
+
+        st.markdown("---")
+
+        # =====================================
+        # جلسة الحكم
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ⚖️ بيانات الحكم
+        </h3>
+        """, unsafe_allow_html=True)
+
+        judgment_date = st.date_input(
+            "تاريخ جلسة الحكم"
+        )
+
+        judgment_text = st.text_area(
+
+            "منطوق الحكم",
+
+            height=150
+
+        )
+
+        if st.button(
+
+            "💾 حفظ الحكم",
+
+            use_container_width=True
+
+        ):
+
+            cur.execute("""
+
+            INSERT INTO sessions(
+
+            case_id,
+
+            session_date,
+
+            roll_number,
+
+            procedure,
+
+            created_at
+
+            )
+
+            VALUES(
+
+            ?,?,?,?,?
+
+            )
+
+            """,
+
+            (
+
+            case_id,
+
+            str(judgment_date),
+
+            "حكم",
+
+            judgment_text,
+
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            )
+
+            )
+
+            conn.commit()
+
+            st.success(
+                "تم حفظ بيانات الحكم"
+            )
+
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        b1, b2 = st.columns(2)
+
+        with b1:
+
+            if st.button(
+                "⬅ العودة للحصر العام",
+                use_container_width=True
+            ):
+
+                st.session_state.page = "inventory"
+
+                st.rerun()
+
+        with b2:
+
+            if st.button(
+                "🏠 الصفحة الرئيسية",
+                use_container_width=True
+            ):
+
+                st.session_state.page = "home"
+
+                st.rerun()
