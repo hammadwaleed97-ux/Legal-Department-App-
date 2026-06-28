@@ -2824,3 +2824,104 @@ elif st.session_state.page == "reports":
         <hr>
 
         """, unsafe_allow_html=True)
+        # =====================================
+        # الجدول
+        # =====================================
+
+        if report_type == "بيان بالدعاوى المتداولة":
+
+            cur.execute("""
+
+            SELECT
+
+            case_number,
+            judicial_year,
+            circuit,
+            case_category,
+            court_name,
+            mission,
+            plaintiff,
+            defendant,
+            subject,
+            notes
+
+            FROM cases
+
+            ORDER BY id DESC
+
+            """)
+
+            rows = cur.fetchall()
+
+            html = """
+
+            <table style="width:100%;
+            border-collapse:collapse;
+            direction:rtl;
+            font-size:16px;">
+
+            <tr style="
+            background:#6B4F3A;
+            color:#FFD700;
+            ">
+
+            <th>م</th>
+
+            <th>رقم القضية</th>
+
+            <th>السنة</th>
+
+            <th>الدائرة</th>
+
+            <th>النوع</th>
+
+            <th>المحكمة</th>
+
+            <th>المأمورية</th>
+
+            <th>الخصوم</th>
+
+            <th>موضوع الدعوى</th>
+
+            <th>ملاحظات</th>
+
+            </tr>
+
+            """
+
+            for i,row in enumerate(rows,1):
+
+                html += f"""
+
+                <tr>
+
+                <td>{i}</td>
+
+                <td>{row[0]}</td>
+
+                <td>{row[1]}</td>
+
+                <td>{row[2]}</td>
+
+                <td>{row[3]}</td>
+
+                <td>{row[4]}</td>
+
+                <td>{row[5] if row[5] else "-"}</td>
+
+                <td>{row[6]}<br><b>ضد</b><br>{row[7]}</td>
+
+                <td>{row[8]}</td>
+
+                <td>{row[9]}</td>
+
+                </tr>
+
+                """
+
+            html += "</table>"
+
+            st.markdown(
+                html,
+                unsafe_allow_html=True
+            )
