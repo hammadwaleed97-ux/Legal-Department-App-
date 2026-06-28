@@ -956,3 +956,68 @@ elif st.session_state.page == "cases":
             st.session_state.page = "inventory"
 
             st.rerun()
+            # =====================================
+    # التحقق من رقم الواتساب
+    # =====================================
+
+    if whatsapp_enabled:
+
+        if whatsapp_number.strip() != "":
+
+            valid_prefix = (
+                whatsapp_number.startswith("010") or
+                whatsapp_number.startswith("011") or
+                whatsapp_number.startswith("012") or
+                whatsapp_number.startswith("015")
+            )
+
+            if len(whatsapp_number) != 11 or not valid_prefix:
+
+                st.error(
+                    "رقم واتساب غير صحيح (يجب أن يكون 11 رقم ويبدأ بـ 010 أو 011 أو 012 أو 015)"
+                )
+                st.stop()
+
+    # =====================================
+    # تحديد نوع المستند تلقائياً
+    # =====================================
+
+    if case_type == "دعوى":
+        document_type = "صحيفة الدعوى"
+
+    elif case_type == "استئناف":
+        document_type = "صحيفة الاستئناف"
+
+    else:
+        document_type = "صحيفة الطعن"
+
+    # =====================================
+    # أزرار أسفل الصفحة
+    # =====================================
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    b1, b2 = st.columns(2)
+
+    with b1:
+
+        if st.button(
+            "⬅ العودة للرئيسية",
+            use_container_width=True,
+            key="back_home_cases"
+        ):
+
+            st.session_state.page = "home"
+            st.rerun()
+
+    with b2:
+
+        if st.button(
+            "🧹 مسح جميع البيانات",
+            use_container_width=True,
+            key="clear_form"
+        ):
+
+            st.warning("تم مسح البيانات المدخلة.")
+
+            st.rerun()
