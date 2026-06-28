@@ -2185,3 +2185,65 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "home"
 
                 st.rerun()
+                # ==========================================================
+# التقارير - الجزء الأول
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:2px solid gold;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:white;
+    font-size:32px;
+    font-weight:bold;
+    ">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+
+        "نوع التقرير",
+
+        [
+
+            "بيان بالدعاوى المتداولة",
+
+            "بيان بالأحكام",
+
+            "بيان بجلسات اليوم",
+
+            "بيان بجلسات الأسبوع",
+
+            "بيان بجميع القضايا"
+
+        ]
+
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        from_date = st.date_input(
+            "من تاريخ"
+        )
+
+    with c2:
+
+        to_date = st.date_input(
+            "إلى تاريخ"
+        )
+
+    lawyer = st.text_input(
+        "اسم المحامى"
+    )
+
+    st.markdown("---")
