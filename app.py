@@ -120,3 +120,318 @@ uploaded_at TEXT
 """)
 
 conn.commit()
+# =====================================
+# التصميم العام (CSS)
+# =====================================
+
+st.markdown("""
+<style>
+
+#MainMenu{visibility:hidden;}
+header{visibility:hidden;}
+footer{visibility:hidden;}
+
+html,body,[class*="css"]{
+    direction:rtl;
+}
+
+/* الخلفية */
+
+.stApp{
+
+background:
+linear-gradient(
+180deg,
+#5A3A22 0%,
+#4A2F1C 35%,
+#352114 70%,
+#24160D 100%
+);
+
+}
+
+/* ميزان الخلفية */
+
+.watermark{
+
+position:fixed;
+
+top:50%;
+
+left:50%;
+
+transform:translate(-50%,-50%);
+
+font-size:320px;
+
+opacity:.05;
+
+z-index:0;
+
+}
+
+/* رأس البرنامج */
+
+.header{
+
+text-align:center;
+
+position:relative;
+
+z-index:999;
+
+}
+
+.logo{
+
+font-size:90px;
+
+margin-bottom:-15px;
+
+}
+
+.title1{
+
+font-size:34px;
+
+font-weight:bold;
+
+color:#FFD700;
+
+}
+
+.title2{
+
+font-size:27px;
+
+font-weight:bold;
+
+color:white;
+
+}
+
+.title3{
+
+font-size:27px;
+
+font-weight:bold;
+
+color:white;
+
+}
+
+.title4{
+
+font-size:27px;
+
+font-weight:bold;
+
+color:white;
+
+}
+
+/* الأزرار */
+
+.stButton>button{
+
+width:100%;
+
+height:85px;
+
+font-size:24px;
+
+font-weight:bold;
+
+border-radius:18px;
+
+background:#6D4C41;
+
+color:white;
+
+border:2px solid gold;
+
+transition:.3s;
+
+}
+
+.stButton>button:hover{
+
+background:#8D6E63;
+
+transform:scale(1.02);
+
+box-shadow:0 0 18px gold;
+
+}
+
+/* الكتابة */
+
+label,p,h1,h2,h3,h4,h5,h6,span{
+
+color:white !important;
+
+font-weight:bold;
+
+}
+
+/* الشريط السفلى */
+
+.news-bar{
+
+position:fixed;
+
+bottom:0;
+
+right:0;
+
+width:100%;
+
+height:45px;
+
+background:#1A120B;
+
+border-top:2px solid gold;
+
+overflow:hidden;
+
+z-index:999999;
+
+}
+
+.news-text{
+
+position:absolute;
+
+right:-100%;
+
+white-space:nowrap;
+
+line-height:45px;
+
+font-size:20px;
+
+font-weight:bold;
+
+animation:scrollText 35s linear infinite;
+
+}
+
+@keyframes scrollText{
+
+from{
+
+right:-100%;
+
+}
+
+to{
+
+right:100%;
+
+}
+
+}
+
+</style>
+
+""",unsafe_allow_html=True)
+
+# =====================================
+# الميزان بالخلفية
+# =====================================
+
+st.markdown("""
+
+<div class="watermark">
+
+⚖️
+
+</div>
+
+""",unsafe_allow_html=True)
+
+# =====================================
+# رأس البرنامج
+# =====================================
+
+st.markdown("""
+
+<div class="header">
+
+<div class="logo">
+⚖️
+</div>
+
+<div class="title1">
+الهيئة القومية للتأمين الاجتماعى
+</div>
+
+<div class="title2">
+الإدارة المركزية للشئون القانونية
+</div>
+
+<div class="title3">
+الإدارة العامة للقضايا
+</div>
+
+<div class="title4">
+ديوان عام منطقة البحيرة
+</div>
+
+</div>
+
+<br>
+
+""",unsafe_allow_html=True)
+
+# =====================================
+# الشريط السفلى
+# =====================================
+
+st.markdown("""
+
+<div class="news-bar">
+
+<div class="news-text">
+
+<span style="color:#FFD700;">
+✨ مع تحيات / وليد حماد
+</span>
+
+<span style="color:white;">
+&nbsp;&nbsp;|&nbsp;&nbsp;
+</span>
+
+<span style="color:#00FFFF;">
+الإدارة العامة للقضايا
+</span>
+
+<span style="color:white;">
+&nbsp;&nbsp;|&nbsp;&nbsp;
+</span>
+
+<span style="color:#7CFC00;">
+الإدارة المركزية للشئون القانونية
+</span>
+
+<span style="color:white;">
+&nbsp;&nbsp;|&nbsp;&nbsp;
+</span>
+
+<span style="color:#FFA500;">
+ديوان عام منطقة البحيرة
+</span>
+
+<span style="color:white;">
+&nbsp;&nbsp;|&nbsp;&nbsp;
+</span>
+
+<span style="color:#FF4444;">
+الهيئة القومية للتأمين الاجتماعى
+</span>
+
+</div>
+
+</div>
+
+""",unsafe_allow_html=True)
