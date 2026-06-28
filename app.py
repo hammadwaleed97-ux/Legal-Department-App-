@@ -1349,3 +1349,78 @@ elif st.session_state.page == "inventory":
                 st.session_state.delete_case_id = case_id
 
         st.markdown("<br>", unsafe_allow_html=True)
+        # =====================================
+    # تأكيد حذف القضية
+    # =====================================
+
+    if "delete_case_id" not in st.session_state:
+        st.session_state.delete_case_id = None
+
+    if st.session_state.delete_case_id:
+
+        st.markdown("---")
+
+        st.error("⚠️ هل تريد حذف القضية نهائياً؟")
+
+        d1, d2 = st.columns(2)
+
+        with d1:
+
+            if st.button(
+                "✅ نعم - حذف القضية",
+                use_container_width=True,
+                key="confirm_delete_case"
+            ):
+
+                delete_id = st.session_state.delete_case_id
+
+                cur.execute(
+                    "DELETE FROM sessions WHERE case_id=?",
+                    (delete_id,)
+                )
+
+                cur.execute(
+                    "DELETE FROM documents WHERE case_id=?",
+                    (delete_id,)
+                )
+
+                cur.execute(
+                    "DELETE FROM cases WHERE id=?",
+                    (delete_id,)
+                )
+
+                conn.commit()
+
+                st.success("تم حذف القضية بنجاح")
+
+                st.session_state.delete_case_id = None
+
+                st.rerun()
+
+        with d2:
+
+            if st.button(
+                "❌ إلغاء",
+                use_container_width=True,
+                key="cancel_delete_case"
+            ):
+
+                st.session_state.delete_case_id = None
+
+                st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # العودة للرئيسية
+    # =====================================
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True,
+        key="inventory_home"
+    ):
+
+        st.session_state.page = "home"
+
+        st.rerun()
