@@ -2408,3 +2408,208 @@ elif st.session_state.page == "reports":
     unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
+    # =====================================
+    # استخراج البيانات
+    # =====================================
+
+    rows = []
+
+    if report_type == "بيان بالدعاوى المتداولة":
+
+        cur.execute("""
+
+        SELECT
+
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+
+        (
+
+        SELECT session_date
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+        ),
+
+        (
+
+        SELECT procedure
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+        )
+
+        FROM cases c
+
+        ORDER BY c.id DESC
+
+        """)
+
+        rows = cur.fetchall()
+
+    elif report_type == "بيان بالدعاوى حسب موضوع الدعوى":
+
+        cur.execute("""
+
+        SELECT
+
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+
+        (
+
+        SELECT session_date
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+        ),
+
+        (
+
+        SELECT procedure
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+        )
+
+        FROM cases c
+
+        WHERE c.subject LIKE ?
+
+        ORDER BY c.id DESC
+
+        """,
+
+        (
+
+        "%" + subject_search + "%",
+
+        )
+
+        )
+
+        rows = cur.fetchall()
+
+    if rows:
+
+        table="""
+
+        <table style='width:100%;border-collapse:collapse;'>
+
+        <tr style='background:#5D4037;color:#FFD700;'>
+
+        <th>م</th>
+
+        <th>رقم القضية</th>
+
+        <th>السنة</th>
+
+        <th>الدائرة</th>
+
+        <th>النوع</th>
+
+        <th>المحكمة</th>
+
+        <th>المأمورية</th>
+
+        <th>الخصوم</th>
+
+        <th>موضوع الدعوى</th>
+
+        <th>آخر جلسة</th>
+
+        <th>سببها</th>
+
+        <th>ملاحظات</th>
+
+        </tr>
+
+        """
+
+        for i,r in enumerate(rows,1):
+
+            table+=f"""
+
+            <tr>
+
+            <td>{i}</td>
+
+            <td>{r[0]}</td>
+
+            <td>{r[1]}</td>
+
+            <td>{r[2]}</td>
+
+            <td>{r[3]}</td>
+
+            <td>{r[4]}</td>
+
+            <td>{r[5] if r[5] else "-"}</td>
+
+            <td>{r[6]}<br>ضد<br>{r[7]}</td>
+
+            <td>{r[8]}</td>
+
+            <td>{r[10]}</td>
+
+            <td>{r[11]}</td>
+
+            <td>{r[9]}</td>
+
+            </tr>
+
+            """
+
+        table+="</table>"
+
+        st.markdown(
+
+            table,
+
+            unsafe_allow_html=True
+
+        )
+
+    else:
+
+        st.warning("لا توجد بيانات لعرضها")
