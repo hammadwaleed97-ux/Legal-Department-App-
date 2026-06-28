@@ -1738,3 +1738,181 @@ elif st.session_state.page == "case_details":
             st.success("تم حفظ الجلسة بنجاح")
 
             st.rerun()
+            # =====================================
+        # تعديل جلسة سابقة
+        # =====================================
+
+        st.markdown("---")
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ✏️ تعديل جلسة
+        </h3>
+        """, unsafe_allow_html=True)
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        session_date
+
+        FROM sessions
+
+        WHERE case_id=?
+
+        ORDER BY session_date ASC
+
+        """, (case_id,))
+
+        session_list = cur.fetchall()
+
+        if session_list:
+
+            session_names = [
+                s[1] for s in session_list
+            ]
+
+            selected_date = st.selectbox(
+                "اختر الجلسة",
+                session_names
+            )
+
+            selected_session = None
+
+            for s in session_list:
+
+                if s[1] == selected_date:
+                    selected_session = s[0]
+
+            cur.execute("""
+
+            SELECT
+
+            roll_number,
+            session_date,
+            procedure
+
+            FROM sessions
+
+            WHERE id=?
+
+            """, (selected_session,))
+
+            data = cur.fetchone()
+
+            edit_roll = st.text_input(
+                "الرول",
+                value=data[0]
+            )
+
+            edit_date = st.date_input(
+                "تاريخ الجلسة",
+                value=datetime.strptime(
+                    data[1],
+                    "%Y-%m-%d"
+                )
+            )
+
+            edit_procedure = st.text_area(
+                "الإجراءات",
+                value=data[2],
+                height=120
+            )
+
+            if st.button(
+                "💾 حفظ التعديل",
+                use_container_width=True
+            ):
+
+                cur.execute("""
+
+                UPDATE sessions
+
+                SET
+
+                roll_number=?,
+                session_date=?,
+                procedure=?
+
+                WHERE id=?
+
+                """,
+
+                (
+
+                edit_roll,
+
+                str(edit_date),
+
+                edit_procedure,
+
+                selected_session
+
+                )
+
+                )
+
+                conn.commit()
+
+                st.success("تم تعديل الجلسة بنجاح")
+
+                st.rerun()
+
+        else:
+
+            st.info("لا توجد جلسات للتعديل")
+
+        st.markdown("---")
+
+        # =====================================
+        # مستندات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📂 مستندات القضية
+        </h3>
+        """, unsafe_allow_html=True)
+
+        document_type = st.selectbox(
+
+            "نوع المستند",
+
+            [
+
+                "صحيفة دعوى",
+
+                "صحيفة استئناف",
+
+                "صحيفة طعن",
+
+                "مذكرة دفاع",
+
+                "حافظة مستندات",
+
+                "تقرير خبير",
+
+                "تقرير طب شرعى",
+
+                "تقرير لجنة طبية",
+
+                "صحيفة تجديد من الشطب",
+
+                "صحيفة تعجيل من الوقف",
+
+                "صورة حكم تمهيدى",
+
+                "أخرى"
+
+            ]
+
+        )
+
+        document_description = st.text_input(
+            "بيان المستند"
+        )
+
+        uploaded_document = st.file_uploader(
+            "رفع المستند"
+            )
