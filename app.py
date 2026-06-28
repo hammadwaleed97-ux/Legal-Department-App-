@@ -2222,7 +2222,7 @@ elif st.session_state.page == "case_details":
 
                 st.rerun()
             with b2:
-            if st.button(
+                if st.button(
                 "🏠 الصفحة الرئيسية",
                 use_container_width=True
             ):
