@@ -730,3 +730,152 @@ elif st.session_state.page == "cases":
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
+    # =====================================
+    # أزرار الحفظ والحذف
+    # =====================================
+
+    col_save, col_delete = st.columns(2)
+
+    # =====================================
+    # حفظ القضية
+    # =====================================
+
+    with col_save:
+
+        if st.button(
+            "💾 حفظ القضية",
+            use_container_width=True
+        ):
+
+            # التحقق من البيانات الأساسية
+
+            if case_number.strip() == "":
+                st.error("برجاء إدخال رقم القضية")
+                st.stop()
+
+            if court_name.strip() == "":
+                st.error("برجاء إدخال اسم المحكمة")
+                st.stop()
+
+            if plaintiff.strip() == "":
+                st.error("برجاء إدخال اسم المدعى")
+                st.stop()
+
+            # حفظ القضية
+
+            cur.execute("""
+
+            INSERT INTO cases(
+
+            case_type,
+            court_type,
+            court_name,
+            mission,
+            case_number,
+            judicial_year,
+            circuit,
+            case_category,
+            plaintiff,
+            defendant,
+            subject,
+            notes,
+            whatsapp_enabled,
+            whatsapp_number,
+            created_at
+
+            )
+
+            VALUES(
+
+            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+
+            )
+
+            """,
+
+            (
+
+            case_type,
+            court_type,
+            court_name,
+            mission,
+            case_number,
+            judicial_year,
+            circuit,
+            case_category,
+            plaintiff,
+            defendant,
+            subject,
+            notes,
+            int(whatsapp_enabled),
+            whatsapp_number,
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            )
+
+            )
+
+            conn.commit()
+
+            case_id = cur.lastrowid
+
+            # =====================================
+            # حفظ أول جلسة
+            # =====================================
+
+            cur.execute("""
+
+            INSERT INTO sessions(
+
+            case_id,
+            session_date,
+            roll_number,
+            procedure,
+            created_at
+
+            )
+
+            VALUES(
+
+            ?,?,?,?,?
+
+            )
+
+            """,
+
+            (
+
+            case_id,
+            str(first_session_date),
+            roll_number,
+            first_procedure,
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            )
+
+            )
+
+            conn.commit()
+
+            st.success("✅ تم حفظ القضية بنجاح")
+
+            st.session_state.page = "inventory"
+
+            st.rerun()
+
+    # =====================================
+    # حذف البيانات المدخلة
+    # =====================================
+
+    with col_delete:
+
+        if st.button(
+            "🗑 حذف البيانات",
+            use_container_width=True
+        ):
+
+            st.rerun()
