@@ -2221,5 +2221,3 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
-
-        
