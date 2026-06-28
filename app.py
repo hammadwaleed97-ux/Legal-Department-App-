@@ -556,3 +556,87 @@ elif st.session_state.page == "search":
     if st.button("⬅ العودة للرئيسية"):
         st.session_state.page = "home"
         st.rerun()
+        # ==========================================================
+# تسجيل القضايا - الجزء الأول
+# ==========================================================
+
+elif st.session_state.page == "cases":
+
+    st.markdown("""
+
+    <div style="
+    background:#4E342E;
+    padding:15px;
+    border-radius:15px;
+    border:2px solid gold;
+    text-align:center;
+    color:white;
+    font-size:30px;
+    font-weight:bold;
+    box-shadow:0 0 15px rgba(255,215,0,.4);
+    ">
+
+    ⚖️ تسجيل قضية جديدة
+
+    </div>
+
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+
+    # =====================================
+    # العمود الأول
+    # =====================================
+
+    with col1:
+
+        case_type = st.selectbox(
+            "نوع الدعوى",
+            [
+                "دعوى",
+                "استئناف",
+                "طعن"
+            ]
+        )
+
+        court_type = st.selectbox(
+            "المحكمة",
+            [
+                "الابتدائية",
+                "الاستئناف",
+                "النقض",
+                "الإدارية",
+                "القضاء الإدارى",
+                "الإدارية العليا"
+            ]
+        )
+
+        court_name = st.text_input(
+            "اسم المحكمة"
+        )
+
+        mission = ""
+
+        if case_type == "استئناف":
+
+            mission = st.text_input(
+                "المأمورية"
+            )
+
+        case_number = st.text_input(
+            "رقم الدعوى / الاستئناف / الطعن"
+        )
+
+        judicial_year = st.text_input(
+            "السنة القضائية"
+        )
+
+        circuit = st.text_input(
+            "الدائرة"
+        )
+
+        case_category = st.text_input(
+            "النوع"
+        )
