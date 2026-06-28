@@ -2613,3 +2613,166 @@ elif st.session_state.page == "reports":
     else:
 
         st.warning("لا توجد بيانات لعرضها")
+        # =====================================
+    # بيان الأحكام
+    # =====================================
+
+    elif report_type in (
+
+        "بيان بالأحكام",
+
+        "بيان بالأحكام حسب موضوع الدعوى"
+
+    ):
+
+        query = """
+
+        SELECT
+
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+
+        s.session_date,
+        s.procedure
+
+        FROM cases c
+
+        INNER JOIN sessions s
+
+        ON c.id=s.case_id
+
+        WHERE s.roll_number='حكم'
+
+        """
+
+        params=[]
+
+        if report_type=="بيان بالأحكام حسب موضوع الدعوى":
+
+            query += " AND c.subject LIKE ?"
+
+            params.append("%"+subject_search+"%")
+
+        query += " ORDER BY s.session_date DESC"
+
+        cur.execute(query,params)
+
+        rows=cur.fetchall()
+
+        if rows:
+
+            table="""
+
+            <table style='width:100%;border-collapse:collapse;'>
+
+            <tr style='background:#5D4037;color:#FFD700;'>
+
+            <th>م</th>
+
+            <th>رقم القضية</th>
+
+            <th>السنة</th>
+
+            <th>الدائرة</th>
+
+            <th>النوع</th>
+
+            <th>المحكمة</th>
+
+            <th>المأمورية</th>
+
+            <th>الخصوم</th>
+
+            <th>موضوع الدعوى</th>
+
+            <th>تاريخ الحكم</th>
+
+            <th>منطوق الحكم</th>
+
+            <th>للصالح / للضد</th>
+
+            <th>ملاحظات</th>
+
+            </tr>
+
+            """
+
+            for i,r in enumerate(rows,1):
+
+                result=""
+
+                text=r[11]
+
+                if "للصالح" in text:
+
+                    result="للصالح"
+
+                elif "للضد" in text:
+
+                    result="للضد"
+
+                else:
+
+                    result="غير محدد"
+
+                if judgment_type!="جميع الأحكام":
+
+                    if result!=judgment_type.replace("الأحكام ",""):
+
+                        continue
+
+                table+=f"""
+
+                <tr>
+
+                <td>{i}</td>
+
+                <td>{r[0]}</td>
+
+                <td>{r[1]}</td>
+
+                <td>{r[2]}</td>
+
+                <td>{r[3]}</td>
+
+                <td>{r[4]}</td>
+
+                <td>{r[5] if r[5] else "-"}</td>
+
+                <td>{r[6]}<br>ضد<br>{r[7]}</td>
+
+                <td>{r[8]}</td>
+
+                <td>{r[10]}</td>
+
+                <td>{r[11]}</td>
+
+                <td>{result}</td>
+
+                <td>{r[9]}</td>
+
+                </tr>
+
+                """
+
+            table+="</table>"
+
+            st.markdown(
+
+                table,
+
+                unsafe_allow_html=True
+
+            )
+
+        else:
+
+            st.warning("لا توجد أحكام خلال الفترة المحددة.")
