@@ -2164,4 +2164,96 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
-                
+                # ==========================================================
+# ==========================================================
+#                    قسم التقارير
+# ==========================================================
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:3px solid #D4AF37;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:#FFD700;
+    font-size:34px;
+    font-weight:bold;">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+
+        "نوع التقرير",
+
+        [
+
+            "بيان بالدعاوى المتداولة",
+
+            "بيان بالأحكام",
+
+            "بيان بالدعاوى حسب موضوع الدعوى",
+
+            "بيان بالأحكام حسب موضوع الدعوى",
+
+            "الإحصائيات"
+
+        ]
+
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        from_date = st.date_input(
+
+            "من تاريخ"
+
+        )
+
+    with c2:
+
+        to_date = st.date_input(
+
+            "إلى تاريخ"
+
+        )
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+
+        office = st.text_input(
+
+            "ديوان عام منطقة"
+
+        )
+
+    with c4:
+
+        lawyer = st.text_input(
+
+            "طرف الأستاذ / المحامى"
+
+        )
+
+    if "حسب موضوع" in report_type:
+
+        subject_search = st.text_input(
+
+            "موضوع الدعوى"
+
+        )
+
+    else:
+
+        subject_search = ""
+
+    st.markdown("---")
