@@ -1021,3 +1021,94 @@ elif st.session_state.page == "cases":
             st.warning("تم مسح البيانات المدخلة.")
 
             st.rerun()
+            # ==========================================================
+# الحصر العام - الجزء الأول
+# ==========================================================
+
+elif st.session_state.page == "inventory":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:2px solid gold;
+    border-radius:15px;
+    padding:15px;
+    text-align:center;
+    color:white;
+    font-size:30px;
+    font-weight:bold;
+    box-shadow:0 0 15px rgba(255,215,0,.4);
+    ">
+    📋 الحصر العام للقضايا
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # الإحصائيات
+    # =====================================
+
+    cur.execute("SELECT COUNT(*) FROM cases")
+    total_cases = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM sessions")
+    total_sessions = cur.fetchone()[0]
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        st.metric(
+            "⚖️ إجمالى القضايا",
+            total_cases
+        )
+
+    with c2:
+
+        st.metric(
+            "📅 إجمالى الجلسات",
+            total_sessions
+        )
+
+    st.markdown("---")
+
+    # =====================================
+    # البحث
+    # =====================================
+
+    search = st.text_input(
+        "🔍 البحث فى القضايا"
+    )
+
+    # =====================================
+    # الفلاتر
+    # =====================================
+
+    f1, f2 = st.columns(2)
+
+    with f1:
+
+        case_filter = st.selectbox(
+
+            "نوع الدعوى",
+
+            [
+
+                "الكل",
+
+                "دعوى",
+
+                "استئناف",
+
+                "طعن"
+
+            ]
+
+        )
+
+    with f2:
+
+        court_filter = st.text_input(
+            "المحكمة"
+    )
