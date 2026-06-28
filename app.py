@@ -640,3 +640,93 @@ elif st.session_state.page == "cases":
         case_category = st.text_input(
             "النوع"
         )
+        # =====================================
+    # العمود الثانى
+    # =====================================
+
+    with col2:
+
+        plaintiff = st.text_input(
+            "اسم المدعى / المستأنف / الطاعن"
+        )
+
+        defendant = st.text_input(
+            "اسم المدعى عليه / المستأنف ضده / المطعون ضده"
+        )
+
+        subject = st.text_area(
+            "موضوع الدعوى",
+            height=130
+        )
+
+        first_session_date = st.date_input(
+            "تاريخ أول جلسة"
+        )
+
+        roll_number = st.text_input(
+            "الرول"
+        )
+
+        first_procedure = st.text_area(
+            "سبب الجلسة",
+            height=120
+        )
+
+        notes = st.text_area(
+            "ملاحظات",
+            height=120
+        )
+
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # =====================================
+    # تنبيهات الواتساب
+    # =====================================
+
+    whatsapp_enabled = st.checkbox(
+        "📲 تفعيل التنبيهات عبر واتساب"
+    )
+
+    whatsapp_number = ""
+
+    if whatsapp_enabled:
+
+        whatsapp_number = st.text_input(
+            "رقم هاتف واتساب"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # رفع المستندات
+    # =====================================
+
+    document_type = st.selectbox(
+
+        "نوع المستند",
+
+        [
+
+            "صحيفة الدعوى",
+
+            "صحيفة الاستئناف",
+
+            "صحيفة الطعن"
+
+        ]
+
+    )
+
+    uploaded_file = st.file_uploader(
+
+        "تحميل المستند",
+
+        type=[
+            "pdf",
+            "doc",
+            "docx"
+        ]
+
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
