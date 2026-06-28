@@ -2257,3 +2257,123 @@ elif st.session_state.page == "reports":
         subject_search = ""
 
     st.markdown("---")
+    # =====================================
+    # عرض التقرير
+    # =====================================
+
+    if st.button(
+
+        "📄 عرض التقرير",
+
+        use_container_width=True,
+
+        type="primary"
+
+    ):
+
+        st.markdown(f"""
+
+        <div style="
+
+        background:#FFF8E7;
+
+        color:black;
+
+        border:2px solid #6D4C41;
+
+        border-radius:12px;
+
+        padding:25px;
+
+        direction:rtl;
+
+        ">
+
+        <div style="
+
+        text-align:center;
+
+        font-size:24px;
+
+        font-weight:bold;
+
+        line-height:2.2;
+
+        ">
+
+        الهيئة القومية للتأمين الاجتماعى<br>
+
+        الإدارة المركزية للشئون القانونية<br>
+
+        الإدارة العامة للقضايا
+
+        </div>
+
+        <br>
+
+        <table style="width:100%;font-size:18px">
+
+        <tr>
+
+        <td style="text-align:right">
+
+        <b>ديوان عام منطقة :</b>
+
+        {office}
+
+        </td>
+
+        <td style="text-align:left">
+
+        <b>طرف الأستاذ /</b>
+
+        {lawyer}
+
+        </td>
+
+        </tr>
+
+        </table>
+
+        <br>
+
+        <div style="
+
+        text-align:center;
+
+        font-size:22px;
+
+        font-weight:bold;
+
+        ">
+
+        {report_type}
+
+        </div>
+
+        <div style="
+
+        text-align:center;
+
+        font-size:18px;
+
+        margin-top:10px;
+
+        ">
+
+        خلال الفترة من
+
+        <b>{from_date.strftime("%d/%m/%Y")}</b>
+
+        حتى
+
+        <b>{to_date.strftime("%d/%m/%Y")}</b>
+
+        </div>
+
+        <hr>
+
+        """,
+
+        unsafe_allow_html=True
+                   )
