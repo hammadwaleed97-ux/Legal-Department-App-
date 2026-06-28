@@ -1424,3 +1424,143 @@ elif st.session_state.page == "inventory":
         st.session_state.page = "home"
 
         st.rerun()
+        # ==========================================================
+# ملف القضية - الجزء الأول
+# ==========================================================
+
+elif st.session_state.page == "case_details":
+
+    case_id = st.session_state.selected_case
+
+    cur.execute("""
+
+    SELECT *
+
+    FROM cases
+
+    WHERE id=?
+
+    """,(case_id,))
+
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("❌ القضية غير موجودة")
+
+        if st.button("⬅ العودة للحصر العام"):
+
+            st.session_state.page="inventory"
+
+            st.rerun()
+
+    else:
+
+        st.markdown("""
+
+        <div style="
+        background:#4E342E;
+        border:2px solid gold;
+        border-radius:18px;
+        padding:18px;
+        text-align:center;
+        color:white;
+        font-size:32px;
+        font-weight:bold;
+        ">
+
+        ⚖️ ملف القضية
+
+        </div>
+
+        """,unsafe_allow_html=True)
+
+        st.markdown("<br>",unsafe_allow_html=True)
+
+        # =====================================
+        # بيانات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📋 بيانات القضية
+        </h3>
+        """,unsafe_allow_html=True)
+
+        t1,t2=st.columns(2)
+
+        with t1:
+
+            st.info(f"""
+⚖️ نوع الدعوى
+
+{case[1]}
+""")
+
+            st.info(f"""
+🏛 المحكمة
+
+{case[3]}
+""")
+
+            st.info(f"""
+📄 رقم الدعوى
+
+{case[5]}
+""")
+
+            st.info(f"""
+📅 السنة القضائية
+
+{case[6]}
+""")
+
+            st.info(f"""
+⚖️ الدائرة
+
+{case[7]}
+""")
+
+            if case[4]:
+
+                st.info(f"""
+📍 المأمورية
+
+{case[4]}
+""")
+
+        with t2:
+
+            st.success(f"""
+👤 المدعى
+
+{case[9]}
+""")
+
+            st.error(f"""
+👤 المدعى عليه
+
+{case[10]}
+""")
+
+            st.warning(f"""
+📑 موضوع الدعوى
+
+{case[11]}
+""")
+
+            if case[12]:
+
+                st.info(f"""
+📝 الملاحظات
+
+{case[12]}
+""")
+
+        st.markdown("<hr>",unsafe_allow_html=True)
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📅 جدول الجلسات
+        </h3>
+        """,unsafe_allow_html=True)
