@@ -2748,3 +2748,79 @@ elif st.session_state.page == "reports":
 #                    نهاية قسم التقارير
 # ==========================================================
 # ==========================================================
+# =====================================
+    # عرض التقرير
+    # =====================================
+
+    if st.button(
+        "📄 عرض التقرير",
+        use_container_width=True
+    ):
+
+        st.markdown(f"""
+        <div style="
+        background:#F8F1E7;
+        color:#000;
+        padding:25px;
+        border:2px solid #8B6B3F;
+        border-radius:12px;
+        direction:rtl;
+        ">
+
+        <div style="text-align:center;font-size:24px;font-weight:bold;line-height:2">
+
+        الهيئة القومية للتأمين الاجتماعى<br>
+
+        الإدارة المركزية للإدارات القانونية<br>
+
+        الإدارة العامة للقضايا
+
+        </div>
+
+        <br>
+
+        <table style="width:100%;font-size:20px">
+
+        <tr>
+
+        <td style="text-align:right;width:50%">
+
+        <b>ديوان عام منطقة :</b> {office}
+
+        </td>
+
+        <td style="text-align:left">
+
+        <b>طرف الأستاذ /</b> {lawyer}
+
+        </td>
+
+        </tr>
+
+        </table>
+
+        <br>
+
+        <div style="text-align:center;font-size:24px;font-weight:bold">
+
+        {report_type}
+
+        </div>
+
+        <br>
+
+        <div style="text-align:center;font-size:18px">
+
+        خلال الفترة من
+
+        <b>{from_date.strftime('%d/%m/%Y')}</b>
+
+        حتى
+
+        <b>{to_date.strftime('%d/%m/%Y')}</b>
+
+        </div>
+
+        <hr>
+
+        """, unsafe_allow_html=True)
