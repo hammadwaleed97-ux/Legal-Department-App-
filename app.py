@@ -2221,7 +2221,7 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
-                elif st.session_state.page == "reports_judgments": # مفترض أنك ستضعه كصفحة مستقلة أو داخل تبويب
+elif st.session_state.page == "reports_judgments": # مفترض أنك ستضعه كصفحة مستقلة أو داخل تبويب
     st.markdown("""
     <div style="text-align:center; color:#FFD700; font-weight:bold;">
     <h2>الهيئة القومية للتأمين الاجتماعى</h2>
