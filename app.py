@@ -2221,3 +2221,190 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
+                # ==========================================================
+# ==========================================================
+#                نهاية صفحة ملف القضية
+# ==========================================================
+# ==========================================================
+
+
+
+# ==========================================================
+# ==========================================================
+#                    بداية قسم التقارير
+# ==========================================================
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:2px solid #D4AF37;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:white;
+    font-size:34px;
+    font-weight:bold;
+    box-shadow:0 0 15px rgba(212,175,55,.40);
+    ">
+    📊 التقارير والإحصائيات
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+
+        "اختر نوع التقرير",
+
+        (
+
+            "بيان بالدعاوى المتداولة",
+
+            "بيان بالأحكام",
+
+            "بيان بالدعاوى حسب موضوع الدعوى",
+
+            "بيان بالأحكام حسب موضوع الدعوى",
+
+            "الإحصائيات"
+
+        )
+
+    )
+
+    st.markdown("---")
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        office_name = st.text_input(
+            "ديوان عام منطقة"
+        )
+
+    with c2:
+
+        lawyer_name = st.text_input(
+            "طرف الأستاذ / المحامى"
+        )
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+
+        from_date = st.date_input(
+            "من تاريخ"
+        )
+
+    with c4:
+
+        to_date = st.date_input(
+            "إلى تاريخ"
+        )
+
+    if report_type == "بيان بالأحكام":
+
+        judgment_type = st.selectbox(
+
+            "نوع الأحكام",
+
+            (
+
+                "جميع الأحكام",
+
+                "الأحكام للصالح",
+
+                "الأحكام للضد"
+
+            )
+
+        )
+
+    elif report_type == "بيان بالدعاوى حسب موضوع الدعوى":
+
+        subject_search = st.text_input(
+            "موضوع الدعوى"
+        )
+
+    elif report_type == "بيان بالأحكام حسب موضوع الدعوى":
+
+        judgment_type = st.selectbox(
+
+            "نوع الأحكام",
+
+            (
+
+                "جميع الأحكام",
+
+                "الأحكام للصالح",
+
+                "الأحكام للضد"
+
+            )
+
+        )
+
+        subject_search = st.text_input(
+            "موضوع الدعوى"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="
+    background:#5D4037;
+    color:white;
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    ">
+
+    الهيئة القومية للتأمين الاجتماعى<br>
+
+    الإدارة المركزية للإدارات القانونية<br>
+
+    الإدارة العامة للقضايا<br>
+
+    ديوان عام منطقة : {}
+    <br><br>
+
+    {}
+    <br>
+
+    خلال الفترة من
+    <span style="color:#FFD700;">{}</span>
+
+    حتى
+
+    <span style="color:#FFD700;">{}</span>
+
+    <br><br>
+
+    طرف الأستاذ /
+
+    <span style="color:#FFD700;">{}</span>
+
+    </div>
+
+    """.format(
+
+        office_name,
+
+        report_type,
+
+        from_date.strftime("%d/%m/%Y"),
+
+        to_date.strftime("%d/%m/%Y"),
+
+        lawyer_name
+
+    ),
+
+    unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
