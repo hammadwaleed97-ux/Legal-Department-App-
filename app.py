@@ -435,3 +435,124 @@ st.markdown("""
 </div>
 
 """,unsafe_allow_html=True)
+# =====================================
+# الصفحة الرئيسية
+# =====================================
+
+if st.session_state.page == "home":
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns([1,3,1])
+
+    with c2:
+
+        if st.button(
+            "⚖️ تسجيل القضايا",
+            use_container_width=True
+        ):
+            st.session_state.page = "cases"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "📋 الحصر العام",
+            use_container_width=True
+        ):
+            st.session_state.page = "inventory"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "🔔 التنبيهات",
+            use_container_width=True
+        ):
+            st.session_state.page = "notifications"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "📊 التقارير",
+            use_container_width=True
+        ):
+            st.session_state.page = "reports"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "🗄️ الأرشيف",
+            use_container_width=True
+        ):
+            st.session_state.page = "archive"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "📚 المكتبة القانونية",
+            use_container_width=True
+        ):
+            st.session_state.page = "library"
+            st.rerun()
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "🔍 البحث عن دعوى",
+            use_container_width=True
+        ):
+            st.session_state.page = "search"
+            st.rerun()
+
+
+# =====================================
+# صفحات تحت الإنشاء
+# =====================================
+
+elif st.session_state.page == "notifications":
+
+    st.info("🚧 سيتم تنفيذ قسم التنبيهات فى المرحلة القادمة.")
+
+    if st.button("⬅ العودة للرئيسية"):
+        st.session_state.page = "home"
+        st.rerun()
+
+
+elif st.session_state.page == "reports":
+
+    st.info("🚧 سيتم تنفيذ قسم التقارير فى المرحلة القادمة.")
+
+    if st.button("⬅ العودة للرئيسية"):
+        st.session_state.page = "home"
+        st.rerun()
+
+
+elif st.session_state.page == "archive":
+
+    st.info("🚧 سيتم تنفيذ قسم الأرشيف فى المرحلة القادمة.")
+
+    if st.button("⬅ العودة للرئيسية"):
+        st.session_state.page = "home"
+        st.rerun()
+
+
+elif st.session_state.page == "library":
+
+    st.info("🚧 سيتم تنفيذ قسم المكتبة القانونية فى المرحلة القادمة.")
+
+    if st.button("⬅ العودة للرئيسية"):
+        st.session_state.page = "home"
+        st.rerun()
+
+
+elif st.session_state.page == "search":
+
+    st.info("🚧 سيتم تنفيذ البحث عن الدعاوى فى المرحلة القادمة.")
+
+    if st.button("⬅ العودة للرئيسية"):
+        st.session_state.page = "home"
+        st.rerun()
