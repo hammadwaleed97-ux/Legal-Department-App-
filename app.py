@@ -2776,3 +2776,233 @@ elif st.session_state.page == "reports":
         else:
 
             st.warning("لا توجد أحكام خلال الفترة المحددة.")
+            # =====================================
+    # الإحصائيات
+    # =====================================
+
+    elif report_type == "الإحصائيات":
+
+        st.markdown("""
+        <h2 style='text-align:center;
+        color:#FFD700;'>
+        📊 إحصائيات القضايا
+        </h2>
+        """, unsafe_allow_html=True)
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+
+            stat_from = st.date_input(
+                "من تاريخ",
+                key="stat_from"
+            )
+
+        with c2:
+
+            stat_to = st.date_input(
+                "إلى تاريخ",
+                key="stat_to"
+            )
+
+        # ==========================
+        # عدد القضايا
+        # ==========================
+
+        cur.execute("""
+
+        SELECT COUNT(*)
+
+        FROM cases
+
+        WHERE created_at
+        BETWEEN ? AND ?
+
+        """,
+
+        (
+
+        str(stat_from),
+
+        str(stat_to)+" 23:59:59"
+
+        )
+
+        )
+
+        total_cases = cur.fetchone()[0]
+
+        # ==========================
+        # عدد الأحكام
+        # ==========================
+
+        cur.execute("""
+
+        SELECT COUNT(*)
+
+        FROM sessions
+
+        WHERE roll_number='حكم'
+
+        AND session_date
+
+        BETWEEN ? AND ?
+
+        """,
+
+        (
+
+        str(stat_from),
+
+        str(stat_to)
+
+        )
+
+        )
+
+        total_judgments = cur.fetchone()[0]
+
+        # ==========================
+        # للصالح
+        # ==========================
+
+        cur.execute("""
+
+        SELECT COUNT(*)
+
+        FROM sessions
+
+        WHERE roll_number='حكم'
+
+        AND procedure LIKE '%للصالح%'
+
+        AND session_date
+
+        BETWEEN ? AND ?
+
+        """,
+
+        (
+
+        str(stat_from),
+
+        str(stat_to)
+
+        )
+
+        )
+
+        favorable = cur.fetchone()[0]
+
+        # ==========================
+        # للضد
+        # ==========================
+
+        cur.execute("""
+
+        SELECT COUNT(*)
+
+        FROM sessions
+
+        WHERE roll_number='حكم'
+
+        AND procedure LIKE '%للضد%'
+
+        AND session_date
+
+        BETWEEN ? AND ?
+
+        """,
+
+        (
+
+        str(stat_from),
+
+        str(stat_to)
+
+        )
+
+        )
+
+        against = cur.fetchone()[0]
+
+        a1, a2 = st.columns(2)
+
+        with a1:
+
+            st.metric(
+
+                "⚖️ القضايا المتداولة",
+
+                total_cases
+
+            )
+
+            st.metric(
+
+                "🏛 الأحكام",
+
+                total_judgments
+
+            )
+
+        with a2:
+
+            st.metric(
+
+                "✅ الأحكام للصالح",
+
+                favorable
+
+            )
+
+            st.metric(
+
+                "❌ الأحكام للضد",
+
+                against
+
+            )
+
+        st.markdown("---")
+
+        b1, b2, b3, b4 = st.columns(4)
+
+        with b1:
+
+            st.button(
+                "📄 فتح Word",
+                use_container_width=True
+            )
+
+        with b2:
+
+            st.button(
+                "📕 فتح PDF",
+                use_container_width=True
+            )
+
+        with b3:
+
+            st.button(
+                "⬇ تحميل Word",
+                use_container_width=True
+            )
+
+        with b4:
+
+            st.button(
+                "⬇ تحميل PDF",
+                use_container_width=True
+            )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        if st.button(
+            "⬅ العودة للرئيسية",
+            use_container_width=True
+        ):
+
+            st.session_state.page = "home"
+
+            st.rerun()
