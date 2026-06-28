@@ -524,9 +524,56 @@ elif st.session_state.page == "notifications":
 
 elif st.session_state.page == "reports":
 
-    st.info("🚧 سيتم تنفيذ قسم التقارير فى المرحلة القادمة.")
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:2px solid gold;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:white;
+    font-size:32px;
+    font-weight:bold;
+    ">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
 
-    if st.button("⬅ العودة للرئيسية"):
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "بيان بالدعاوى المتداولة",
+            "بيان بالأحكام",
+            "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+            "بيان بالأحكام حسب موضوع الدعوى",
+            "الإحصائيات"
+        ]
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        from_date = st.date_input("من تاريخ", value=datetime.now().replace(day=1))
+    with col2:
+        to_date = st.date_input("إلى تاريخ")
+
+    lawyer = st.text_input("طرف الاستاذ / المحامي", value="")
+
+    if "حسب موضوع" in report_type:
+        subject_filter = st.text_input("موضوع الدعوى")
+    else:
+        subject_filter = ""
+
+    st.markdown("---")
+
+    if st.button("📄 عرض التقرير", use_container_width=True, type="primary"):
+        st.success(f"✅ تقرير {report_type} جاري تحميله...")
+        st.info("التقرير شغال وهيظهر الجداول + الإحصائيات.\n\n(هنكمله أكتر بعدين)")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.button("⬅ العودة للرئيسية", use_container_width=True):
         st.session_state.page = "home"
         st.rerun()
 
