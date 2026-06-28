@@ -1208,3 +1208,144 @@ elif st.session_state.page == "inventory":
         st.success(f"عدد النتائج : {len(filtered)}")
 
         st.markdown("<br>", unsafe_allow_html=True)
+        # =====================================
+    # عرض القضايا
+    # =====================================
+
+    for row in filtered:
+
+        case_id = row[0]
+
+        plaintiff = (
+            row[8].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
+            if row[8] else ""
+        )
+
+        defendant = (
+            row[9].replace(
+                "الهيئة القومية للتأمين الاجتماعى",
+                "الهيئة"
+            )
+            if row[9] else ""
+        )
+
+        st.markdown(f"""
+        <div style="
+        background:#4E342E;
+        border:2px solid #D4AF37;
+        border-radius:18px;
+        padding:18px;
+        margin-bottom:18px;
+        box-shadow:0 0 10px rgba(212,175,55,.35);
+        ">
+
+        <div style="
+        color:#FFD700;
+        font-size:24px;
+        font-weight:bold;
+        ">
+
+        ⚖️ {row[1]} رقم {row[2]} لسنة {row[3]}
+
+        </div>
+
+        <hr style="border:1px solid #8B7355;">
+
+        <div style="color:white;font-size:18px;">
+
+        🏛 <b>المحكمة :</b> {row[6]}
+
+        </div>
+
+        <div style="color:white;font-size:18px;">
+
+        ⚖️ <b>الدائرة :</b> {row[4]}
+
+        </div>
+
+        <div style="color:white;font-size:18px;">
+
+        📂 <b>النوع :</b> {row[5]}
+
+        </div>
+
+        <div style="color:white;font-size:18px;">
+
+        👤 <b>الخصوم :</b><br>
+
+        {plaintiff}<br>
+
+        ضد<br>
+
+        {defendant}
+
+        </div>
+
+        <div style="color:#00FFFF;font-size:18px;">
+
+        📄 <b>الموضوع :</b><br>
+
+        {row[10]}
+
+        </div>
+
+        <div style="color:#7CFC00;font-size:18px;">
+
+        📅 <b>آخر جلسة :</b>
+
+        {row[11] if row[11] else "لا يوجد"}
+
+        </div>
+
+        <div style="color:#FFA500;font-size:18px;">
+
+        ⚖️ <b>آخر إجراء :</b><br>
+
+        {row[12] if row[12] else "لا يوجد"}
+
+        </div>
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+        b1, b2, b3 = st.columns(3)
+
+        with b1:
+
+            if st.button(
+                "📂 فتح القضية",
+                key=f"open_{case_id}",
+                use_container_width=True
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "case_details"
+                st.rerun()
+
+        with b2:
+
+            if st.button(
+                "✏️ تعديل",
+                key=f"edit_{case_id}",
+                use_container_width=True
+            ):
+
+                st.session_state.selected_case = case_id
+                st.session_state.page = "edit_case"
+                st.rerun()
+
+        with b3:
+
+            if st.button(
+                "🗑 حذف",
+                key=f"delete_{case_id}",
+                use_container_width=True
+            ):
+
+                st.session_state.delete_case_id = case_id
+
+        st.markdown("<br>", unsafe_allow_html=True)
