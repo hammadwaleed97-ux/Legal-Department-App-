@@ -2741,3 +2741,156 @@ elif st.session_state.page == "reports":
             else:
 
                 st.warning("لا توجد أحكام مطابقة.")
+                # =====================================
+        # الإحصائيات
+        # =====================================
+
+        elif report_type == "الإحصائيات":
+
+            cur.execute("SELECT COUNT(*) FROM cases")
+            total_cases = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(DISTINCT case_id)
+            FROM sessions
+            WHERE roll_number='حكم'
+            """)
+            total_judgments = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE roll_number='حكم'
+            AND procedure LIKE '%للصالح%'
+            """)
+            favorable = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE roll_number='حكم'
+            AND procedure LIKE '%للضد%'
+            """)
+            unfavorable = cur.fetchone()[0]
+
+            c1, c2 = st.columns(2)
+
+            with c1:
+
+                st.metric(
+
+                    "عدد القضايا المتداولة",
+
+                    total_cases
+
+                )
+
+                st.metric(
+
+                    "عدد الأحكام",
+
+                    total_judgments
+
+                )
+
+            with c2:
+
+                st.metric(
+
+                    "الأحكام للصالح",
+
+                    favorable
+
+                )
+
+                st.metric(
+
+                    "الأحكام للضد",
+
+                    unfavorable
+
+                )
+
+        st.markdown("<hr>", unsafe_allow_html=True)
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+
+            st.button(
+
+                "📄 فتح Word",
+
+                use_container_width=True
+
+            )
+
+        with c2:
+
+            st.button(
+
+                "📕 فتح PDF",
+
+                use_container_width=True
+
+            )
+
+        with c3:
+
+            st.button(
+
+                "⬇ تحميل Word",
+
+                use_container_width=True
+
+            )
+
+        with c4:
+
+            st.button(
+
+                "⬇ تحميل PDF",
+
+                use_container_width=True
+
+            )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        st.markdown("""
+
+        <div style="
+
+        text-align:center;
+
+        font-size:18px;
+
+        line-height:2;
+
+        ">
+
+        وتفضلوا بقبول وافر الاحترام
+
+        <br><br>
+
+        عضو الإدارة                                             مدير الإدارة
+
+        <br><br>
+
+        تحريراً فى :
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+    if st.button(
+
+        "⬅ العودة للرئيسية",
+
+        use_container_width=True
+
+    ):
+
+        st.session_state.page = "home"
+
+        st.rerun()
