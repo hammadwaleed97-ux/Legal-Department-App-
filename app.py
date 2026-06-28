@@ -2221,7 +2221,7 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
-               with b2:
+      with b2:
             if st.button(
                 "🏠 الصفحة الرئيسية",
                 use_container_width=True
