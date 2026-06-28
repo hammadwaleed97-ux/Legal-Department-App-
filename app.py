@@ -2292,3 +2292,170 @@ elif st.session_state.page == "reports":
         to_date = st.date_input("إلى تاريخ")
 
     st.markdown("---")
+    # =====================================
+    # بيان الدعاوى المتداولة
+    # =====================================
+
+    if report_type in (
+
+        "بيان بالدعاوى المتداولة",
+
+        "بيان بالدعاوى حسب موضوع الدعوى"
+
+    ):
+
+        subject_filter = ""
+
+        if report_type == "بيان بالدعاوى حسب موضوع الدعوى":
+
+            subject_filter = st.text_input(
+                "موضوع الدعوى"
+            )
+
+        query = """
+
+        SELECT
+
+        c.id,
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+
+        (
+
+            SELECT session_date
+
+            FROM sessions s
+
+            WHERE s.case_id=c.id
+
+            ORDER BY session_date DESC
+
+            LIMIT 1
+
+        ),
+
+        (
+
+            SELECT procedure
+
+            FROM sessions s
+
+            WHERE s.case_id=c.id
+
+            ORDER BY session_date DESC
+
+            LIMIT 1
+
+        )
+
+        FROM cases c
+
+        """
+
+        params = []
+
+        if report_type == "بيان بالدعاوى حسب موضوع الدعوى":
+
+            query += " WHERE c.subject LIKE ? "
+
+            params.append("%"+subject_filter+"%")
+
+        query += " ORDER BY c.id DESC "
+
+        cur.execute(query, params)
+
+        rows = cur.fetchall()
+
+        st.markdown("### 📋 بيان بالدعاوى المتداولة")
+
+        if rows:
+
+            report = """
+
+            <table style='width:100%;border-collapse:collapse' border='1'>
+
+            <tr style='background:#5D4037;color:#FFD700;font-weight:bold;'>
+
+            <th>م</th>
+
+            <th>رقم القضية</th>
+
+            <th>السنة</th>
+
+            <th>الدائرة</th>
+
+            <th>النوع</th>
+
+            <th>المحكمة</th>
+
+            <th>المأمورية</th>
+
+            <th>الخصوم</th>
+
+            <th>موضوع الدعوى</th>
+
+            <th>آخر جلسة</th>
+
+            <th>سببها</th>
+
+            <th>ملاحظات</th>
+
+            </tr>
+
+            """
+
+            for i,row in enumerate(rows,1):
+
+                report += f"""
+
+                <tr>
+
+                <td>{i}</td>
+
+                <td>{row[1]}</td>
+
+                <td>{row[2]}</td>
+
+                <td>{row[3]}</td>
+
+                <td>{row[4]}</td>
+
+                <td>{row[5]}</td>
+
+                <td>{row[6] if row[6] else "-"}</td>
+
+                <td>{row[7]}<br>ضد<br>{row[8]}</td>
+
+                <td>{row[9]}</td>
+
+                <td>{row[11]}</td>
+
+                <td>{row[12]}</td>
+
+                <td>{row[10]}</td>
+
+                </tr>
+
+                """
+
+            report += "</table>"
+
+            st.markdown(
+
+                report,
+
+                unsafe_allow_html=True
+
+            )
+
+        else:
+
+            st.warning("لا توجد دعاوى مطابقة.")
