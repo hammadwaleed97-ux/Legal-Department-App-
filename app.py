@@ -1112,3 +1112,99 @@ elif st.session_state.page == "inventory":
         court_filter = st.text_input(
             "المحكمة"
     )
+        # =====================================
+    # قراءة القضايا
+    # =====================================
+
+    cur.execute("""
+
+    SELECT
+
+    c.id,
+    c.case_type,
+    c.case_number,
+    c.judicial_year,
+    c.circuit,
+    c.case_category,
+    c.court_name,
+    c.mission,
+    c.plaintiff,
+    c.defendant,
+    c.subject,
+
+    (
+
+        SELECT session_date
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+    ) last_session,
+
+    (
+
+        SELECT procedure
+
+        FROM sessions s
+
+        WHERE s.case_id=c.id
+
+        ORDER BY session_date DESC
+
+        LIMIT 1
+
+    ) last_procedure
+
+    FROM cases c
+
+    ORDER BY c.created_at DESC
+
+    """)
+
+    rows = cur.fetchall()
+
+    # =====================================
+    # تطبيق البحث والفلاتر
+    # =====================================
+
+    filtered = []
+
+    for row in rows:
+
+        text = " ".join(
+            [str(x) if x else "" for x in row]
+        ).lower()
+
+        if search.strip():
+
+            if search.lower() not in text:
+                continue
+
+        if case_filter != "الكل":
+
+            if row[1] != case_filter:
+                continue
+
+        if court_filter.strip():
+
+            if court_filter.lower() not in row[6].lower():
+                continue
+
+        filtered.append(row)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if len(filtered) == 0:
+
+        st.warning("لا توجد نتائج")
+
+    else:
+
+        st.success(f"عدد النتائج : {len(filtered)}")
+
+        st.markdown("<br>", unsafe_allow_html=True)
