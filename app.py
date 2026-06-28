@@ -1564,3 +1564,177 @@ elif st.session_state.page == "case_details":
         📅 جدول الجلسات
         </h3>
         """,unsafe_allow_html=True)
+        # =====================================
+        # قراءة الجلسات
+        # =====================================
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        roll_number,
+        session_date,
+        procedure
+
+        FROM sessions
+
+        WHERE case_id=?
+
+        ORDER BY session_date ASC
+
+        """,(case_id,))
+
+        sessions=cur.fetchall()
+
+        if sessions:
+
+            st.markdown("""
+            <style>
+
+            table{
+                width:100%;
+                border-collapse:collapse;
+            }
+
+            th{
+                background:#5D4037;
+                color:#FFD700;
+                text-align:center;
+                padding:10px;
+                border:1px solid gold;
+            }
+
+            td{
+                background:#3E2723;
+                color:white;
+                text-align:center;
+                padding:8px;
+                border:1px solid #8D6E63;
+            }
+
+            </style>
+            """,unsafe_allow_html=True)
+
+            table="""
+
+            <table>
+
+            <tr>
+
+            <th>م</th>
+
+            <th>الرول</th>
+
+            <th>تاريخ الجلسة</th>
+
+            <th>الإجراءات</th>
+
+            </tr>
+
+            """
+
+            for i,s in enumerate(sessions,start=1):
+
+                table+=f"""
+
+                <tr>
+
+                <td>{i}</td>
+
+                <td>{s[1]}</td>
+
+                <td>{s[2]}</td>
+
+                <td>{s[3]}</td>
+
+                </tr>
+
+                """
+
+            table+="</table>"
+
+            st.markdown(
+                table,
+                unsafe_allow_html=True
+            )
+
+        else:
+
+            st.warning("لا توجد جلسات مسجلة")
+
+        st.markdown("<br>",unsafe_allow_html=True)
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ⚖️ متابعة الجلسات
+        </h3>
+        """,unsafe_allow_html=True)
+
+        c1,c2=st.columns(2)
+
+        with c1:
+
+            next_session_date=st.date_input(
+                "تاريخ الجلسة القادمة"
+            )
+
+            next_roll=st.text_input(
+                "الرول الجديد"
+            )
+
+        with c2:
+
+            next_procedure=st.text_area(
+                "سبب التأجيل / الإجراء",
+                height=120
+            )
+
+        if st.button(
+            "💾 حفظ الجلسة الجديدة",
+            use_container_width=True
+        ):
+
+            cur.execute("""
+
+            INSERT INTO sessions(
+
+            case_id,
+            session_date,
+            roll_number,
+            procedure,
+            created_at
+
+            )
+
+            VALUES(
+
+            ?,?,?,?,?
+
+            )
+
+            """,
+
+            (
+
+            case_id,
+
+            str(next_session_date),
+
+            next_roll,
+
+            next_procedure,
+
+            datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+
+            )
+
+            )
+
+            conn.commit()
+
+            st.success("تم حفظ الجلسة بنجاح")
+
+            st.rerun()
