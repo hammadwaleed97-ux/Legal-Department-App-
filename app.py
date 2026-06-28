@@ -2459,3 +2459,191 @@ elif st.session_state.page == "reports":
         else:
 
             st.warning("لا توجد دعاوى مطابقة.")
+            # =====================================
+    # بيان الأحكام
+    # =====================================
+
+    elif report_type in (
+
+        "بيان بالأحكام",
+
+        "بيان بالأحكام حسب موضوع الدعوى"
+
+    ):
+
+        judgment_type = st.selectbox(
+
+            "نوع الأحكام",
+
+            [
+
+                "جميع الأحكام",
+
+                "الأحكام للصالح",
+
+                "الأحكام للضد"
+
+            ]
+
+        )
+
+        subject_filter = ""
+
+        if report_type == "بيان بالأحكام حسب موضوع الدعوى":
+
+            subject_filter = st.text_input(
+                "موضوع الدعوى"
+            )
+
+        query = """
+
+        SELECT
+
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+        s.session_date,
+        s.procedure
+
+        FROM cases c
+
+        INNER JOIN sessions s
+
+        ON c.id=s.case_id
+
+        WHERE s.roll_number='حكم'
+
+        """
+
+        params=[]
+
+        if report_type=="بيان بالأحكام حسب موضوع الدعوى":
+
+            query += " AND c.subject LIKE ? "
+
+            params.append("%"+subject_filter+"%")
+
+        query += " ORDER BY s.session_date DESC "
+
+        cur.execute(query,params)
+
+        rows=cur.fetchall()
+
+        st.markdown("### ⚖️ بيان الأحكام")
+
+        if rows:
+
+            report="""
+
+            <table style='width:100%;border-collapse:collapse' border='1'>
+
+            <tr style='background:#5D4037;color:#FFD700;font-weight:bold;'>
+
+            <th>م</th>
+
+            <th>رقم القضية</th>
+
+            <th>السنة</th>
+
+            <th>الدائرة</th>
+
+            <th>النوع</th>
+
+            <th>المحكمة</th>
+
+            <th>المأمورية</th>
+
+            <th>الخصوم</th>
+
+            <th>موضوع الدعوى</th>
+
+            <th>تاريخ الحكم</th>
+
+            <th>منطوق الحكم</th>
+
+            <th>النتيجة</th>
+
+            <th>ملاحظات</th>
+
+            </tr>
+
+            """
+
+            serial=1
+
+            for row in rows:
+
+                result="غير محدد"
+
+                if "للصالح" in row[11]:
+
+                    result="للصالح"
+
+                elif "للضد" in row[11]:
+
+                    result="للضد"
+
+                if judgment_type=="الأحكام للصالح" and result!="للصالح":
+
+                    continue
+
+                if judgment_type=="الأحكام للضد" and result!="للضد":
+
+                    continue
+
+                report+=f"""
+
+                <tr>
+
+                <td>{serial}</td>
+
+                <td>{row[0]}</td>
+
+                <td>{row[1]}</td>
+
+                <td>{row[2]}</td>
+
+                <td>{row[3]}</td>
+
+                <td>{row[4]}</td>
+
+                <td>{row[5] if row[5] else "-"}</td>
+
+                <td>{row[6]}<br>ضد<br>{row[7]}</td>
+
+                <td>{row[8]}</td>
+
+                <td>{row[10]}</td>
+
+                <td>{row[11]}</td>
+
+                <td>{result}</td>
+
+                <td>{row[9]}</td>
+
+                </tr>
+
+                """
+
+                serial += 1
+
+            report += "</table>"
+
+            st.markdown(
+
+                report,
+
+                unsafe_allow_html=True
+
+            )
+
+        else:
+
+            st.warning("لا توجد أحكام مطابقة.")
