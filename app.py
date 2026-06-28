@@ -2647,3 +2647,104 @@ elif st.session_state.page == "reports":
         else:
 
             st.warning("لا توجد أحكام مطابقة.")
+            # =====================================
+    # أزرار التقرير
+    # =====================================
+
+    st.markdown("---")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+
+        if st.button(
+
+            "📄 فتح Word",
+
+            use_container_width=True
+
+        ):
+
+            st.info(
+                "سيتم تفعيل إنشاء ملف Word فى المرحلة النهائية."
+            )
+
+    with c2:
+
+        if st.button(
+
+            "📕 فتح PDF",
+
+            use_container_width=True
+
+        ):
+
+            st.info(
+                "سيتم تفعيل إنشاء ملف PDF فى المرحلة النهائية."
+            )
+
+    with c3:
+
+        if st.button(
+
+            "⬇ تحميل Word",
+
+            use_container_width=True
+
+        ):
+
+            st.info(
+                "سيتم تفعيل تحميل Word فى المرحلة النهائية."
+            )
+
+    with c4:
+
+        if st.button(
+
+            "⬇ تحميل PDF",
+
+            use_container_width=True
+
+        ):
+
+            st.info(
+                "سيتم تفعيل تحميل PDF فى المرحلة النهائية."
+            )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    b1, b2 = st.columns(2)
+
+    with b1:
+
+        if st.button(
+
+            "🏠 الصفحة الرئيسية",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.page = "home"
+
+            st.rerun()
+
+    with b2:
+
+        if st.button(
+
+            "📋 الحصر العام",
+
+            use_container_width=True
+
+        ):
+
+            st.session_state.page = "inventory"
+
+            st.rerun()
+
+# ==========================================================
+# ==========================================================
+#                    نهاية قسم التقارير
+# ==========================================================
+# ==========================================================
