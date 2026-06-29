@@ -2232,3 +2232,5 @@ elif st.session_state.page == "reports":
     )
 
     if show_report:
+            if show_report:
+        pass
