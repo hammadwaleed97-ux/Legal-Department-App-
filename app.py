@@ -2216,6 +2216,24 @@ elif st.session_state.page == "reports":
             "طرف الأستاذ / المحامى",
             value=""
         )
+        subject_search = ""
+
+if report_type == "بيان بالدعاوى المتداولة حسب موضوع الدعوى":
+    subject_search = st.text_input("موضوع الدعوى")
+
+elif report_type == "بيان بالأحكام الصادرة":
+    judgment_filter = st.selectbox(
+        "نوع الحكم",
+        [
+            "جميع الأحكام",
+            "الأحكام للصالح",
+            "الأحكام للضد"
+        ]
+    )
+
+    subject_search = st.text_input(
+        "موضوع الدعوى (اختيارى)"
+    )
     st.markdown("---")
 
     show_report = st.button(
