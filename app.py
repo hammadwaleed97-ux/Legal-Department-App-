@@ -2374,7 +2374,6 @@ elif st.session_state.page == "reports":
         <hr>
 
         """,
-       </div>
 
         unsafe_allow_html=True
                    )
