@@ -2400,6 +2400,40 @@ elif report_type == "بيان بالأحكام الصادرة":
     )
     WHERE 1=1
     """
+        params = []
+
+    if subject_search:
+        sql += " AND c.subject LIKE ? "
+        params.append("%" + subject_search + "%")
+
+    sql += " ORDER BY s.session_date DESC "
+
+    cur.execute(sql, params)
+
+    rows = cur.fetchall()
+
+    if rows:
+
+        data = []
+        serial = 1
+
+        for r in rows:
+
+            result = "غير محدد"
+
+            procedure = str(r[11]).strip().lower()
+
+            if "للصالح" in procedure:
+                result = "للصالح"
+
+            elif "للضد" in procedure:
+                result = "للضد"
+
+            if judgment_filter == "الأحكام للصالح" and result != "للصالح":
+                continue
+
+            if judgment_filter == "الأحكام للضد" and result != "للضد":
+                continue
         # ==================================================
         # نهاية الجزء الثالث
         # ==================================================
