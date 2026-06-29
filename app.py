@@ -2185,6 +2185,15 @@ elif st.session_state.page == "reports":
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
+    report_type = st.selectbox(
+    "نوع التقرير",
+    [
+        "بيان بالدعاوى المتداولة",
+        "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+        "بيان بالأحكام الصادرة",
+        "الإحصائيات"
+    ]
+)
 
     c1, c2 = st.columns(2)
 
