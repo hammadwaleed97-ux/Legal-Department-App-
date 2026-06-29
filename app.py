@@ -3175,3 +3175,10 @@ direction:rtl;
                     """
 
                 table += "</table>"
+                                st.markdown(table,unsafe_allow_html=True)
+
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            else:
+
+                st.warning("لا توجد دعاوى مطابقة.")
