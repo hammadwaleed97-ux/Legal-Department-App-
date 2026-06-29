@@ -2300,11 +2300,11 @@ elif st.session_state.page == "reports":
                     LIMIT 1
                 ) last_procedure
                 FROM cases c
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM sessions s
-    WHERE s.case_id = c.id
-    AND s.roll_number = 'حكم'
+                WHERE NOT EXISTS (
+                SELECT 1
+               FROM sessions s
+               WHERE s.case_id = c.id
+              AND s.roll_number = 'حكم'
 )
 
             params = []
