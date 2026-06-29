@@ -2361,6 +2361,46 @@ elif report_type == "بيان بالأحكام الصادرة":
                 st.warning("لا توجد دعاوى خلال الفترة المحددة.")
         # ==================================================
         # ==================================================
+# بيان الأحكام
+# ==================================================
+elif report_type == "بيان بالأحكام الصادرة":
+
+    judgment_filter = st.selectbox(
+        "نوع الأحكام",
+        [
+            "جميع الأحكام",
+            "الأحكام للصالح",
+            "الأحكام للضد"
+        ]
+    )
+
+    sql = """
+    SELECT
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_type || ' ' || c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+        s.session_date,
+        s.procedure
+    FROM cases c
+    INNER JOIN sessions s
+    ON s.id = (
+        SELECT id
+        FROM sessions
+        WHERE case_id = c.id
+        AND roll_number='حكم'
+        ORDER BY session_date DESC,id DESC
+        LIMIT 1
+    )
+    WHERE 1=1
+    """
+        # ==================================================
         # نهاية الجزء الثالث
         # ==================================================
         # ==================================================
