@@ -2278,7 +2278,6 @@ elif st.session_state.page == "reports":
                 c.judicial_year,
                 c.circuit,
                 c.case_category,
-                c.court_name,
                 c.mission,
                 c.plaintiff,
                 c.defendant,
