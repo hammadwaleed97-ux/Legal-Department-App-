@@ -2233,8 +2233,6 @@ elif st.session_state.page == "reports":
 
     if show_report:
 
-        st.success("تم فتح التقرير بنجاح.")
-
     st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button(
