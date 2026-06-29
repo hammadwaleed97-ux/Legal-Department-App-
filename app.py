@@ -2894,3 +2894,128 @@ elif st.session_state.page == "reports":
         st.session_state.page = "home"
 
         st.rerun()
+        # ==========================================================
+#                       التقارير
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+        background:#4E342E;
+        border:3px solid #D4AF37;
+        border-radius:15px;
+        padding:15px;
+        text-align:center;
+        color:#FFD700;
+        font-size:30px;
+        font-weight:bold;
+    ">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "بيان بالدعاوى المتداولة",
+            "بيان بالأحكام",
+            "بيان بالدعاوى حسب موضوع الدعوى",
+            "بيان بالأحكام حسب موضوع الدعوى",
+            "الإحصائيات"
+        ]
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        from_date = st.date_input(
+            "من تاريخ",
+            value=datetime.now().replace(day=1)
+        )
+
+    with c2:
+        to_date = st.date_input(
+            "إلى تاريخ",
+            value=datetime.now()
+        )
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+        office = st.text_input(
+            "ديوان عام منطقة",
+            value="البحيرة"
+        )
+
+    with c4:
+        lawyer = st.text_input(
+            "طرف الأستاذ / المحامى"
+        )
+
+    if "حسب موضوع" in report_type:
+        subject_search = st.text_input(
+            "موضوع الدعوى"
+        )
+    else:
+        subject_search = ""
+
+    st.markdown("---")
+
+    show_report = st.button(
+        "📄 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    )
+
+    if show_report:
+
+        st.markdown(f"""
+<div style="
+background:#FFFDF7;
+border:2px solid #6D4C41;
+border-radius:12px;
+padding:20px;
+direction:rtl;
+">
+
+<div style="text-align:center;font-size:24px;font-weight:bold;">
+الهيئة القومية للتأمين الاجتماعى<br>
+الإدارة المركزية للشئون القانونية<br>
+الإدارة العامة للقضايا
+</div>
+
+<br>
+
+<table style="width:100%">
+<tr>
+
+<td style="text-align:right;width:50%">
+<b>ديوان عام منطقة :</b>
+{office}
+</td>
+
+<td style="text-align:left;width:50%">
+<b>طرف الأستاذ /</b>
+{lawyer}
+</td>
+
+</tr>
+</table>
+
+<br>
+
+<div style="text-align:center;font-size:22px;font-weight:bold;">
+{report_type}
+</div>
+
+<div style="text-align:center;font-size:18px;">
+خلال الفترة من
+<b>{from_date.strftime("%d/%m/%Y")}</b>
+حتى
+<b>{to_date.strftime("%d/%m/%Y")}</b>
+</div>
+
+<hr>
+
+""", unsafe_allow_html=True)
