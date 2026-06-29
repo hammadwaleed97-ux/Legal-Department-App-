@@ -2323,3 +2323,120 @@ elif st.session_state.page == "reports":
     ):
         st.session_state.page = "home"
         st.rerun()
+        # ==========================================================
+#                    قسم التقارير
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:3px solid #D4AF37;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:#FFD700;
+    font-size:34px;
+    font-weight:bold;">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "بيان بالدعاوى المتداولة",
+            "بيان بالأحكام",
+            "بيان بالدعاوى حسب موضوع الدعوى",
+            "بيان بالأحكام حسب موضوع الدعوى",
+            "الإحصائيات"
+        ]
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        from_date = st.date_input("من تاريخ")
+
+    with c2:
+        to_date = st.date_input("إلى تاريخ")
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+        office = st.text_input(
+            "ديوان عام منطقة",
+            value=""
+        )
+
+    with c4:
+        lawyer = st.text_input(
+            "طرف الأستاذ / المحامى",
+            value=""
+        )
+
+    subject_search = ""
+
+    if "حسب موضوع" in report_type:
+        subject_search = st.text_input("موضوع الدعوى")
+
+    st.markdown("---")
+
+    if st.button(
+        "📄 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    ):
+
+        st.markdown(f"""
+<div style="background:#FFF8E7;color:#000000;border:2px solid #6D4C41;border-radius:12px;padding:20px;direction:rtl;">
+
+<h2 style="text-align:center;color:#000000;">
+الهيئة القومية للتأمين الاجتماعى
+</h2>
+
+<h3 style="text-align:center;color:#000000;">
+الإدارة المركزية للشئون القانونية
+</h3>
+
+<h3 style="text-align:center;color:#000000;">
+الإدارة العامة للقضايا
+</h3>
+
+<br>
+
+<table style="width:100%;color:#000000;font-size:18px;">
+<tr>
+<td style="text-align:right">
+<b>ديوان عام منطقة :</b> {office}
+</td>
+
+<td style="text-align:left">
+<b>طرف الأستاذ /</b> {lawyer}
+</td>
+</tr>
+</table>
+
+<br>
+
+<h3 style="text-align:center;color:#000000;">
+{report_type}
+</h3>
+
+<div style="text-align:center;color:#000000;font-size:18px;">
+خلال الفترة من
+<b>{from_date.strftime("%d/%m/%Y")}</b>
+حتى
+<b>{to_date.strftime("%d/%m/%Y")}</b>
+</div>
+
+<hr>
+</div>
+""", unsafe_allow_html=True)
+
+# ==========================================================
+# الجزء الأول انتهى
+# ==========================================================
