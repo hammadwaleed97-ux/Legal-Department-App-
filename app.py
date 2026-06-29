@@ -2299,9 +2299,6 @@ elif st.session_state.page == "reports":
                     ORDER BY session_date DESC
                     LIMIT 1
                 ) last_procedure
-            FROM cases c
-            WHERE 1=1
-            """
 
             params = []
 
