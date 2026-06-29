@@ -3019,7 +3019,7 @@ direction:rtl;
 <hr>
 
 """, unsafe_allow_html=True)
-            if report_type in (
+        if report_type in (
 
             "بيان بالدعاوى المتداولة",
 
