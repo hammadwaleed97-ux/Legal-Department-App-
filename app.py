@@ -3019,3 +3019,164 @@ direction:rtl;
 <hr>
 
 """, unsafe_allow_html=True)
+                if report_type in (
+
+            "بيان بالدعاوى المتداولة",
+
+            "بيان بالدعاوى حسب موضوع الدعوى"
+
+        ):
+
+            sql = """
+
+            SELECT
+
+            c.case_number,
+
+            c.judicial_year,
+
+            c.circuit,
+
+            c.case_category,
+
+            c.court_name,
+
+            c.mission,
+
+            c.plaintiff,
+
+            c.defendant,
+
+            c.subject,
+
+            c.notes,
+
+            (
+
+            SELECT session_date
+
+            FROM sessions s
+
+            WHERE s.case_id=c.id
+
+            ORDER BY session_date DESC
+
+            LIMIT 1
+
+            ) last_session,
+
+            (
+
+            SELECT procedure
+
+            FROM sessions s
+
+            WHERE s.case_id=c.id
+
+            ORDER BY session_date DESC
+
+            LIMIT 1
+
+            ) last_procedure
+
+            FROM cases c
+
+            WHERE 1=1
+
+            """
+
+            params=[]
+
+            if subject_search:
+
+                sql += " AND c.subject LIKE ? "
+
+                params.append("%"+subject_search+"%")
+
+            sql += """
+
+            ORDER BY last_session DESC,c.id DESC
+
+            """
+
+            cur.execute(sql,params)
+
+            rows=cur.fetchall()
+
+            if rows:
+
+                table="""
+
+                <table style="width:100%;border-collapse:collapse" border="1">
+
+                <tr style="background:#6D4C41;color:#FFD700">
+
+                <th>م</th>
+
+                <th>رقم القضية</th>
+
+                <th>السنة</th>
+
+                <th>الدائرة</th>
+
+                <th>النوع</th>
+
+                <th>المحكمة</th>
+
+                <th>المأمورية</th>
+
+                <th>الخصوم</th>
+
+                <th>موضوع الدعوى</th>
+
+                <th>آخر جلسة</th>
+
+                <th>سببها</th>
+
+                <th>ملاحظات</th>
+
+                </tr>
+
+                """
+
+                for i,r in enumerate(rows,1):
+
+                    table += f"""
+
+                    <tr>
+
+                    <td>{i}</td>
+
+                    <td>{r[0]}</td>
+
+                    <td>{r[1]}</td>
+
+                    <td>{r[2]}</td>
+
+                    <td>{r[3]}</td>
+
+                    <td>{r[4]}</td>
+
+                    <td>{r[5] or "-"}</td>
+
+                    <td>{r[6]}<br>ضد<br>{r[7]}</td>
+
+                    <td>{r[8]}</td>
+
+                    <td>{r[10] or "-"}</td>
+
+                    <td>{r[11] or "-"}</td>
+
+                    <td>{r[9] or "-"}</td>
+
+                    </tr>
+
+                    """
+
+                table += "</table>"
+
+                st.markdown(table,unsafe_allow_html=True)
+
+            else:
+
+                st.warning("لا توجد دعاوى مطابقة.")
