@@ -2231,5 +2231,5 @@ elif st.session_state.page == "reports":
         type="primary"
     )
 
-        if show_report:
-        pass
+            if show_report:
+        st.write("جارى إنشاء التقرير...")
