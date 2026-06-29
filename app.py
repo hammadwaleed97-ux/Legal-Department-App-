@@ -2372,6 +2372,7 @@ elif st.session_state.page == "reports":
         </div>
 
         <hr>
+        </div>
 
         """,
 
