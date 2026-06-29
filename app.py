@@ -2216,12 +2216,6 @@ elif st.session_state.page == "reports":
             "طرف الأستاذ / المحامى",
             value=""
         )
-
-    subject_search = ""
-
-    if "حسب موضوع" in report_type:
-        subject_search = st.text_input("موضوع الدعوى")
-
     st.markdown("---")
 
     show_report = st.button(
