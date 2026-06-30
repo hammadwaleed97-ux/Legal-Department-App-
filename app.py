@@ -2837,3 +2837,63 @@ def create_word_report(
 # ###############################################################
 # ##################### نهاية الجزء الثانى #######################
 # ###############################################################
+# ###############################################################
+# ##################### بداية الجزء الثالث #######################
+# ###############################################################
+
+    # ==================================================
+    # ختام التقرير
+    # ==================================================
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("وتفضلوا بقبول وافر الاحترام")
+    r.bold = True
+    r.font.size = Pt(14)
+
+    doc.add_paragraph()
+
+    sign = doc.add_table(rows=1, cols=2)
+
+    sign.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    sign.columns[0].width = Pt(250)
+    sign.columns[1].width = Pt(250)
+
+    c1 = sign.cell(0, 0)
+    c2 = sign.cell(0, 1)
+
+    p1 = c1.paragraphs[0]
+    p1.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p1.add_run("عضو الإدارة").bold = True
+
+    p2 = c2.paragraphs[0]
+    p2.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    p2.add_run("مدير الإدارة").bold = True
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    p.add_run(
+        "تحريراً فى : "
+        + datetime.now().strftime("%d/%m/%Y")
+    ).bold = True
+
+    file = BytesIO()
+
+    doc.save(file)
+
+    file.seek(0)
+
+    return file
+
+# ###############################################################
+# ##################### نهاية الجزء الثالث #######################
+# ###############################################################
