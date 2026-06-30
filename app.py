@@ -2297,6 +2297,107 @@ elif st.session_state.page == "reports":
         # يبدأ هنا جدول التقرير
         # ==================================================
         # ==================================================
+        # ==================================================
+# بيان الدعاوى المتداولة
+# ==================================================
+
+        if report_type in (
+            "بيان بالدعاوى المتداولة",
+            "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                (
+                    SELECT session_date
+                    FROM sessions s
+                    WHERE s.case_id = c.id
+                    ORDER BY session_date DESC
+                    LIMIT 1
+                ) AS last_session,
+                (
+                    SELECT procedure
+                    FROM sessions s
+                    WHERE s.case_id = c.id
+                    ORDER BY session_date DESC
+                    LIMIT 1
+                ) AS last_procedure
+            FROM cases c
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM sessions s
+                WHERE s.case_id = c.id
+                AND s.roll_number='حكم'
+            )
+            """
+
+            params = []
+
+            if subject_search:
+                sql += " AND c.subject LIKE ? "
+                params.append(f"%{subject_search}%")
+
+            sql += """
+            ORDER BY
+            last_session DESC,
+            c.id DESC
+            """
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            if rows:
+
+                data = []
+
+                for i, r in enumerate(rows, start=1):
+
+                    data.append({
+                        "م": i,
+                        "رقم القضية": r[0],
+                        "السنة": r[1],
+                        "الدائرة": r[2],
+                        "النوع": r[3],
+                        "المحكمة": r[4],
+                        "المأمورية": r[5] or "-",
+                        "الخصوم": f"{r[6]}\nضد\n{r[7]}",
+                        "موضوع الدعوى": r[8],
+                        "آخر جلسة": r[10] or "-",
+                        "سبب آخر جلسة": r[11] or "-",
+                        "ملاحظات": r[9] or "-"
+                    })
+
+                headers = list(data[0].keys())
+                rows_word = [list(item.values()) for item in data]
+
+                st.dataframe(
+                    data,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            else:
+
+                data = []
+                headers = []
+                rows_word = []
+
+                st.warning("لا توجد دعاوى خلال الفترة المحددة.")
+
+# ==================================================
+# نهاية بيان الدعاوى المتداولة
+# ==================================================
 # =====================================
 # الفاصل الأول
 # =====================================
