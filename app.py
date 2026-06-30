@@ -2401,6 +2401,121 @@ elif st.session_state.page == "reports":
 # =====================================
 # #################### بداية الجزء الأول ####################
 # ###########################################################
+        # ==================================================
+# بيان الأحكام
+# ==================================================
+
+        elif report_type in (
+            "بيان بجميع الأحكام الصادرة",
+            "بيان بالأحكام الصادرة للصالح",
+            "بيان بالأحكام الصادرة للضد",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                s.session_date,
+                s.procedure
+            FROM cases c
+            INNER JOIN sessions s
+            ON s.id = (
+                SELECT id
+                FROM sessions
+                WHERE case_id = c.id
+                AND roll_number='حكم'
+                ORDER BY session_date DESC,id DESC
+                LIMIT 1
+            )
+            WHERE 1=1
+            """
+
+            params = []
+
+            if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
+                sql += " AND c.subject LIKE ? "
+                params.append("%" + subject_search + "%")
+
+            sql += " ORDER BY s.session_date DESC "
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            data = []
+
+            serial = 1
+
+            for r in rows:
+
+                procedure = str(r[11] or "").strip()
+
+                result = "غير محدد"
+
+                if "للصالح" in procedure:
+                    result = "للصالح"
+
+                elif "للضد" in procedure:
+                    result = "للضد"
+
+                if report_type == "بيان بالأحكام الصادرة للصالح":
+                    if result != "للصالح":
+                        continue
+
+                if report_type == "بيان بالأحكام الصادرة للضد":
+                    if result != "للضد":
+                        continue
+
+                data.append({
+
+                    "م": serial,
+                    "رقم القضية": r[0],
+                    "السنة": r[1],
+                    "الدائرة": r[2],
+                    "النوع": r[3],
+                    "المحكمة": r[4],
+                    "المأمورية": r[5] or "-",
+                    "الخصوم": f"{r[6]}\nضد\n{r[7]}",
+                    "موضوع الدعوى": r[8],
+                    "تاريخ الحكم": r[10] or "-",
+                    "منطوق الحكم": r[11] or "-",
+                    "النتيجة": result,
+                    "ملاحظات": r[9] or "-"
+
+                })
+
+                serial += 1
+
+            if data:
+
+                headers = list(data[0].keys())
+                rows_word = [list(item.values()) for item in data]
+
+                st.dataframe(
+                    data,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            else:
+
+                headers = []
+                rows_word = []
+
+                st.warning("لا توجد بيانات مطابقة لشروط التقرير.")
+
+# ==================================================
+# نهاية بيان الأحكام
+# ==================================================
 # ==================================================
 # الإحصائيات
 # ==================================================
