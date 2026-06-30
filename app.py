@@ -2298,6 +2298,7 @@ elif st.session_state.page == "reports":
     )
 
     if show_report:
+        report_text = ""
 
         st.info("📄 التقرير")
 
