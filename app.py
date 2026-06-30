@@ -2632,7 +2632,6 @@ elif st.session_state.page == "reports":
                 use_container_width=True
             )
             with c3:
-
     word_file = create_word_report(
         report_type,
         "تقرير صادر من برنامج إدارة القضايا"
