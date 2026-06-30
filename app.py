@@ -562,40 +562,6 @@ elif st.session_state.page == "search":
     if st.button("⬅ العودة للرئيسية"):
         st.session_state.page = "home"
         st.rerun()
-        # =====================================
-# إنشاء تقرير Word
-# =====================================
-
-def create_word_report(title, text):
-
-    doc = Document()
-
-    p = doc.add_heading(
-        "الهيئة القومية للتأمين الاجتماعى",
-        level=1
-    )
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    p = doc.add_paragraph("الإدارة المركزية للشئون القانونية")
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    p = doc.add_paragraph("الإدارة العامة للقضايا")
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    doc.add_paragraph("")
-
-    h = doc.add_heading(title, level=2)
-    h.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    doc.add_paragraph(text)
-
-    file = BytesIO()
-
-    doc.save(file)
-
-    file.seek(0)
-
-    return file
         # ==========================================================
 # تسجيل القضايا - الجزء الأول
 # ==========================================================
