@@ -2417,6 +2417,29 @@ elif st.session_state.page == "reports":
                     use_container_width=True,
                     hide_index=True
                 )
+                # ==================================================
+# تجهيز بيانات Word
+# ==================================================
+
+headers = list(data[0].keys())
+
+rows_word = []
+
+for row in data:
+    rows_word.append([
+        row["م"],
+        row["رقم القضية"],
+        row["السنة"],
+        row["الدائرة"],
+        row["النوع"],
+        row["المحكمة"],
+        row["المأمورية"],
+        row["الخصوم"],
+        row["موضوع الدعوى"],
+        row["آخر جلسة"],
+        row["سببها"],
+        row["ملاحظات"]
+    ])
 
             else:
 
