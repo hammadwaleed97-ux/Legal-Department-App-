@@ -2631,6 +2631,20 @@ elif st.session_state.page == "reports":
                 "📕 فتح PDF",
                 use_container_width=True
             )
+            with c3:
+
+    word_file = create_word_report(
+        report_type,
+        "تقرير صادر من برنامج إدارة القضايا"
+    )
+
+    st.download_button(
+        label="⬇ تحميل Word",
+        data=word_file,
+        file_name="report.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        use_container_width=True
+    )
 
         with c4:
             st.button(
