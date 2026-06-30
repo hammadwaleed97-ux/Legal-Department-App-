@@ -2616,6 +2616,111 @@ elif st.session_state.page == "reports":
 # ###########################################################
 # #################### بداية الجزء الأول ####################
 # ###########################################################
+# ==================================================
+# الإحصائيات
+# ==================================================
+
+        elif report_type == "الإحصائيات":
+
+            cur.execute("SELECT COUNT(*) FROM cases")
+            total_cases = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(DISTINCT case_id)
+                FROM sessions
+                WHERE roll_number='حكم'
+            """)
+            total_judgments = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM sessions
+                WHERE roll_number='حكم'
+                AND procedure LIKE '%للصالح%'
+            """)
+            favorable = cur.fetchone()[0]
+
+            cur.execute("""
+                SELECT COUNT(*)
+                FROM sessions
+                WHERE roll_number='حكم'
+                AND procedure LIKE '%للضد%'
+            """)
+            unfavorable = cur.fetchone()[0]
+
+            c1, c2 = st.columns(2)
+
+            with c1:
+                st.metric("عدد القضايا المتداولة", total_cases)
+                st.metric("عدد الأحكام", total_judgments)
+
+            with c2:
+                st.metric("الأحكام للصالح", favorable)
+                st.metric("الأحكام للضد", unfavorable)
+
+        st.divider()
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+            st.button(
+                "📄 فتح Word",
+                use_container_width=True,
+                disabled=True
+            )
+
+        with c2:
+            st.button(
+                "📕 فتح PDF",
+                use_container_width=True,
+                disabled=True
+            )
+
+        with c3:
+
+            if (
+                "headers" in locals()
+                and "rows_word" in locals()
+                and len(rows_word) > 0
+            ):
+
+                word_file = create_word_report(
+                    report_title=report_type,
+                    office=office,
+                    lawyer=lawyer,
+                    from_date=from_date,
+                    to_date=to_date,
+                    headers=headers,
+                    rows=rows_word
+                )
+
+                st.download_button(
+                    label="⬇ تحميل Word",
+                    data=word_file,
+                    file_name=f"{report_type}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True
+                )
+            else:
+
+                st.button(
+                    "⬇ تحميل Word",
+                    use_container_width=True,
+                    disabled=True
+                )
+
+        with c4:
+            st.button(
+                "⬇ تحميل PDF",
+                use_container_width=True,
+                disabled=True
+            )
+
+        st.divider()
+
+# ###########################################################
+# #################### نهاية الجزء ###########################
+# ###########################################################
 # ###########################################################
 # #################### بداية الجزء الثانى ####################
 # ###########################################################
