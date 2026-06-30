@@ -2632,12 +2632,6 @@ elif st.session_state.page == "reports":
                 use_container_width=True
             )
 
-        with c3:
-            st.button(
-                "⬇ تحميل Word",
-                use_container_width=True
-            )
-
         with c4:
             st.button(
                 "⬇ تحميل PDF",
