@@ -2694,3 +2694,91 @@ elif st.session_state.page == "reports":
 # ###########################################################
 # #################### نهاية الجزء الثانى ####################
 # ###########################################################
+# ###############################################################
+# ##################### بداية الجزء الأول #######################
+# ###############################################################
+
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from io import BytesIO
+
+
+def create_word_report(
+        report_title,
+        office,
+        lawyer,
+        from_date,
+        to_date,
+        headers,
+        rows
+):
+
+    doc = Document()
+
+    section = doc.sections[0]
+
+    section.top_margin = Pt(25)
+    section.bottom_margin = Pt(25)
+    section.left_margin = Pt(20)
+    section.right_margin = Pt(20)
+
+    # ==================================================
+    # رأس التقرير
+    # ==================================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run("الهيئة القومية للتأمين الاجتماعى\n")
+    r.bold = True
+    r.font.size = Pt(16)
+
+    r = p.add_run("الإدارة المركزية للشئون القانونية\n")
+    r.bold = True
+    r.font.size = Pt(15)
+
+    r = p.add_run("الإدارة العامة للقضايا\n")
+    r.bold = True
+    r.font.size = Pt(15)
+
+    r = p.add_run(f"ديوان عام منطقة / {office}")
+    r.bold = True
+    r.font.size = Pt(14)
+
+    # ==================================================
+    # عنوان التقرير
+    # ==================================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run(report_title)
+    r.bold = True
+    r.font.size = Pt(18)
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    p.add_run(
+        f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} "
+        f"حتى {to_date.strftime('%d/%m/%Y')}"
+    ).bold = True
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    p.add_run(
+        f"طرف الأستاذ / {lawyer} المحامى"
+    ).bold = True
+
+    doc.add_paragraph()
+
+# ###############################################################
+# ##################### نهاية الجزء الأول #######################
+# ###############################################################
