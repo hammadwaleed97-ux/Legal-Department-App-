@@ -2782,3 +2782,58 @@ def create_word_report(
 # ###############################################################
 # ##################### نهاية الجزء الأول #######################
 # ###############################################################
+# ###############################################################
+# ##################### بداية الجزء الثانى #######################
+# ###############################################################
+
+    # ==================================================
+    # إنشاء الجدول
+    # ==================================================
+
+    table = doc.add_table(
+        rows=1,
+        cols=len(headers)
+    )
+
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    table.style = "Table Grid"
+
+    hdr = table.rows[0].cells
+
+    for i, h in enumerate(headers):
+
+        hdr[i].text = str(h)
+
+        for p in hdr[i].paragraphs:
+
+            p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            for r in p.runs:
+                r.bold = True
+                r.font.size = Pt(11)
+
+    # ==================================================
+    # بيانات القضايا
+    # ==================================================
+
+    for row in rows:
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row):
+
+            cells[i].text = "" if value is None else str(value)
+
+            for p in cells[i].paragraphs:
+
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+                for r in p.runs:
+                    r.font.size = Pt(10)
+
+    doc.add_paragraph()
+
+# ###############################################################
+# ##################### نهاية الجزء الثانى #######################
+# ###############################################################
