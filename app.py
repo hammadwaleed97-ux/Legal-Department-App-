@@ -1,4 +1,24 @@
+import streamlit as st
+import sqlite3
+from datetime import datetime
+import os
 
+# =====================================
+# مكتبات تصدير التقارير
+# =====================================
+
+from io import BytesIO
+
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
 # =====================================
 # إعداد الصفحة
 # =====================================
