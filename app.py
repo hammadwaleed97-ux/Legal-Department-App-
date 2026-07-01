@@ -90,6 +90,37 @@ def create_word_report(
 
     for i, h in enumerate(headers):
         hdr[i].text = str(h)
+            for row in rows:
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row):
+
+            cells[i].text = "" if value is None else str(value)
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run("وتفضلوا بقبول وافر الاحترام").bold = True
+
+    doc.add_paragraph()
+
+    table2 = doc.add_table(rows=1, cols=2)
+    table2.style = "Table Grid"
+
+    cells = table2.rows[0].cells
+
+    cells[0].text = "عضو الإدارة"
+    cells[1].text = "مدير الإدارة"
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(
+        f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+    )
 # =====================================
 # إعداد الصفحة
 # =====================================
