@@ -2405,3 +2405,124 @@ elif st.session_state.page == "reports":
                 )
 
 # ==================== نهاية الجزء الثانى ====================
+# ==================== بداية الجزء الثالث ====================
+
+            else:
+
+                st.warning("لا توجد دعاوى مطابقة لشروط البحث.")
+
+        # ==================================================
+        # بيان الأحكام الصادرة
+        # ==================================================
+
+        elif report_type in (
+            "بيان بجميع الأحكام الصادرة",
+            "بيان بالأحكام الصادرة للصالح",
+            "بيان بالأحكام الصادرة للضد",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                s.session_date,
+                s.procedure
+            FROM cases c
+            INNER JOIN sessions s
+            ON s.id = (
+                SELECT id
+                FROM sessions
+                WHERE case_id = c.id
+                AND roll_number='حكم'
+                ORDER BY session_date DESC,id DESC
+                LIMIT 1
+            )
+            WHERE 1=1
+            """
+
+            params = []
+
+            if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
+                if subject_search:
+                    sql += " AND c.subject LIKE ? "
+                    params.append(f"%{subject_search}%")
+
+            sql += " ORDER BY s.session_date DESC "
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            if rows:
+
+                data = []
+                rows_word = []
+                serial = 1
+
+                for r in rows:
+
+                    procedure = str(r[11] or "").strip()
+
+                    result = "غير محدد"
+
+                    if "للصالح" in procedure:
+                        result = "للصالح"
+
+                    elif "للضد" in procedure:
+                        result = "للضد"
+
+                    if report_type == "بيان بالأحكام الصادرة للصالح":
+                        if result != "للصالح":
+                            continue
+
+                    if report_type == "بيان بالأحكام الصادرة للضد":
+                        if result != "للضد":
+                            continue
+
+                    row = {
+
+                        "م": serial,
+                        "رقم القضية": r[0],
+                        "السنة": r[1],
+                        "الدائرة": r[2],
+                        "النوع": r[3],
+                        "المحكمة": r[4],
+                        "المأمورية": r[5] or "-",
+                        "الخصوم": f"{r[6]}\nضد\n{r[7]}",
+                        "موضوع الدعوى": r[8],
+                        "تاريخ الحكم": r[10] or "-",
+                        "منطوق الحكم": r[11] or "-",
+                        "النتيجة": result,
+                        "ملاحظات": r[9] or "-"
+                    }
+
+                    data.append(row)
+
+                    rows_word.append([
+                        row["م"],
+                        row["رقم القضية"],
+                        row["السنة"],
+                        row["الدائرة"],
+                        row["النوع"],
+                        row["المحكمة"],
+                        row["المأمورية"],
+                        row["الخصوم"],
+                        row["موضوع الدعوى"],
+                        row["تاريخ الحكم"],
+                        row["منطوق الحكم"],
+                        row["النتيجة"],
+                        row["ملاحظات"]
+                    ])
+
+                    serial += 1
+
+# ==================== نهاية الجزء الثالث ====================
