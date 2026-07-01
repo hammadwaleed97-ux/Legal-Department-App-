@@ -2620,3 +2620,88 @@ elif st.session_state.page == "reports":
             )
 
 # ==================== نهاية الجزء الرابع ====================
+# ==================== بداية الجزء الخامس ====================
+
+        rows_word = locals().get("rows_word", [])
+        headers = locals().get("headers", [])
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+            st.button(
+                "🖨 طباعة",
+                use_container_width=True,
+                disabled=True
+            )
+
+        with c2:
+            st.button(
+                "📊 Excel",
+                use_container_width=True,
+                disabled=True
+            )
+
+        with c3:
+
+            if rows_word:
+
+                word_file = create_word_report(
+                    report_title=report_type,
+                    office=office,
+                    lawyer=lawyer,
+                    from_date=from_date,
+                    to_date=to_date,
+                    headers=headers,
+                    rows=rows_word
+                )
+
+                st.download_button(
+                    label="⬇ تحميل Word",
+                    data=word_file,
+                    file_name=f"{report_type}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True
+                )
+
+            else:
+
+                st.button(
+                    "⬇ تحميل Word",
+                    use_container_width=True,
+                    disabled=True
+                )
+
+        with c4:
+
+            st.button(
+                "⬇ تحميل PDF",
+                use_container_width=True,
+                disabled=True
+            )
+
+        st.divider()
+
+        st.write("### وتفضلوا بقبول وافر الاحترام")
+
+        s1, s2 = st.columns(2)
+
+        with s1:
+            st.write("عضو الإدارة")
+
+        with s2:
+            st.write("مدير الإدارة")
+
+        st.write(
+            f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True
+    ):
+        st.session_state.page = "home"
+        st.rerun()
+
+# ==================== نهاية الجزء الخامس ====================
