@@ -2526,3 +2526,97 @@ elif st.session_state.page == "reports":
                     serial += 1
 
 # ==================== نهاية الجزء الثالث ====================
+# ==================== بداية الجزء الرابع ====================
+
+        elif report_type.startswith("بيان عددى"):
+
+            sql = """
+            SELECT
+                c.subject,
+                (
+                    SELECT procedure
+                    FROM sessions s
+                    WHERE s.case_id = c.id
+                    ORDER BY session_date DESC, id DESC
+                    LIMIT 1
+                ) AS procedure
+            FROM cases c
+            WHERE 1=1
+            """
+
+            params = []
+
+            if report_type in (
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+            ):
+                if subject_search:
+                    sql += " AND c.subject LIKE ? "
+                    params.append(f"%{subject_search}%")
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            total = 0
+
+            for subject, procedure in rows:
+
+                procedure = str(procedure or "")
+
+                if report_type == "بيان عددى بجميع الدعاوى المتداولة":
+
+                    if "للصالح" not in procedure and "للضد" not in procedure:
+                        total += 1
+
+                elif report_type == "بيان عددى بالدعاوى حسب موضوع الدعوى":
+
+                    if "للصالح" not in procedure and "للضد" not in procedure:
+                        total += 1
+
+                elif report_type == "بيان عددى بجميع الأحكام الصادرة":
+
+                    if "للصالح" in procedure or "للضد" in procedure:
+                        total += 1
+
+                elif report_type == "بيان عددى بالأحكام الصادرة للصالح":
+
+                    if "للصالح" in procedure:
+                        total += 1
+
+                elif report_type == "بيان عددى بالأحكام الصادرة للضد":
+
+                    if "للضد" in procedure:
+                        total += 1
+
+                elif report_type == "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى":
+
+                    if "للصالح" in procedure or "للضد" in procedure:
+                        total += 1
+
+            data = [
+                {
+                    "البيان": report_type,
+                    "العدد": total
+                }
+            ]
+
+            headers = [
+                "البيان",
+                "العدد"
+            ]
+
+            rows_word = [
+                [
+                    report_type,
+                    total
+                ]
+            ]
+
+            st.dataframe(
+                data,
+                use_container_width=True,
+                hide_index=True
+            )
+
+# ==================== نهاية الجزء الرابع ====================
