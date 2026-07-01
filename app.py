@@ -21,13 +21,6 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 # =============================
 # =====================================
-from io import BytesIO
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from datetime import datetime
-
-# =====================================
 # إنشاء تقرير Word (نسخة نهائية ومستقرة)
 # =====================================
 
