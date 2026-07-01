@@ -21,6 +21,76 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 # ====================================
 # =====================================
+# إنشاء تقرير Word
+# =====================================
+
+def create_word_report(
+    report_title,
+    office,
+    lawyer,
+    from_date,
+    to_date,
+    headers,
+    rows
+):
+
+    file = BytesIO()
+
+    doc = Document()
+
+    section = doc.sections[0]
+
+    section.right_margin = Pt(30)
+    section.left_margin = Pt(30)
+    section.top_margin = Pt(30)
+    section.bottom_margin = Pt(30)
+
+    style = doc.styles["Normal"]
+    style.font.name = "Arial"
+    style.font.size = Pt(11)
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run("الهيئة القومية للتأمين الاجتماعى\n").bold = True
+    p.add_run("الإدارة المركزية للشئون القانونية\n").bold = True
+    p.add_run("الإدارة العامة للقضايا").bold = True
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"ديوان عام منطقة : {office}")
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"طرف الأستاذ / المحامى : {lawyer}")
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run(report_title).bold = True
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run(
+        f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}"
+    ).bold = True
+
+    doc.add_paragraph()
+
+    table = doc.add_table(
+        rows=1,
+        cols=len(headers)
+    )
+
+    table.style = "Table Grid"
+
+    hdr = table.rows[0].cells
+
+    for i, h in enumerate(headers):
+        hdr[i].text = str(h)
+# =====================================
 # إعداد الصفحة
 # =====================================
 
