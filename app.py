@@ -20,6 +20,42 @@ from reportlab.platypus import (
 
 from reportlab.lib.styles import getSampleStyleSheet
 # =============================
+if st.button("📄 إنشاء التقرير Word"):
+    st.write("🔍 Debugging Info:")
+    st.write(f"• Report Type: {report_type}")
+    st.write(f"• Office: {office}")
+    st.write(f"• Lawyer: {lawyer}")
+    st.write(f"• From Date: {from_date} (نوع: {type(from_date)})")
+    st.write(f"• To Date: {to_date} (نوع: {type(to_date)})")
+    st.write(f"• Headers: {headers}")
+    st.write(f"• Rows Count: {len(rows_word) if 'rows_word' in locals() else 'غير معرف'}")
+    
+    if 'rows_word' in locals() and rows_word:
+        st.write("أول 3 صفوف:", rows_word[:3])
+    else:
+        st.warning("⚠️ rows_word فارغ أو مش موجود!")
+    
+    try:
+        word_file = create_word_report(
+            report_title=report_type,
+            office=office or "غير محدد",
+            lawyer=lawyer or "غير محدد",
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers or ["العمود 1", "العمود 2"],
+            rows=rows_word if 'rows_word' in locals() else []
+        )
+        
+        st.success("✅ تم إنشاء التقرير بنجاح")
+        st.download_button(
+            label="⬇️ تحميل التقرير",
+            data=word_file,
+            file_name=f"تقرير_{report_type}_{datetime.now().strftime('%Y%m%d_%H%M')}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+    except Exception as e:
+        st.error(f"❌ خطأ: {str(e)}")
+        st.exception(e)   # هيظهر الخطأ بالتفصيل
 # =====================================
 # =====================================
 # إعداد الصفحة
