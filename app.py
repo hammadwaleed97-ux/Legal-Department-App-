@@ -20,6 +20,109 @@ from reportlab.platypus import (
 
 from reportlab.lib.styles import getSampleStyleSheet
 # =============================
+def create_word_report(
+    report_title,
+    office,
+    lawyer,
+    from_date,
+    to_date,
+    headers,
+    rows
+):
+    file = BytesIO()
+    doc = Document()
+
+    section = doc.sections[0]
+    section.right_margin = Pt(30)
+    section.left_margin = Pt(30)
+    section.top_margin = Pt(30)
+    section.bottom_margin = Pt(30)
+
+    style = doc.styles["Normal"]
+    style.font.name = "Arial"
+    style.font.size = Pt(11)
+
+    # العنوان الرسمي
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run("الهيئة القومية للتأمين الاجتماعى\n").bold = True
+    p.add_run("الإدارة المركزية للشئون القانونية\n").bold = True
+    p.add_run("الإدارة العامة للقضايا").bold = True
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"ديوان عام منطقة : {office or 'غير محدد'}")
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"طرف الأستاذ / المحامى : {lawyer or 'غير محدد'}")
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    run = p.add_run(report_title)
+    run.bold = True
+    run.font.size = Pt(14)
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run(f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}").bold = True
+
+    doc.add_paragraph()
+
+    # الجدول مع حماية
+    if headers and rows and len(rows) > 0:
+        table = doc.add_table(rows=1, cols=len(headers))
+        table.style = "Table Grid"
+
+        # Header
+        hdr = table.rows[0].cells
+        for i, h in enumerate(headers):
+            hdr[i].text = str(h)
+            for paragraph in hdr[i].paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+
+        # Rows
+        for row in rows:
+            if not row:
+                continue
+            cells = table.add_row().cells
+            row_list = list(row) if not isinstance(row, list) else row
+            for i in range(min(len(cells), len(row_list))):
+                value = row_list[i]
+                cells[i].text = "" if value is None else str(value)
+    else:
+        p = doc.add_paragraph()
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        p.add_run("لا توجد بيانات في هذه الفترة").italic = True
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run("وتفضلوا بقبول وافر الاحترام").bold = True
+
+    doc.add_paragraph()
+
+    t = doc.add_table(rows=1, cols=2)
+    t.style = "Table Grid"
+    c = t.rows[0].cells
+    c[0].text = "عضو الإدارة"
+    c[1].text = "مدير الإدارة"
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}")
+
+    doc.save(file)
+    file.seek(0)
+    return file
 # =====================================
 # =====================================
 # إعداد الصفحة
