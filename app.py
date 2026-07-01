@@ -2180,3 +2180,120 @@ elif st.session_state.page == "case_details":
                 st.session_state.page = "inventory"
 
                 st.rerun()
+                # ==================== بداية الجزء الأول ====================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    border:3px solid #D4AF37;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    color:#FFD700;
+    font-size:34px;
+    font-weight:bold;">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+            "بيان بجميع الدعاوى المتداولة",
+            "بيان الدعاوى حسب موضوع الدعوى",
+
+            "بيان بجميع الأحكام الصادرة",
+            "بيان بالأحكام الصادرة للصالح",
+            "بيان بالأحكام الصادرة للضد",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+            "التقارير العددية",
+
+            "بيان عددى بجميع الدعاوى المتداولة",
+            "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+            "بيان عددى بجميع الأحكام الصادرة",
+            "بيان عددى بالأحكام الصادرة للصالح",
+            "بيان عددى بالأحكام الصادرة للضد",
+            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+        ]
+    )
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+        from_date = st.date_input("من تاريخ")
+
+    with c2:
+        to_date = st.date_input("إلى تاريخ")
+
+    c3, c4 = st.columns(2)
+
+    with c3:
+        office = st.text_input(
+            "ديوان عام منطقة",
+            value=""
+        )
+
+    with c4:
+        lawyer = st.text_input(
+            "طرف الأستاذ / المحامى",
+            value=""
+        )
+
+    subject_search = ""
+
+    if report_type in (
+        "بيان الدعاوى حسب موضوع الدعوى",
+        "بيان الأحكام الصادرة حسب موضوع الدعوى",
+        "بيان عددى بالدعاوى حسب موضوع الدعوى",
+        "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+    ):
+
+        subject_search = st.text_input(
+            "موضوع الدعوى"
+        )
+
+    st.markdown("---")
+
+    show_report = st.button(
+        "📄 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    )
+
+    if show_report:
+
+        report_text = ""
+
+        st.info("📄 التقرير")
+
+        st.write("# الهيئة القومية للتأمين الاجتماعى")
+        st.write("## الإدارة المركزية للشئون القانونية")
+        st.write("## الإدارة العامة للقضايا")
+
+        st.divider()
+
+        a1, a2 = st.columns(2)
+
+        with a1:
+            st.write("**ديوان عام منطقة :**", office)
+
+        with a2:
+            st.write("**طرف الأستاذ / المحامى :**", lawyer)
+
+        st.divider()
+
+        st.write(f"## {report_type}")
+
+        st.write(
+            f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}"
+        )
+
+        st.divider()
+
+# ==================== نهاية الجزء الأول ====================
