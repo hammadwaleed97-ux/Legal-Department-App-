@@ -2621,6 +2621,8 @@ elif st.session_state.page == "reports":
 
 # ==================== نهاية الجزء الرابع ====================
 # ==================== بداية الجزء الخامس ====================
+        rows_word = locals().get("rows_word", [])
+headers = locals().get("headers", [])
 
         c1, c2, c3, c4 = st.columns(4)
 
