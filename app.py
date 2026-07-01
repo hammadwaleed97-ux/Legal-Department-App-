@@ -21,6 +21,132 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 # =============================
 # =====================================
+from io import BytesIO
+from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from datetime import datetime
+
+# =====================================
+# إنشاء تقرير Word (نسخة نهائية ومستقرة)
+# =====================================
+
+def create_word_report(
+    report_title,
+    office,
+    lawyer,
+    from_date,
+    to_date,
+    headers,
+    rows=None  # غيرناه من rows_word إلى rows عشان يبقى عام
+):
+    if rows is None:
+        rows = []
+
+    file = BytesIO()
+    doc = Document()
+    section = doc.sections[0]
+
+    # الهوامش
+    section.right_margin = Pt(30)
+    section.left_margin = Pt(30)
+    section.top_margin = Pt(30)
+    section.bottom_margin = Pt(30)
+
+    # إعدادات الخط
+    style = doc.styles["Normal"]
+    style.font.name = "Arial"          # أو "Traditional Arabic" لو عايز خط عربي أفضل
+    style.font.size = Pt(11)
+
+    # ==================== الرأس ====================
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    run = p.add_run("الهيئة القومية للتأمين الاجتماعى\n")
+    run.bold = True
+    run = p.add_run("الإدارة المركزية للشئون القانونية\n")
+    run.bold = True
+    run = p.add_run("الإدارة العامة للقضايا")
+    run.bold = True
+
+    doc.add_paragraph()
+
+    # بيانات الإدارة
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"ديوان عام منطقة : {office}")
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"طرف الأستاذ / المحامى : {lawyer}")
+
+    doc.add_paragraph()
+
+    # عنوان التقرير
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    run = p.add_run(report_title)
+    run.bold = True
+    run.font.size = Pt(14)
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run(
+        f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}"
+    ).bold = True
+
+    doc.add_paragraph()
+
+    # ==================== جدول البيانات ====================
+    if headers and rows:
+        table = doc.add_table(rows=1, cols=len(headers))
+        table.style = "Table Grid"
+        
+        # Header
+        hdr_cells = table.rows[0].cells
+        for i, h in enumerate(headers):
+            hdr_cells[i].text = str(h)
+            # تنسيق الهيدر
+            for paragraph in hdr_cells[i].paragraphs:
+                for run in paragraph.runs:
+                    run.bold = True
+                    run.font.size = Pt(11)
+
+        # البيانات
+        for row in rows:
+            if not row:
+                continue
+            cells = table.add_row().cells
+            for i in range(min(len(row), len(cells))):
+                value = row[i]
+                cells[i].text = "" if value is None else str(value)
+
+    doc.add_paragraph()
+
+    # ==================== التذييل ====================
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+    p.add_run("وتفضلوا بقبول وافر الاحترام").bold = True
+
+    doc.add_paragraph()
+
+    # جدول التوقيع
+    table2 = doc.add_table(rows=1, cols=2)
+    table2.style = "Table Grid"
+    cells = table2.rows[0].cells
+    cells[0].text = "عضو الإدارة"
+    cells[1].text = "مدير الإدارة"
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}")
+
+    # حفظ
+    doc.save(file)
+    file.seek(0)
+
+    return file
 # =====================================
 # =====================================
 # إعداد الصفحة
