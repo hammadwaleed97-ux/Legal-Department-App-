@@ -89,6 +89,12 @@ def create_word_report(
 
     for i, h in enumerate(headers):
         hdr[i].text = str(h)
+        for row in rows:
+
+    cells = table.add_row().cells
+
+    for i, value in enumerate(row):
+        cells[i].text = str(value)
     doc.add_paragraph()
 
     p = doc.add_paragraph()
