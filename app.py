@@ -370,6 +370,42 @@ def create_word_report(
     r.font.size = Pt(10)
 
     # ==========================
+    # ==========================
+    # ترقيم الصفحات
+    # ==========================
+
+    footer = section.footer
+
+    p = footer.paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    p.add_run("صفحة ")
+
+    fld = OxmlElement("w:fldSimple")
+    fld.set(qn("w:instr"), "PAGE")
+    p._p.append(fld)
+
+    p.add_run(" من ")
+
+    fld2 = OxmlElement("w:fldSimple")
+    fld2.set(qn("w:instr"), "NUMPAGES")
+    p._p.append(fld2)
+
+    # تحديث الحقول عند فتح الملف
+    settings = doc.settings._element
+    update = OxmlElement("w:updateFields")
+    update.set(qn("w:val"), "true")
+    settings.append(update)
+
+    # ==========================
+    # حفظ الملف
+    # ==========================
+
+    doc.save(file)
+
+    file.seek(0)
+
+    return file
 # =====================================
 # إعداد الصفحة
 # =====================================
