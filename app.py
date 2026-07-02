@@ -147,8 +147,6 @@ def create_word_report(
     p = head.cell(0, 2).paragraphs[0]
     p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
 
-    # سنضيف صورة شعار الهيئة هنا فى الخطوة القادمة
-
     doc.add_paragraph()
         # =================================
     # عنوان التقرير
