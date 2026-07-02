@@ -199,6 +199,93 @@ def create_word_report(
     doc.add_paragraph()
     # =================================
     # =================================
+        # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(rows=1, cols=len(headers))
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+
+    rtl_headers = list(reversed(headers))
+
+    # المقاسات النهائية
+
+    widths = [
+        0.5,   # م
+        1.1,   # رقم القضية
+        0.6,   # السنة
+        0.8,   # الدائرة
+        1.1,   # النوع
+        1.7,   # المحكمة
+        1.1,   # المأمورية
+        7.5,   # الخصوم
+        6.8,   # موضوع الدعوى
+        1.2,   # آخر جلسة
+        4.8,   # الإجراء
+        1.6    # الملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    # رؤوس الجدول
+
+    head_cells = table.rows[0].cells
+
+    for i, h in enumerate(rtl_headers):
+
+        head_cells[i].width = Cm(widths[i])
+
+        p = head_cells[i].paragraphs[0]
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        run = p.add_run(str(h))
+        run.bold = True
+        run.font.size = Pt(7)
+        run.font.color.rgb = RGBColor(255,255,255)
+
+        # تلوين رأس الجدول
+        tcPr = head_cells[i]._tc.get_or_add_tcPr()
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:fill"), "1F4E78")
+        tcPr.append(shd)
+
+    # =================================
+    # البيانات
+    # =================================
+
+    for row_data in rows:
+
+        row_data = list(reversed(row_data))
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row_data):
+
+            cells[i].width = Cm(widths[i])
+
+            p = cells[i].paragraphs[0]
+
+            if rtl_headers[i] in (
+                "الخصوم",
+                "موضوع الدعوى",
+                "الإجراء",
+                "سبب آخر جلسة",
+                "ملاحظات"
+            ):
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            else:
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            run = p.add_run("" if value is None else str(value))
+            run.font.size = Pt(7)
+
+    doc.add_paragraph()
+
+    # =================================
+    # التوقيعات
+    # =================================
     # التوقيعات
     # =================================
 
