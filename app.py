@@ -240,6 +240,116 @@ def create_word_report(
         table.add_row()
 
     doc.add_paragraph()
+        # =================================
+    # ختام التقرير
+    # =================================
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("وتفضلوا بقبول وافر الاحترام")
+
+    r.bold = True
+
+    r.font.size = Pt(13)
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+
+    # =================================
+    # التوقيعات (بدون جدول)
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    p.add_run(
+        "عضو الإدارة"
+    ).bold = True
+
+    p.add_run(
+        " " * 70
+    )
+
+    p.add_run(
+        "مدير الإدارة"
+    ).bold = True
+
+    doc.add_paragraph()
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    p.add_run(
+        "........................."
+    )
+
+    p.add_run(
+        " " * 60
+    )
+
+    p.add_run(
+        "........................."
+    )
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+
+    # =================================
+    # التاريخ
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    p.add_run(
+        f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+    ).bold = True
+
+    # =================================
+    # ترقيم الصفحات
+    # =================================
+
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    footer = section.footer
+
+    fp = footer.paragraphs[0]
+
+    fp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    fp.add_run("صفحة ")
+
+    fld = OxmlElement("w:fldSimple")
+    fld.set(qn("w:instr"), "PAGE")
+    fp._p.append(fld)
+
+    fp.add_run(" من ")
+
+    fld2 = OxmlElement("w:fldSimple")
+    fld2.set(qn("w:instr"), "NUMPAGES")
+    fp._p.append(fld2)
+
+    # =================================
+    # حفظ الملف
+    # =================================
+
+    doc.save(file)
+
+    file.seek(0)
+
+    return file
+
+# =====================================
+# نهاية دالة التقرير
+# =====================================
 # =====================================
 # =====================================
 # إعداد الصفحة
