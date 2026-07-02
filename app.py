@@ -2515,10 +2515,6 @@ elif st.session_state.page == "reports":
                     use_container_width=True,
                     hide_index=True
                 )
-
-            else:
-
-                st.warning("لا توجد دعاوى خلال الفترة المحددة.")
 # ==================== بداية الجزء الثالث ====================
 
             else:
