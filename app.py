@@ -35,12 +35,6 @@ def create_word_report(
     rows
 ):
 
-    from io import BytesIO
-    from docx import Document
-    from docx.shared import Pt, Cm
-    from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-    from docx.enum.section import WD_ORIENTATION
-
     file = BytesIO()
 
     doc = Document()
