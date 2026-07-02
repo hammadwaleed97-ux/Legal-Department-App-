@@ -2614,6 +2614,157 @@ elif st.session_state.page == "reports":
 
 # ==================== نهاية الجزء الأول ====================
 # ==================================================
+        # ==================================================
+# بيان الدعاوى المتداولة
+# ==================================================
+
+        if report_type in (
+            "بيان بجميع الدعاوى المتداولة",
+            "بيان الدعاوى حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                (
+                    SELECT session_date
+                    FROM sessions s
+                    WHERE s.case_id = c.id
+                    ORDER BY session_date DESC,id DESC
+                    LIMIT 1
+                ) AS last_session,
+                (
+                    SELECT procedure
+                    FROM sessions s
+                    WHERE s.case_id = c.id
+                    ORDER BY session_date DESC,id DESC
+                    LIMIT 1
+                ) AS last_procedure
+            FROM cases c
+            WHERE NOT EXISTS(
+                SELECT 1
+                FROM sessions s
+                WHERE s.case_id=c.id
+                AND s.roll_number='حكم'
+            )
+            """
+
+            params = []
+
+            if subject_search:
+
+                sql += " AND c.subject LIKE ? "
+                params.append(f"%{subject_search}%")
+
+            sql += """
+            ORDER BY
+            last_session DESC,
+            c.id DESC
+            """
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            if rows:
+
+                data = []
+                rows_word = []
+
+                headers = [
+                    "م",
+                    "رقم القضية",
+                    "السنة",
+                    "الدائرة",
+                    "نوع القضية",
+                    "المحكمة",
+                    "المأمورية",
+                    "الخصوم",
+                    "موضوع الدعوى",
+                    "آخر جلسة",
+                    "الإجراء",
+                    "ملاحظات"
+                ]
+
+                serial = 1
+
+                for r in rows:
+
+                    row = {
+
+                        "م": serial,
+
+                        "رقم القضية": r[0],
+
+                        "السنة": r[1],
+
+                        "الدائرة": r[2],
+
+                        "نوع القضية": r[3] if r[3] else "-",
+
+                        "المحكمة": r[4],
+
+                        "المأمورية": r[5] if r[5] else "-",
+
+                        "الخصوم":
+                        f"{r[6] if r[6] else '-'}\nضــــــد\n{r[7] if r[7] else '-'}",
+
+                        "موضوع الدعوى": r[8] if r[8] else "-",
+
+                        "آخر جلسة": r[10] if r[10] else "-",
+
+                        "الإجراء": r[11] if r[11] else "-",
+
+                        "ملاحظات": r[9] if r[9] else "-"
+
+                    }
+
+                    data.append(row)
+
+                    rows_word.append([
+
+                        row["م"],
+
+                        row["رقم القضية"],
+
+                        row["السنة"],
+
+                        row["الدائرة"],
+
+                        row["نوع القضية"],
+
+                        row["المحكمة"],
+
+                        row["المأمورية"],
+
+                        row["الخصوم"],
+
+                        row["موضوع الدعوى"],
+
+                        row["آخر جلسة"],
+
+                        row["الإجراء"],
+
+                        row["ملاحظات"]
+
+                    ])
+
+                    serial += 1
+
+                st.dataframe(
+                    data,
+                    use_container_width=True,
+                    hide_index=True
+                )
 # ==================== بداية الجزء الثالث ====================
 
             else:
