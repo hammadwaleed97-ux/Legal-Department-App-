@@ -146,6 +146,12 @@ def create_word_report(
 
     p = head.cell(0, 2).paragraphs[0]
     p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+        try:
+        from docx.shared import Mm
+        run = p.add_run()
+        run.add_picture("logo.png", width=Mm(18))
+    except:
+        pass
 
     doc.add_paragraph()
         # =================================
