@@ -80,6 +80,77 @@ def create_word_report(
     COLOR_BLACK = RGBColor(0, 0, 0)
     # =================================
         # =================================
+    # رأس التقرير
+    # =================================
+
+    head = doc.add_table(rows=1, cols=3)
+    head.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    head.columns[0].width = Cm(2.5)
+    head.columns[1].width = Cm(18)
+    head.columns[2].width = Cm(3)
+
+    # إزالة حدود الجدول
+    for cell in head.rows[0].cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcBorders = OxmlElement("w:tcBorders")
+
+        for edge in ("top", "left", "bottom", "right"):
+            element = OxmlElement(f"w:{edge}")
+            element.set(qn("w:val"), "nil")
+            tcBorders.append(element)
+
+        tcPr.append(tcBorders)
+
+    # =================================
+    # الميزان (يسار)
+    # =================================
+
+    p = head.cell(0, 0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    run = p.add_run("⚖")
+    run.bold = True
+    run.font.size = Pt(24)
+    run.font.color.rgb = COLOR_GOLD
+
+    # =================================
+    # عنوان الهيئة (منتصف)
+    # =================================
+
+    p = head.cell(0, 1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("الهيئة القومية للتأمين الاجتماعى\n")
+    r.bold = True
+    r.font.size = Pt(15)
+    r.font.color.rgb = COLOR_BLUE
+
+    r = p.add_run("الإدارة المركزية للشئون القانونية\n")
+    r.bold = True
+    r.font.size = Pt(13)
+    r.font.color.rgb = COLOR_BLUE
+
+    r = p.add_run("الإدارة العامة للقضايــــــــــــا\n")
+    r.bold = True
+    r.font.size = Pt(13)
+    r.font.color.rgb = COLOR_BLUE
+
+    r = p.add_run(f"ديوان عام منطقة : {office}")
+    r.bold = True
+    r.font.size = Pt(12)
+
+    # =================================
+    # شعار الهيئة (يمين)
+    # =================================
+
+    p = head.cell(0, 2).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    # سنضيف صورة شعار الهيئة هنا فى الخطوة القادمة
+
+    doc.add_paragraph()
+        # =================================
     # عنوان التقرير
     # =================================
 
