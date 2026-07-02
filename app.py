@@ -246,6 +246,95 @@ def create_word_report(
                 row.cells[idx].width = Cm(width)
 
     doc.add_paragraph()
+        # =================================
+    # التوقيعات
+    # =================================
+
+    sign_table = doc.add_table(rows=1, cols=2)
+
+    sign_table.autofit = False
+
+    sign_table.columns[0].width = Cm(12)
+    sign_table.columns[1].width = Cm(12)
+
+    # إزالة حدود الجدول
+    sign_table.style = "Table Grid"
+
+    # يمين
+    p = sign_table.cell(0, 1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("عضو الإدارة\n")
+    r.bold = True
+    r.font.size = Pt(12)
+
+    p.add_run("\n.........................")
+
+    # يسار
+    p = sign_table.cell(0, 0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("مدير الإدارة\n")
+    r.bold = True
+    r.font.size = Pt(12)
+
+    p.add_run("\n.........................")
+
+    doc.add_paragraph()
+
+    # =================================
+    # التاريخ
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    p.add_run(
+        f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+    ).bold = True
+
+    # =================================
+    # ترقيم الصفحات
+    # =================================
+
+    footer = section.footer
+
+    fp = footer.paragraphs[0]
+
+    fp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    fp.add_run("صفحة ")
+
+    # حقل رقم الصفحة
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
+
+    fld1 = OxmlElement("w:fldSimple")
+    fld1.set(qn("w:instr"), "PAGE")
+
+    fp._p.append(fld1)
+
+    fp.add_run(" من ")
+
+    fld2 = OxmlElement("w:fldSimple")
+    fld2.set(qn("w:instr"), "NUMPAGES")
+
+    fp._p.append(fld2)
+
+    # =================================
+    # حفظ الملف
+    # =================================
+
+    doc.save(file)
+
+    file.seek(0)
+
+    return file
+
+# =====================================
+# نهاية دالة Word
+# =====================================
 # =====================================
 # إعداد الصفحة
 # =====================================
