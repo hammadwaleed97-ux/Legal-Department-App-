@@ -2875,7 +2875,150 @@ elif st.session_state.page == "reports":
 
                 st.warning("لا توجد دعاوى خلال الفترة المحددة.")
         # ==================================================
-# ==================== نهاية الجزء الثالث ====================
+                # ==================================================
+        # بيان الأحكام الصادرة
+        # ==================================================
+
+        elif report_type in (
+            "بيان بجميع الأحكام الصادرة",
+            "بيان بالأحكام الصادرة للصالح",
+            "بيان بالأحكام الصادرة للضد",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                s.session_date,
+                s.procedure
+            FROM cases c
+            INNER JOIN sessions s
+            ON s.id = (
+                SELECT id
+                FROM sessions
+                WHERE case_id = c.id
+                AND roll_number='حكم'
+                ORDER BY session_date DESC,id DESC
+                LIMIT 1
+            )
+            WHERE DATE(s.session_date)
+            BETWEEN DATE(?) AND DATE(?)
+            """
+
+            params = [
+                from_date.strftime("%Y-%m-%d"),
+                to_date.strftime("%Y-%m-%d")
+            ]
+
+            if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
+                if subject_search:
+                    sql += " AND c.subject LIKE ? "
+                    params.append(f"%{subject_search}%")
+
+            sql += " ORDER BY s.session_date DESC "
+
+            cur.execute(sql, params)
+
+            rows = cur.fetchall()
+
+            if rows:
+
+                data = []
+                rows_word = []
+
+                headers = [
+                    "م",
+                    "رقم القضية",
+                    "السنة",
+                    "الدائرة",
+                    "نوع القضية",
+                    "المحكمة",
+                    "المأمورية",
+                    "الخصوم",
+                    "موضوع الدعوى",
+                    "تاريخ الحكم",
+                    "منطوق الحكم",
+                    "ملاحظات"
+                ]
+
+                serial = 1
+
+                for r in rows:
+
+                    procedure = str(r[11] or "").strip()
+
+                    result = "غير محدد"
+
+                    if "للصالح" in procedure:
+                        result = "للصالح"
+
+                    elif "للضد" in procedure:
+                        result = "للضد"
+
+                    if report_type == "بيان بالأحكام الصادرة للصالح" and result != "للصالح":
+                        continue
+
+                    if report_type == "بيان بالأحكام الصادرة للضد" and result != "للضد":
+                        continue
+
+                    row = {
+
+                        "م": serial,
+                        "رقم القضية": r[0],
+                        "السنة": r[1],
+                        "الدائرة": r[2],
+                        "نوع القضية": r[3] if r[3] else "-",
+                        "المحكمة": r[4],
+                        "المأمورية": r[5] if r[5] else "-",
+                        "الخصوم": f"{r[6] if r[6] else '-'}\nضــــــد\n{r[7] if r[7] else '-'}",
+                        "موضوع الدعوى": r[8] if r[8] else "-",
+                        "تاريخ الحكم": r[10] if r[10] else "-",
+                        "منطوق الحكم": f"{r[11] if r[11] else '-'} ({result})",
+                        "ملاحظات": r[9] if r[9] else "-"
+
+                    }
+
+                    data.append(row)
+
+                    rows_word.append([
+
+                        row["م"],
+                        row["رقم القضية"],
+                        row["السنة"],
+                        row["الدائرة"],
+                        row["نوع القضية"],
+                        row["المحكمة"],
+                        row["المأمورية"],
+                        row["الخصوم"],
+                        row["موضوع الدعوى"],
+                        row["تاريخ الحكم"],
+                        row["منطوق الحكم"],
+                        row["ملاحظات"]
+
+                    ])
+
+                    serial += 1
+
+                st.dataframe(
+                    data,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            else:
+
+                st.warning("لا توجد أحكام خلال الفترة المحددة.")
+
+        # ==================== نهاية الجزء الثالث ====================
 # ==================== بداية الجزء الرابع ====================
 
         elif report_type.startswith("بيان عددى"):
