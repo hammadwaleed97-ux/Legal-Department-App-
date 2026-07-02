@@ -139,6 +139,107 @@ def create_word_report(
     r.font.size = Pt(12)
 
     doc.add_paragraph()
+        # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(
+        rows=1,
+        cols=len(headers)
+    )
+
+    table.style = "Table Grid"
+
+    table.autofit = False
+
+    # ---------------------------------
+    # عناوين الأعمدة (يمين ← يسار)
+    # ---------------------------------
+
+    rtl_headers = list(reversed(headers))
+
+    head = table.rows[0].cells
+
+    for i, h in enumerate(rtl_headers):
+
+        p = head[i].paragraphs[0]
+
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        run = p.add_run(str(h))
+
+        run.bold = True
+
+        run.font.size = Pt(10)
+
+    # ---------------------------------
+    # عرض الأعمدة
+    # ---------------------------------
+
+    widths = [
+        1.0,   # م
+        2.0,   # رقم القضية
+        1.2,   # السنة
+        1.5,   # الدائرة
+        2.2,   # نوع القضية
+        2.7,   # المحكمة
+        2.5,   # المأمورية
+        4.8,   # الخصوم
+        4.5,   # موضوع الدعوى
+        2.0,   # آخر جلسة
+        3.8,   # الإجراء
+        3.0    # الملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    for row in table.rows:
+
+        for i, w in enumerate(widths):
+
+            row.cells[i].width = Cm(w)
+
+    # =================================
+    # بيانات الجدول
+    # =================================
+
+    for item in rows:
+
+        item = list(reversed(item))
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(item):
+
+            txt = "" if value is None else str(value)
+
+            p = cells[i].paragraphs[0]
+
+            # الأعمدة النصية يمين
+            if rtl_headers[i] in (
+                "الخصوم",
+                "موضوع الدعوى",
+                "الإجراء",
+                "ملاحظات"
+            ):
+
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+            else:
+
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            run = p.add_run(txt)
+
+            run.font.size = Pt(9)
+
+    # إضافة صفوف فارغة ليبدو التقرير رسمياً
+
+    while len(table.rows) < 18:
+
+        table.add_row()
+
+    doc.add_paragraph()
 # =====================================
 # =====================================
 # إعداد الصفحة
