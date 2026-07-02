@@ -79,34 +79,6 @@ def create_word_report(
     COLOR_GOLD = RGBColor(184, 134, 11)     # ذهبى
     COLOR_BLACK = RGBColor(0, 0, 0)
     # =================================
-    # رأس التقرير
-    # =================================
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-
-    r = p.add_run("الهيئة القومية للتأمين الاجتماعى\n")
-    r.bold = True
-    r.font.size = Pt(15)
-
-    r = p.add_run("الإدارة المركزية للشئون القانونية\n")
-    r.bold = True
-    r.font.size = Pt(13)
-
-    r = p.add_run("الإدارة العامة للقضايا\n")
-    r.bold = True
-    r.font.size = Pt(13)
-
-    r = p.add_run(f"ديوان عام منطقة : {office}")
-    r.bold = True
-    r.font.size = Pt(12)
-
-    doc.add_paragraph()
-
-    # =================================
-    # عنوان التقرير
-    # =================================
         # =================================
     # عنوان التقرير
     # =================================
