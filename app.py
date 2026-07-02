@@ -185,6 +185,101 @@ def create_word_report(
     doc.add_paragraph()
     # =================================
     # =================================
+        # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(rows=1, cols=len(headers))
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+    table.allow_autofit = False
+
+    rtl_headers = list(reversed(headers))
+
+    # عرض الأعمدة (سم)
+
+    widths = [
+        0.20,   # م
+        0.60,   # رقم القضية
+        0.35,   # السنة
+        0.50,   # الدائرة
+        0.80,   # نوع القضية
+        1.40,   # المحكمة
+        0.80,   # المأمورية
+        10.50,  # الخصوم
+        5.30,   # موضوع الدعوى
+        1.00,   # آخر جلسة
+        3.80,   # الإجراء
+        1.00    # الملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    # ==========================
+    # رؤوس الجدول
+    # ==========================
+
+    head_cells = table.rows[0].cells
+
+    for i, h in enumerate(rtl_headers):
+
+        cell = head_cells[i]
+
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcW = OxmlElement("w:tcW")
+        tcW.set(qn("w:type"), "dxa")
+        tcW.set(qn("w:w"), str(int(widths[i] * 567)))
+        tcPr.append(tcW)
+
+        p = cell.paragraphs[0]
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        run = p.add_run(str(h))
+        run.bold = True
+        run.font.size = Pt(6)
+
+        shd = OxmlElement("w:shd")
+        shd.set(qn("w:fill"), "1F4E78")
+        tcPr.append(shd)
+
+    # ==========================
+    # بيانات الجدول
+    # ==========================
+
+    for row_data in rows:
+
+        row_data = list(reversed(row_data))
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row_data):
+
+            cell = cells[i]
+
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcW = OxmlElement("w:tcW")
+            tcW.set(qn("w:type"), "dxa")
+            tcW.set(qn("w:w"), str(int(widths[i] * 567)))
+            tcPr.append(tcW)
+
+            p = cell.paragraphs[0]
+
+            if rtl_headers[i] in (
+                "الخصوم",
+                "موضوع الدعوى",
+                "الإجراء",
+                "سبب آخر جلسة",
+                "ملاحظات"
+            ):
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            else:
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            run = p.add_run("" if value is None else str(value))
+            run.font.size = Pt(5.5)
+
+    doc.add_paragraph()
     # =================================
         # =================================
     # التوقيعات
