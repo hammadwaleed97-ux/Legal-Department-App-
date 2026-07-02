@@ -370,57 +370,6 @@ def create_word_report(
     r.font.size = Pt(10)
 
     # ==========================
-    # ==========================
-    # ترقيم الصفحات
-    # ==========================
-
-    from docx.oxml import OxmlElement
-    from docx.oxml.ns import qn
-
-    footer = section.footer
-
-    p = footer.paragraphs[0]
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    p.add_run("صفحة ")
-
-    fldChar1 = OxmlElement('w:fldChar')
-    fldChar1.set(qn('w:fldCharType'), 'begin')
-
-    instrText = OxmlElement('w:instrText')
-    instrText.set(qn('xml:space'), 'preserve')
-    instrText.text = " PAGE "
-
-    fldChar2 = OxmlElement('w:fldChar')
-    fldChar2.set(qn('w:fldCharType'), 'separate')
-
-    fldChar3 = OxmlElement('w:fldChar')
-    fldChar3.set(qn('w:fldCharType'), 'end')
-
-    p._p.append(fldChar1)
-    p._p.append(instrText)
-    p._p.append(fldChar2)
-    p._p.append(fldChar3)
-
-    p.add_run(" من ")
-
-    fldChar1 = OxmlElement('w:fldChar')
-    fldChar1.set(qn('w:fldCharType'), 'begin')
-
-    instrText = OxmlElement('w:instrText')
-    instrText.set(qn('xml:space'), 'preserve')
-    instrText.text = " NUMPAGES "
-
-    fldChar2 = OxmlElement('w:fldChar')
-    fldChar2.set(qn('w:fldCharType'), 'separate')
-
-    fldChar3 = OxmlElement('w:fldChar')
-    fldChar3.set(qn('w:fldCharType'), 'end')
-
-    p._p.append(fldChar1)
-    p._p.append(instrText)
-    p._p.append(fldChar2)
-    p._p.append(fldChar3)
 # =====================================
 # إعداد الصفحة
 # =====================================
