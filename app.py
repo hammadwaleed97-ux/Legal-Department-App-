@@ -27,6 +27,87 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 # ==================================
     # =================================
+    # رأس الصفحة
+    # =================================
+
+    head = doc.add_table(rows=1, cols=3)
+    head.alignment = WD_TABLE_ALIGNMENT.CENTER
+    head.autofit = False
+
+    head.columns[0].width = Cm(3)
+    head.columns[1].width = Cm(18)
+    head.columns[2].width = Cm(3)
+
+    # إزالة الحدود
+    for cell in head.rows[0].cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        borders = OxmlElement("w:tcBorders")
+
+        for edge in ("top", "left", "bottom", "right"):
+            b = OxmlElement(f"w:{edge}")
+            b.set(qn("w:val"), "nil")
+            borders.append(b)
+
+        tcPr.append(borders)
+
+    # =================================
+    # الميزان (يسار)
+    # =================================
+
+    p = head.cell(0,0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    try:
+        run = p.add_run()
+        run.add_picture("scale.png", width=Mm(22))
+    except:
+        run = p.add_run("⚖")
+        run.font.size = Pt(28)
+
+    # =================================
+    # العنوان (منتصف)
+    # =================================
+
+    p = head.cell(0,1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    try:
+        run = p.add_run()
+        run.add_picture("logo.png", width=Mm(18))
+    except:
+        pass
+
+    p.add_run("\n")
+
+    r = p.add_run("الهيئة القومية للتأمين الاجتماعى")
+    r.bold = True
+    r.font.size = Pt(15)
+    r.font.color.rgb = COLOR_BLUE
+
+    p.add_run("\n")
+
+    r = p.add_run("الإدارة المركزية للشئون القانونية")
+    r.bold = True
+    r.font.size = Pt(13)
+    r.font.color.rgb = COLOR_BLUE
+
+    p.add_run("\n")
+
+    r = p.add_run("الإدارة العامة للقضايــــــــــــا")
+    r.bold = True
+    r.font.size = Pt(13)
+    r.font.color.rgb = COLOR_BLUE
+
+    p.add_run("\n")
+
+    r = p.add_run(f"ديوان عام منطقة : {office}")
+    r.bold = True
+    r.font.size = Pt(12)
+
+    head.cell(0,2).text=""
+
+    doc.add_paragraph()
+    # =================================
     # عنوان التقرير
     # =================================
 
