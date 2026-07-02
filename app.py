@@ -2516,6 +2516,66 @@ elif st.session_state.page == "case_details":
         st.markdown("---")
 
         # =====================================
+        # =====================================
+        # جلسة الحكم
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ⚖️ بيانات الحكم
+        </h3>
+        """, unsafe_allow_html=True)
+
+        judgment_date = st.date_input(
+            "تاريخ جلسة الحكم"
+        )
+
+        judgment_text = st.text_area(
+            "منطوق الحكم",
+            height=150
+        )
+
+        judgment_result = st.selectbox(
+            "نتيجة الحكم",
+            [
+                "لصالح الهيئة",
+                "ضد الهيئة"
+            ]
+        )
+
+        if st.button(
+            "💾 حفظ الحكم",
+            use_container_width=True
+        ):
+
+            cur.execute("""
+            INSERT INTO sessions(
+                case_id,
+                session_date,
+                roll_number,
+                procedure,
+                judgment_result,
+                created_at
+            )
+            VALUES(
+                ?,?,?,?,?,?
+            )
+            """,
+            (
+                case_id,
+                str(judgment_date),
+                "حكم",
+                judgment_text,
+                judgment_result,
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            )
+            )
+
+            conn.commit()
+
+            st.success("تم حفظ بيانات الحكم")
+
+            st.rerun()
                 # ==================== بداية الجزء الأول ====================
 
 elif st.session_state.page == "reports":
