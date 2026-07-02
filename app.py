@@ -314,6 +314,64 @@ def create_word_report(
     doc.add_paragraph()
 
     # =================================
+# =================================
+# التوقيعات
+# =================================
+
+doc.add_paragraph()
+
+p = doc.add_paragraph()
+p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+r = p.add_run("وتفضلوا بقبول وافر الاحترام")
+r.bold = True
+r.font.size = Pt(12)
+
+doc.add_paragraph()
+
+sign = doc.add_table(rows=2, cols=3)
+sign.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+# إزالة الحدود
+for row in sign.rows:
+    for cell in row.cells:
+        tcPr = cell._tc.get_or_add_tcPr()
+        tcBorders = OxmlElement("w:tcBorders")
+        for edge in ("top", "left", "bottom", "right"):
+            e = OxmlElement(f"w:{edge}")
+            e.set(qn("w:val"), "nil")
+            tcBorders.append(e)
+        tcPr.append(tcBorders)
+
+# الصف الأول
+sign.cell(0,0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+sign.cell(0,0).text = "عضو الإدارة"
+
+sign.cell(0,1).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+sign.cell(0,1).text = "مدير عام الإدارات القانونية"
+
+sign.cell(0,2).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+sign.cell(0,2).text = "مدير الإدارة"
+
+# الصف الثانى
+sign.cell(1,0).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+sign.cell(1,0).text = "......................."
+
+sign.cell(1,1).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+sign.cell(1,1).text = "......................."
+
+sign.cell(1,2).paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+sign.cell(1,2).text = "......................."
+
+doc.add_paragraph()
+
+p = doc.add_paragraph()
+p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+r = p.add_run(
+    f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+)
+r.bold = True
     # =================================
     # التاريخ
     # =================================
