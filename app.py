@@ -3075,3 +3075,114 @@ elif st.session_state.page == "reports":
         st.rerun()
 
 # ==================== نهاية الجزء الخامس ====================
+import streamlit as st
+import sqlite3
+
+# =====================================
+# الاتصال بقاعدة البيانات
+# =====================================
+conn = sqlite3.connect("cases.db", check_same_thread=False)
+cursor = conn.cursor()
+
+st.title("🔍 البحث المتقدم عن القضايا")
+
+# =====================================
+# مدخلات البحث
+# =====================================
+col1, col2 = st.columns([3, 1])
+
+with col1:
+    search_input = st.text_input("ابحث بالاسم / رقم القضية / السنة")
+
+with col2:
+    status_filter = st.selectbox(
+        "الحالة",
+        ["الكل", "مفتوحة", "حكم", "طعن", "محفوظة"]
+    )
+
+# =====================================
+# تقييم قوة التطابق
+# =====================================
+def score_row(row, key):
+    key = key.lower()
+    score = 0
+
+    if key in str(row[1]).lower():
+        score += 4  # رقم القضية
+    if key in str(row[2]).lower():
+        score += 3  # السنة
+    if key in str(row[3]).lower():
+        score += 6  # المدعي
+    if key in str(row[4]).lower():
+        score += 5  # المدعى عليه
+
+    return score
+
+# =====================================
+# تنفيذ البحث
+# =====================================
+if search_input:
+
+    query = """
+    SELECT *
+    FROM cases
+    WHERE 
+        plaintiff_name LIKE ?
+        OR case_number LIKE ?
+        OR case_year LIKE ?
+        OR defendant_name LIKE ?
+    """
+
+    params = [
+        f"%{search_input}%",
+        f"%{search_input}%",
+        f"%{search_input}%",
+        f"%{search_input}%"
+    ]
+
+    if status_filter != "الكل":
+        query += " AND status = ?"
+        params.append(status_filter)
+
+    cursor.execute(query, params)
+    results = cursor.fetchall()
+
+    # =====================================
+    # لو مفيش نتائج
+    # =====================================
+    if not results:
+        st.error("❌ لا توجد دعوى مطابقة. تأكد من البيانات أو جرب طريقة بحث أخرى.")
+        st.stop()
+
+    # =====================================
+    # ترتيب النتائج
+    # =====================================
+    results = sorted(results, key=lambda x: score_row(x, search_input), reverse=True)
+
+    st.success(f"✔ تم العثور على {len(results)} نتيجة")
+
+    # =====================================
+    # عرض النتائج
+    # =====================================
+    for row in results:
+
+        case_id = row[0]
+        case_number = row[1]
+        case_year = row[2]
+        plaintiff_name = row[3]
+        defendant_name = row[4]
+        status = row[5]
+
+        st.markdown("---")
+
+        with st.container():
+
+            st.write(f"📌 **المدعي:** {plaintiff_name}")
+            st.write(f"⚖ رقم القضية: {case_number} / {case_year}")
+            st.write(f"👤 المدعى عليه: {defendant_name}")
+            st.write(f"📂 الحالة: {status}")
+
+            if st.button("فتح القضية", key=f"open_{case_id}"):
+                st.session_state.selected_case = case_id
+                st.session_state.page = "case_details"
+                st.rerun()
