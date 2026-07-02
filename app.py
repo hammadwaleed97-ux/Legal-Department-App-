@@ -266,6 +266,138 @@ def create_word_report(
     doc.add_paragraph()
 
     # =================================
+    # =================================
+    # التوقيعات
+    # =================================
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    run = p.add_run("وتفضلوا بقبول وافر الاحترام")
+    run.bold = True
+    run.font.size = Pt(12)
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+
+    sign = doc.add_table(rows=3, cols=2)
+    sign.alignment = WD_TABLE_ALIGNMENT.CENTER
+    sign.autofit = False
+
+    sign.columns[0].width = Cm(11)
+    sign.columns[1].width = Cm(11)
+
+    # إزالة حدود الجدول
+    for row in sign.rows:
+        for cell in row.cells:
+
+            tcPr = cell._tc.get_or_add_tcPr()
+
+            borders = OxmlElement("w:tcBorders")
+
+            for edge in ("top", "left", "bottom", "right"):
+
+                b = OxmlElement(f"w:{edge}")
+                b.set(qn("w:val"), "nil")
+                borders.append(b)
+
+            tcPr.append(borders)
+
+    # =================================
+    # الصف الأول
+    # =================================
+
+    p = sign.cell(0, 0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run("عضو الإدارة")
+    r.bold = True
+    r.font.size = Pt(11)
+
+    p = sign.cell(0, 1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    r = p.add_run("مدير الإدارة")
+    r.bold = True
+    r.font.size = Pt(11)
+
+    # =================================
+    # الصف الثانى
+    # =================================
+
+    p = sign.cell(1, 0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(".........................")
+
+    p = sign.cell(1, 1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    p.add_run(".........................")
+
+    # =================================
+    # الصف الثالث
+    # =================================
+
+    sign.cell(2, 0).merge(sign.cell(2, 1))
+
+    p = sign.cell(2, 0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("مدير عام الإدارات القانونية")
+    r.bold = True
+    r.font.size = Pt(11)
+
+    doc.add_paragraph()
+
+    # =================================
+    # التاريخ
+    # =================================
+
+    p = doc.add_paragraph()
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run(
+        f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+    )
+
+    r.bold = True
+    r.font.size = Pt(11)
+
+    # =================================
+    # ترقيم الصفحات
+    # =================================
+
+    footer = section.footer
+
+    if footer.paragraphs:
+        fp = footer.paragraphs[0]
+    else:
+        fp = footer.add_paragraph()
+
+    fp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    fp.add_run("صفحة ")
+
+    fld = OxmlElement("w:fldSimple")
+    fld.set(qn("w:instr"), "PAGE")
+    fp._p.append(fld)
+
+    fp.add_run(" من ")
+
+    fld2 = OxmlElement("w:fldSimple")
+    fld2.set(qn("w:instr"), "NUMPAGES")
+    fp._p.append(fld2)
+
+    # =================================
+    # حفظ الملف
+    # =================================
+
+    doc.add_paragraph()
+
+    doc.save(file)
+
+    file.seek(0)
+
+    return file
 # =====================================
 # =====================================
 # إعداد الصفحة
