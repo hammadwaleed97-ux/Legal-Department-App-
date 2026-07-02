@@ -5,20 +5,7 @@ import os
 
 # =====================================
 # مكتبات تصدير التقارير
-# =====================================
-
-from io import BytesIO
-
-from docx import Document
-from docx.shared import Pt
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph
-)
-
-from reportlab.lib.styles import getSampleStyleSheet
+# =================================
 # =============================
 # =====================================
 # إنشاء تقرير Word
