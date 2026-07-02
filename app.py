@@ -1,4 +1,31 @@
+import streamlit as st
+import sqlite3
+from datetime import datetime
+import os
 
+# =====================================
+# مكتبات تصدير التقارير
+# =====================================
+
+from io import BytesIO
+
+from docx import Document
+from docx.shared import Pt, Cm, RGBColor, Mm
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.section import WD_ORIENTATION
+from docx.enum.table import WD_TABLE_ALIGNMENT
+
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+
+# =====================================
 # =====================================
 # إنشاء تقرير Word
 # =====================================
