@@ -515,29 +515,6 @@ created_at TEXT
 """)
 
 # =====================================
-# جدول الجلسات
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS sessions(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-case_id INTEGER,
-
-session_date TEXT,
-
-roll_number TEXT,
-
-procedure TEXT,
-
-created_at TEXT
-
-)
-
-""")
-
 # =====================================
 # جدول المستندات
 # =====================================
