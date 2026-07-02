@@ -167,6 +167,82 @@ def create_word_report(
 
     # =================================
         # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(rows=1, cols=len(headers))
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+
+    rtl_headers = list(reversed(headers))
+
+    # عرض الأعمدة
+    widths = [
+        1.0,   # م
+        2.0,   # رقم القضية
+        1.2,   # السنة
+        1.5,   # الدائرة
+        2.2,   # النوع
+        2.8,   # المحكمة
+        2.4,   # المأمورية
+        5.0,   # الخصوم
+        4.5,   # موضوع الدعوى
+        2.0,   # آخر جلسة
+        3.8,   # الإجراء
+        3.0    # الملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    # رؤوس الجدول
+    head_cells = table.rows[0].cells
+
+    for i, h in enumerate(rtl_headers):
+
+        head_cells[i].width = Cm(widths[i])
+
+        p = head_cells[i].paragraphs[0]
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        run = p.add_run(str(h))
+        run.bold = True
+        run.font.size = Pt(10)
+
+    # البيانات
+    for row_data in rows:
+
+        row_data = list(reversed(row_data))
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row_data):
+
+            cells[i].width = Cm(widths[i])
+
+            p = cells[i].paragraphs[0]
+
+            if rtl_headers[i] in (
+                "الخصوم",
+                "موضوع الدعوى",
+                "سبب آخر جلسة",
+                "الإجراء",
+                "ملاحظات"
+            ):
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            else:
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            run = p.add_run("" if value is None else str(value))
+            run.font.size = Pt(9)
+
+    # عدم إضافة صفوف فارغة
+    doc.add_paragraph()
+
+    # =================================
+    # ختام التقرير
+    # =================================
+        # =================================
     # ختام التقرير
     # =================================
 
