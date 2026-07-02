@@ -6,6 +6,20 @@ import os
 # =====================================
 # مكتبات تصدير التقارير
 # =================================
+from io import BytesIO
+
+from docx import Document
+from docx.shared import Pt, Cm, RGBColor
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml.ns import qn
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
 # =============================
 # =====================================
 # إنشاء تقرير Word
