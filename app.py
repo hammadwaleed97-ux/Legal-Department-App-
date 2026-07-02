@@ -516,6 +516,40 @@ created_at TEXT
 
 # =====================================
 # =====================================
+# جدول الجلسات
+# =====================================
+
+cur.execute("""
+
+CREATE TABLE IF NOT EXISTS sessions(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+case_id INTEGER,
+
+session_date TEXT,
+
+roll_number TEXT,
+
+procedure TEXT,
+
+judgment_result TEXT,
+
+created_at TEXT
+
+)
+
+""")
+
+# إضافة العمود تلقائياً للقواعد القديمة
+try:
+    cur.execute("""
+        ALTER TABLE sessions
+        ADD COLUMN judgment_result TEXT
+    """)
+except:
+    pass
+# =====================================
 # جدول المستندات
 # =====================================
 
