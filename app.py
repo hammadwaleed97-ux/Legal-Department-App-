@@ -190,6 +190,84 @@ def create_word_report(
     doc.add_paragraph()
 
     # =================================
+    # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(rows=1, cols=len(headers))
+    table.style = "Table Grid"
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    table.autofit = False
+
+    rtl_headers = list(reversed(headers))
+
+    # عرض الأعمدة (مضبوط للطباعة)
+
+    widths = [
+        0.6,   # م
+        1.2,   # رقم القضية
+        0.8,   # السنة
+        0.9,   # الدائرة
+        1.5,   # النوع
+        2.2,   # المحكمة
+        1.5,   # المأمورية
+        5.4,   # الخصوم
+        5.0,   # موضوع الدعوى
+        1.5,   # آخر جلسة
+        4.3,   # سبب آخر جلسة
+        2.2    # الملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    # رؤوس الأعمدة
+
+    head_cells = table.rows[0].cells
+
+    for i, h in enumerate(rtl_headers):
+
+        head_cells[i].width = Cm(widths[i])
+
+        p = head_cells[i].paragraphs[0]
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        run = p.add_run(str(h))
+        run.bold = True
+        run.font.size = Pt(8)
+
+    # البيانات
+
+    for row_data in rows:
+
+        row_data = list(reversed(row_data))
+
+        cells = table.add_row().cells
+
+        for i, value in enumerate(row_data):
+
+            cells[i].width = Cm(widths[i])
+
+            p = cells[i].paragraphs[0]
+
+            if rtl_headers[i] in (
+                "الخصوم",
+                "موضوع الدعوى",
+                "سبب آخر جلسة",
+                "الإجراء",
+                "ملاحظات"
+            ):
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+            else:
+                p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            run = p.add_run("" if value is None else str(value))
+            run.font.size = Pt(8)
+
+    doc.add_paragraph()
+
+    # =================================
+    # التوقيعات
+    # =================================
 # =====================================
 # =====================================
 # إعداد الصفحة
