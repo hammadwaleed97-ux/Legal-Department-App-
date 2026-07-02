@@ -285,6 +285,80 @@ def create_word_report(
 
     # =================================
     # =================================
+        # =================================
+    # التوقيعات
+    # =================================
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+
+    sign = doc.add_table(rows=3, cols=2)
+    sign.alignment = WD_TABLE_ALIGNMENT.CENTER
+    sign.autofit = False
+
+    sign.columns[0].width = Cm(11)
+    sign.columns[1].width = Cm(11)
+
+    # إزالة الحدود
+    for row in sign.rows:
+        for cell in row.cells:
+
+            tcPr = cell._tc.get_or_add_tcPr()
+
+            tcBorders = OxmlElement("w:tcBorders")
+
+            for edge in ("top", "left", "bottom", "right"):
+
+                e = OxmlElement(f"w:{edge}")
+                e.set(qn("w:val"), "nil")
+                tcBorders.append(e)
+
+            tcPr.append(tcBorders)
+
+    # --------------------------
+    # السطر الأول
+    # --------------------------
+
+    # اليمين
+    p = sign.cell(0,1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run("عضو الإدارة")
+    r.bold = True
+    r.font.size = Pt(11)
+
+    # اليسار
+    p = sign.cell(0,0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    r = p.add_run("مدير الإدارة")
+    r.bold = True
+    r.font.size = Pt(11)
+
+    # --------------------------
+    # السطر الثانى
+    # --------------------------
+
+    p = sign.cell(1,1).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+    p.add_run(".......................")
+
+    p = sign.cell(1,0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    p.add_run(".......................")
+
+    # --------------------------
+    # السطر الثالث
+    # --------------------------
+
+    sign.cell(2,0).merge(sign.cell(2,1))
+
+    p = sign.cell(2,0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run("مدير عام الإدارات القانونية")
+    r.bold = True
+    r.font.size = Pt(11)
     # ==========================
     # التاريخ
     # ==========================
