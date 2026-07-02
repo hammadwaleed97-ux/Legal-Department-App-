@@ -106,19 +106,6 @@ def create_word_report(
 
     # =================================
     # =================================
-    # شعار الهيئة
-    # =================================
-
-    p = head.cell(0,1).paragraphs[0]
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    try:
-        run = p.add_run()
-        run.add_picture("logo.png", width=Mm(22))
-    except:
-        pass
-
-    # =================================
     # بيانات الهيئة
     # =================================
 
