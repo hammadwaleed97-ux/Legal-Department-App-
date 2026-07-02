@@ -1,4 +1,82 @@
+import streamlit as st
+import sqlite3
+from datetime import datetime
+import os
 
+# =====================================
+# مكتبات تصدير التقارير
+# =====================================
+
+from io import BytesIO
+
+from docx import Document
+from docx.shared import Pt, Cm, RGBColor, Mm
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+from docx.enum.section import WD_ORIENTATION
+from docx.enum.table import WD_TABLE_ALIGNMENT
+
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+
+# =====================================
+# إنشاء تقرير Word
+# =====================================
+
+def create_word_report(
+    report_title,
+    office,
+    lawyer,
+    from_date,
+    to_date,
+    headers,
+    rows
+):
+
+    file = BytesIO()
+
+    doc = Document()
+
+    # =================================
+    # إعداد الصفحة
+    # =================================
+
+    section = doc.sections[0]
+
+    section.orientation = WD_ORIENTATION.LANDSCAPE
+
+    section.page_width, section.page_height = (
+        section.page_height,
+        section.page_width
+    )
+
+    section.top_margin = Cm(1)
+    section.bottom_margin = Cm(1)
+    section.left_margin = Cm(1)
+    section.right_margin = Cm(1)
+
+    style = doc.styles["Normal"]
+
+    style.font.name = "Arial"
+
+    style._element.rPr.rFonts.set(
+        qn("w:eastAsia"),
+        "Arial"
+    )
+
+    style.font.size = Pt(9)
+
+    COLOR_BLUE = RGBColor(17, 52, 120)
+    COLOR_GOLD = RGBColor(184, 134, 11)
+
+    # =================================
+    # رأس الصفحة
     # =================================
 
     head = doc.add_table(rows=1, cols=3)
