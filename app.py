@@ -107,48 +107,6 @@ def create_word_report(
     # =================================
     # عنوان التقرير
     # =================================
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    r = p.add_run(report_title)
-
-    r.bold = True
-
-    r.font.size = Pt(16)
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    r = p.add_run(
-        f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}"
-    )
-
-    r.bold = True
-
-    r.font.size = Pt(12)
-
-    doc.add_paragraph()
-
-    # =================================
-    # الأستاذ
-    # =================================
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-
-    r = p.add_run(
-        f"طرف الأستاذ / المحامى : {lawyer}"
-    )
-
-    r.bold = True
-
-    r.font.size = Pt(12)
-
-    doc.add_paragraph()
         # =================================
     # إنشاء الجدول
     # =================================
