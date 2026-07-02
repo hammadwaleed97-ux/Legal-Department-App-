@@ -105,6 +105,24 @@ def create_word_report(
         tcPr.append(borders)
 
     # =================================
+        # =================================
+    # الميزان (فاخر)
+    # =================================
+
+    p = head.cell(0,0).paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+
+    try:
+        run = p.add_run()
+        run.add_picture(
+            "scale.png",
+            width=Mm(35)   # كان 22
+        )
+    except:
+        run = p.add_run("⚖")
+        run.bold = True
+        run.font.size = Pt(42)
+        run.font.color.rgb = COLOR_GOLD
     # =================================
     # شعار الهيئة
     # =================================
