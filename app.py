@@ -21,6 +21,125 @@ from reportlab.platypus import (
 from reportlab.lib.styles import getSampleStyleSheet
 # =============================
 # =====================================
+# إنشاء تقرير Word
+# =====================================
+
+def create_word_report(
+    report_title,
+    office,
+    lawyer,
+    from_date,
+    to_date,
+    headers,
+    rows
+):
+
+    from io import BytesIO
+    from docx import Document
+    from docx.shared import Pt, Cm
+    from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+    from docx.enum.section import WD_ORIENTATION
+
+    file = BytesIO()
+
+    doc = Document()
+
+    # =================================
+    # إعداد الصفحة
+    # =================================
+
+    section = doc.sections[0]
+
+    section.orientation = WD_ORIENTATION.LANDSCAPE
+
+    section.page_width, section.page_height = (
+        section.page_height,
+        section.page_width
+    )
+
+    section.top_margin = Cm(1)
+    section.bottom_margin = Cm(1)
+    section.right_margin = Cm(1)
+    section.left_margin = Cm(1)
+
+    style = doc.styles["Normal"]
+
+    style.font.name = "Arial"
+
+    style.font.size = Pt(11)
+
+    # =================================
+    # رأس التقرير
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run("الهيئة القومية للتأمين الاجتماعى\n")
+    r.bold = True
+    r.font.size = Pt(15)
+
+    r = p.add_run("الإدارة المركزية للشئون القانونية\n")
+    r.bold = True
+    r.font.size = Pt(13)
+
+    r = p.add_run("الإدارة العامة للقضايا\n")
+    r.bold = True
+    r.font.size = Pt(13)
+
+    r = p.add_run(f"ديوان عام منطقة : {office}")
+    r.bold = True
+    r.font.size = Pt(12)
+
+    doc.add_paragraph()
+
+    # =================================
+    # عنوان التقرير
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run(report_title)
+
+    r.bold = True
+
+    r.font.size = Pt(16)
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    r = p.add_run(
+        f"خلال الفترة من {from_date.strftime('%d/%m/%Y')} حتى {to_date.strftime('%d/%m/%Y')}"
+    )
+
+    r.bold = True
+
+    r.font.size = Pt(12)
+
+    doc.add_paragraph()
+
+    # =================================
+    # الأستاذ
+    # =================================
+
+    p = doc.add_paragraph()
+
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+
+    r = p.add_run(
+        f"طرف الأستاذ / المحامى : {lawyer}"
+    )
+
+    r.bold = True
+
+    r.font.size = Pt(12)
+
+    doc.add_paragraph()
+# =====================================
 # =====================================
 # إعداد الصفحة
 # =====================================
