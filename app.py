@@ -46,29 +46,6 @@ def create_word_report(
     doc = Document()
 
     # =================================
-    # إعداد الصفحة
-    # =================================
-
-    section = doc.sections[0]
-
-    section.orientation = WD_ORIENTATION.LANDSCAPE
-
-    section.page_width, section.page_height = (
-        section.page_height,
-        section.page_width
-    )
-
-    section.top_margin = Cm(1)
-    section.bottom_margin = Cm(1)
-    section.right_margin = Cm(1)
-    section.left_margin = Cm(1)
-
-    style = doc.styles["Normal"]
-
-    style.font.name = "Arial"
-
-    style.font.size = Pt(11)
-
     # =================================
     # رأس التقرير
     # =================================
