@@ -370,6 +370,81 @@ def create_word_report(
     r.font.size = Pt(10)
 
     # ==========================
+    # ==========================
+    # ترقيم الصفحات (Page X of Y)
+    # ==========================
+
+    footer = section.footer
+    p = footer.paragraphs[0]
+    p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    p.add_run("صفحة ")
+
+    # PAGE
+    r = p.add_run()
+
+    fldBegin = OxmlElement("w:fldChar")
+    fldBegin.set(qn("w:fldCharType"), "begin")
+
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = " PAGE "
+
+    fldSeparate = OxmlElement("w:fldChar")
+    fldSeparate.set(qn("w:fldCharType"), "separate")
+
+    text = OxmlElement("w:t")
+    text.text = "1"
+
+    fldEnd = OxmlElement("w:fldChar")
+    fldEnd.set(qn("w:fldCharType"), "end")
+
+    r._r.append(fldBegin)
+    r._r.append(instr)
+    r._r.append(fldSeparate)
+    r._r.append(text)
+    r._r.append(fldEnd)
+
+    p.add_run(" من ")
+
+    # NUMPAGES
+    r = p.add_run()
+
+    fldBegin = OxmlElement("w:fldChar")
+    fldBegin.set(qn("w:fldCharType"), "begin")
+
+    instr = OxmlElement("w:instrText")
+    instr.set(qn("xml:space"), "preserve")
+    instr.text = " NUMPAGES "
+
+    fldSeparate = OxmlElement("w:fldChar")
+    fldSeparate.set(qn("w:fldCharType"), "separate")
+
+    text = OxmlElement("w:t")
+    text.text = "1"
+
+    fldEnd = OxmlElement("w:fldChar")
+    fldEnd.set(qn("w:fldCharType"), "end")
+
+    r._r.append(fldBegin)
+    r._r.append(instr)
+    r._r.append(fldSeparate)
+    r._r.append(text)
+    r._r.append(fldEnd)
+
+    # تحديث الحقول عند فتح Word
+    settings = doc.settings._element
+    update = OxmlElement("w:updateFields")
+    update.set(qn("w:val"), "true")
+    settings.append(update)
+
+    # ==========================
+    # حفظ الملف
+    # ==========================
+
+    doc.save(file)
+    file.seek(0)
+    return file
 # =====================================
 # إعداد الصفحة
 # =====================================
