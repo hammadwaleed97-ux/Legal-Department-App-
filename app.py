@@ -217,32 +217,6 @@ def create_word_report(
     widths = list(reversed(widths))
 
     # ==========================
-    # رؤوس الجدول
-    # ==========================
-
-    head_cells = table.rows[0].cells
-
-    for i, h in enumerate(rtl_headers):
-
-        cell = head_cells[i]
-
-        tcPr = cell._tc.get_or_add_tcPr()
-        tcW = OxmlElement("w:tcW")
-        tcW.set(qn("w:type"), "dxa")
-        tcW.set(qn("w:w"), str(int(widths[i] * 567)))
-        tcPr.append(tcW)
-
-        p = cell.paragraphs[0]
-        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-        run = p.add_run(str(h))
-        run.bold = True
-        run.font.size = Pt(6)
-
-        shd = OxmlElement("w:shd")
-        shd.set(qn("w:fill"), "1F4E78")
-        tcPr.append(shd)
-
     # ==========================
     # بيانات الجدول
     # ==========================
