@@ -129,12 +129,12 @@ def create_word_report(
     r.font.size = Pt(15)
     r.font.color.rgb = COLOR_BLUE
 
-    r = p.add_run("الإدارة المركزية للشئون القانونية\n")
+    r = p.add_run("الإدارة المركزية للادارات القانونية\n")
     r.bold = True
     r.font.size = Pt(13)
     r.font.color.rgb = COLOR_BLUE
 
-    r = p.add_run("الإدارة العامة للقضايــــــــــــا\n")
+    r = p.add_run("الإدارة العامة للشئون القانونية\n")
     r.bold = True
     r.font.size = Pt(13)
     r.font.color.rgb = COLOR_BLUE
