@@ -46,6 +46,44 @@ def create_word_report(
     doc = Document()
 
     # =================================
+        # =================================
+    # إعداد الصفحة
+    # =================================
+
+    section = doc.sections[0]
+
+    section.orientation = WD_ORIENTATION.LANDSCAPE
+
+    section.page_width, section.page_height = (
+        section.page_height,
+        section.page_width
+    )
+
+    # الهوامش
+    section.top_margin = Cm(1.2)
+    section.bottom_margin = Cm(1.2)
+    section.right_margin = Cm(1.2)
+    section.left_margin = Cm(1.2)
+
+    # نوع الخط الافتراضى
+    style = doc.styles["Normal"]
+
+    style.font.name = "Arial"
+
+    style._element.rPr.rFonts.set(
+        qn("w:eastAsia"),
+        "Arial"
+    )
+
+    style.font.size = Pt(11)
+
+    # =================================
+    # ألوان التقرير
+    # =================================
+
+    COLOR_BLUE = RGBColor(17, 52, 120)      # كحلى
+    COLOR_GOLD = RGBColor(184, 134, 11)     # ذهبى
+    COLOR_BLACK = RGBColor(0, 0, 0)
     # =================================
     # رأس التقرير
     # =================================
