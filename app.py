@@ -151,6 +151,101 @@ def create_word_report(
     ).bold = True
 
     doc.add_paragraph()
+        # =================================
+    # إنشاء الجدول
+    # =================================
+
+    table = doc.add_table(
+        rows=1,
+        cols=len(headers)
+    )
+
+    table.style = "Table Grid"
+
+    table.autofit = False
+
+    # رأس الجدول
+    hdr = table.rows[0].cells
+
+    # لأن التقرير عربى نخلى الأعمدة تبدأ من اليمين
+    rtl_headers = list(reversed(headers))
+
+    for i, title in enumerate(rtl_headers):
+
+        p = hdr[i].paragraphs[0]
+
+        p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+        r = p.add_run(str(title))
+
+        r.bold = True
+        r.font.size = Pt(10)
+
+    # =================================
+    # البيانات
+    # =================================
+
+    for row in rows:
+
+        cells = table.add_row().cells
+
+        rtl_row = list(reversed(row))
+
+        for i, value in enumerate(rtl_row):
+
+            txt = "" if value is None else str(value)
+
+            p = cells[i].paragraphs[0]
+
+            p.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+            rr = p.add_run(txt)
+
+            rr.font.size = Pt(9)
+
+    # =================================
+    # إضافة صفوف فارغة حتى يبدو التقرير رسمياً
+    # =================================
+
+    if len(rows) < 8:
+
+        for _ in range(8 - len(rows)):
+
+            cells = table.add_row().cells
+
+            for c in cells:
+                c.text = ""
+
+    # =================================
+    # عرض الأعمدة
+    # =================================
+
+    widths = [
+        1.2,   # م
+        2.0,   # رقم القضية
+        1.3,   # السنة
+        1.5,   # الدائرة
+        1.8,   # النوع
+        2.6,   # المحكمة
+        2.4,   # المأمورية
+        4.0,   # الخصوم
+        3.5,   # موضوع الدعوى
+        2.0,   # آخر جلسة
+        2.5,   # سبب آخر جلسة
+        2.2    # ملاحظات
+    ]
+
+    widths = list(reversed(widths))
+
+    for row in table.rows:
+
+        for idx, width in enumerate(widths):
+
+            if idx < len(row.cells):
+
+                row.cells[idx].width = Cm(width)
+
+    doc.add_paragraph()
 # =====================================
 # إعداد الصفحة
 # =====================================
