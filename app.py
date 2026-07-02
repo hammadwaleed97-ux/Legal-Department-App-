@@ -370,59 +370,6 @@ def create_word_report(
     r.font.size = Pt(10)
 
     # ==========================
-    # ترقيم الصفحات
-    # ==========================
-    from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-
-footer = section.footer
-fp = footer.paragraphs[0]
-fp.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-fp.add_run("صفحة ")
-
-run1 = fp.add_run()
-r1 = run1._r
-
-fld1 = OxmlElement('w:fldChar')
-fld1.set(qn('w:fldCharType'), 'begin')
-
-instr1 = OxmlElement('w:instrText')
-instr1.text = " PAGE "
-
-fld2 = OxmlElement('w:fldChar')
-fld2.set(qn('w:fldCharType'), 'separate')
-
-fld3 = OxmlElement('w:fldChar')
-fld3.set(qn('w:fldCharType'), 'end')
-
-r1.append(fld1)
-r1.append(instr1)
-r1.append(fld2)
-r1.append(fld3)
-
-fp.add_run(" من ")
-
-run2 = fp.add_run()
-r2 = run2._r
-
-fld1 = OxmlElement('w:fldChar')
-fld1.set(qn('w:fldCharType'), 'begin')
-
-instr2 = OxmlElement('w:instrText')
-instr2.text = " NUMPAGES "
-
-fld2 = OxmlElement('w:fldChar')
-fld2.set(qn('w:fldCharType'), 'separate')
-
-fld3 = OxmlElement('w:fldChar')
-fld3.set(qn('w:fldCharType'), 'end')
-
-r2.append(fld1)
-r2.append(instr2)
-r2.append(fld2)
-r2.append(fld3)
     # ==========================
     # حفظ الملف
     # ==========================
