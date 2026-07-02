@@ -314,46 +314,6 @@ def create_word_report(
     doc.add_paragraph()
 
     # =================================
-    # التوقيعات (بدون جدول)
-    # =================================
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-
-    p.add_run(
-        "عضو الإدارة"
-    ).bold = True
-
-    p.add_run(
-        " " * 70
-    )
-
-    p.add_run(
-        "مدير الإدارة"
-    ).bold = True
-
-    doc.add_paragraph()
-
-    p = doc.add_paragraph()
-
-    p.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-
-    p.add_run(
-        "........................."
-    )
-
-    p.add_run(
-        " " * 60
-    )
-
-    p.add_run(
-        "........................."
-    )
-
-    doc.add_paragraph()
-    doc.add_paragraph()
-
     # =================================
     # التاريخ
     # =================================
