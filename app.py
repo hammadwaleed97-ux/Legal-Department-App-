@@ -3079,3 +3079,120 @@ elif st.session_state.page == "reports":
                 use_container_width=True,
                 hide_index=True
             )
+            # ==================================================
+# أزرار التصدير
+# ==================================================
+
+        rows_word = locals().get("rows_word", [])
+        headers = locals().get("headers", [])
+
+        st.divider()
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        with c1:
+
+            st.button(
+                "🖨 طباعة",
+                use_container_width=True,
+                disabled=False
+            )
+
+        with c2:
+
+            st.button(
+                "📊 Excel",
+                use_container_width=True,
+                disabled=False
+            )
+
+        with c3:
+
+            if rows_word:
+
+                word_file = create_word_report(
+                    report_title=report_type,
+                    office=office,
+                    lawyer=lawyer,
+                    from_date=from_date,
+                    to_date=to_date,
+                    headers=headers,
+                    rows=rows_word
+                )
+
+                st.download_button(
+                    "📄 تحميل Word",
+                    data=word_file,
+                    file_name=f"{report_type}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    use_container_width=True
+                )
+
+            else:
+
+                st.button(
+                    "📄 تحميل Word",
+                    disabled=True,
+                    use_container_width=True
+                )
+
+        with c4:
+
+            st.button(
+                "📕 تحميل PDF",
+                use_container_width=True,
+                disabled=False
+            )
+
+        st.divider()
+
+        st.markdown(f"""
+<div style="text-align:center">
+
+<h4>وتفضلوا بقبول وافر الاحترام</h4>
+
+<br>
+
+<table style="width:100%;font-weight:bold">
+
+<tr>
+
+<td style="text-align:center">
+عضو الإدارة
+</td>
+
+<td style="text-align:center">
+مدير عام الإدارات القانونية
+</td>
+
+</tr>
+
+<tr>
+
+<td style="height:60px;"></td>
+
+<td></td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:center">
+{lawyer}
+</td>
+
+<td style="text-align:center">
+............................
+</td>
+
+</tr>
+
+</table>
+
+<br>
+
+تحريراً فى : {datetime.now().strftime("%d/%m/%Y")}
+
+</div>
+
+""", unsafe_allow_html=True)
