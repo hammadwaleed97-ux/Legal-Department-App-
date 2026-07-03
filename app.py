@@ -2981,3 +2981,101 @@ elif st.session_state.page == "reports":
             else:
 
                 st.warning("لا توجد أحكام خلال الفترة المحددة.")
+                # ==================================================
+# التقارير العددية
+# ==================================================
+
+        elif report_type.startswith("بيان عددى"):
+
+            sql = """
+            SELECT
+                c.subject,
+                s.roll_number,
+                COALESCE(s.judgment_result,'')
+            FROM cases c
+            LEFT JOIN sessions s
+            ON s.id=(
+                SELECT id
+                FROM sessions
+                WHERE case_id=c.id
+                ORDER BY session_date DESC,id DESC
+                LIMIT 1
+            )
+            WHERE 1=1
+            """
+
+            params=[]
+
+            if report_type in (
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+            ):
+                if subject_search:
+                    sql+=" AND c.subject LIKE ? "
+                    params.append(f"%{subject_search}%")
+
+            cur.execute(sql,params)
+
+            rows=cur.fetchall()
+
+            total=0
+
+            for subject,roll_number,judgment_result in rows:
+
+                roll_number=str(roll_number or "")
+                judgment_result=str(judgment_result or "")
+
+                if report_type=="بيان عددى بجميع الدعاوى المتداولة":
+
+                    if roll_number!="حكم":
+                        total+=1
+
+                elif report_type=="بيان عددى بالدعاوى حسب موضوع الدعوى":
+
+                    if roll_number!="حكم":
+                        total+=1
+
+                elif report_type=="بيان عددى بجميع الأحكام الصادرة":
+
+                    if roll_number=="حكم":
+                        total+=1
+
+                elif report_type=="بيان عددى بالأحكام الصادرة للصالح":
+
+                    if judgment_result=="لصالح الهيئة":
+                        total+=1
+
+                elif report_type=="بيان عددى بالأحكام الصادرة للضد":
+
+                    if judgment_result=="ضد الهيئة":
+                        total+=1
+
+                elif report_type=="بيان عددى بالأحكام الصادرة حسب موضوع الدعوى":
+
+                    if roll_number=="حكم":
+                        total+=1
+
+            data=[
+                {
+                    "البيان":report_type,
+                    "العدد":total
+                }
+            ]
+
+            headers=[
+                "البيان",
+                "العدد"
+            ]
+
+            rows_word=[
+                [
+                    report_type,
+                    total
+                ]
+            ]
+
+            st.dataframe(
+                data,
+                use_container_width=True,
+                hide_index=True
+            )
