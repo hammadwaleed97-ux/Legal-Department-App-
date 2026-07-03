@@ -2589,7 +2589,7 @@ elif st.session_state.page == "case_details":
 
             st.rerun()
             # ==================================================
-# قسم التقارير (معدل ومظبوط)
+# قسم التقارير
 # ==================================================
 
 elif st.session_state.page == "reports":
@@ -2700,15 +2700,14 @@ elif st.session_state.page == "reports":
             "الخصوم",
             "موضوع الدعوى",
             "آخر جلسة",
-            "الإجراء",
-            "رقم الرول"
+            "الإجراءات",
+            "ملاحظات"
         ]
 
         serial = 1
 
         for r in rows:
 
-            # الحكم = رول "حكم"
             if str(r[12] or "").strip() == "حكم":
                 continue
 
@@ -2723,8 +2722,8 @@ elif st.session_state.page == "reports":
                 "الخصوم": f"{r[6] or '-'}\nضــــد\n{r[7] or '-'}",
                 "موضوع الدعوى": r[8] or "-",
                 "آخر جلسة": r[10] or "-",
-                "الإجراء": r[11] or "-",
-                "رقم الرول": r[12] or "-"
+                "الإجراءات": r[11] or "-",
+                "ملاحظات": r[9] or "-"
             }
 
             data.append(item)
@@ -2740,11 +2739,9 @@ elif st.session_state.page == "reports":
                 item["الخصوم"],
                 item["موضوع الدعوى"],
                 item["آخر جلسة"],
-                item["الإجراء"],
-                item["رقم الرول"]
+                item["الإجراءات"],
+                item["ملاحظات"]
             ])
-
-            serial += 1
 
         st.dataframe(data, use_container_width=True, hide_index=True)
 
@@ -2794,6 +2791,13 @@ elif st.session_state.page == "reports":
             to_date.strftime("%Y-%m-%d")
         ]
 
+        if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
+            if subject_search:
+                sql += " AND c.subject LIKE ? "
+                params.append(f"%{subject_search}%")
+
+        sql += " ORDER BY s.session_date DESC"
+
         cur.execute(sql, params)
         rows = cur.fetchall()
 
@@ -2842,14 +2846,13 @@ elif st.session_state.page == "reports":
             }
 
             data.append(row)
-
             rows_word.append(list(row.values()))
             serial += 1
 
         st.dataframe(data, use_container_width=True, hide_index=True)
 
     # ==================================================
-    # التقارير العددية + تحليل
+    # التقارير العددية + التحليل
     # ==================================================
     elif report_type.startswith("بيان عددى"):
 
@@ -2866,14 +2869,13 @@ elif st.session_state.page == "reports":
             ORDER BY session_date DESC,id DESC
             LIMIT 1
         )
-        WHERE 1=1
         """
 
         cur.execute(sql)
         rows = cur.fetchall()
 
         total = 0
-        by_subject = {}
+        analysis = {}
 
         for subject, roll, result in rows:
 
@@ -2881,10 +2883,10 @@ elif st.session_state.page == "reports":
             roll = roll or ""
             result = result or ""
 
-            if report_type in [
+            if report_type in (
                 "بيان عددى بجميع الدعاوى المتداولة",
                 "بيان عددى بالدعاوى حسب موضوع الدعوى"
-            ]:
+            ):
                 if roll != "حكم":
                     total += 1
 
@@ -2900,23 +2902,19 @@ elif st.session_state.page == "reports":
                 if result == "ضد الهيئة":
                     total += 1
 
-            # تحليل حسب الموضوع
-            if subject not in by_subject:
-                by_subject[subject] = 0
-            by_subject[subject] += 1
+            analysis[subject] = analysis.get(subject, 0) + 1
 
         data = [{"البيان": report_type, "العدد": total}]
-
         headers = ["البيان", "العدد"]
         rows_word = [[report_type, total]]
 
         st.dataframe(data, use_container_width=True, hide_index=True)
 
         st.markdown("### 📊 تحليل حسب الموضوع")
-        st.write(by_subject)
+        st.write(analysis)
 
     # ==================================================
-    # أزرار التصدير (مفعّلة)
+    # أزرار التصدير
     # ==================================================
     st.divider()
 
