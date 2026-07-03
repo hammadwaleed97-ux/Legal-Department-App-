@@ -2973,27 +2973,36 @@ if show_report:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
+            # ==========================================
+# PDF
+# ==========================================
 
-    # ==========================================
-    # PDF
-    # ==========================================
+with c3:
 
-    with c3:
+    if rows_word:
 
-        st.button(
+        pdf_file = create_pdf_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
             "📄 تحميل PDF",
-            disabled=True,
+            data=pdf_file,
+            file_name=f"{report_type}.pdf",
+            mime="application/pdf",
             use_container_width=True
         )
 
-    # ==========================================
-    # طباعة
-    # ==========================================
-
-    with c4:
+    else:
 
         st.button(
-            "🖨 طباعة",
+            "📄 تحميل PDF",
             disabled=True,
             use_container_width=True
         )
