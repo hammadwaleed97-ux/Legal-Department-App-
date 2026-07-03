@@ -2596,25 +2596,57 @@ elif st.session_state.page == "reports":
 
     st.markdown("""
     <div style="
-    background:#4E342E;
-    padding:15px;
-    border-radius:15px;
-    border:2px solid gold;
-    text-align:center;
-    color:white;
-    font-size:30px;
-    font-weight:bold;
-    box-shadow:0 0 15px rgba(255,215,0,.4);
+        background:#4E342E;
+        color:white;
+        border:2px solid gold;
+        border-radius:15px;
+        padding:15px;
+        text-align:center;
+        font-size:32px;
+        font-weight:bold;
     ">
-    📊 التقارير
+        📊 إدارة التقارير
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    info1, info2 = st.columns(2)
+    st.markdown("""
+    <div style="
+        background:#FFF8E1;
+        border:2px solid #C9A227;
+        border-radius:12px;
+        padding:15px;
+    ">
+    """, unsafe_allow_html=True)
 
-    with info1:
+    report_type = st.selectbox(
+        "📑 البيان",
+        [
+
+            "بيان بجميع الدعاوى المتداولة",
+            "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+
+            "بيان بجميع الأحكام الصادرة",
+            "بيان بالأحكام الصادرة للصالح",
+            "بيان بالأحكام الصادرة للضد",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+            "بيان عددى بجميع الدعاوى المتداولة",
+            "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+            "بيان عددى بجميع الأحكام الصادرة",
+            "بيان عددى بالأحكام الصادرة للصالح",
+            "بيان عددى بالأحكام الصادرة للضد",
+            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+        ],
+        use_container_width=True
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
 
         office = st.text_input(
             "ديوان عام منطقة",
@@ -2625,82 +2657,49 @@ elif st.session_state.page == "reports":
             "اسم المحامى"
         )
 
-    with info2:
-
         from_date = st.date_input(
             "من تاريخ"
         )
+
+    with col2:
 
         to_date = st.date_input(
             "إلى تاريخ"
         )
 
-    st.markdown("---")
+        subject_search = st.text_input(
+            "موضوع الدعوى (اختيارى)"
+        )
 
-    report_group = st.radio(
-        "نوع التقرير",
-        [
-            "تقارير الدعاوى",
-            "تقارير الأحكام",
-            "التقارير العددية"
-        ],
-        horizontal=True
-    )
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    subject_search = ""
+    b1, b2 = st.columns(2)
 
-    if report_group == "تقارير الدعاوى":
+    with b1:
 
-        subject_search = st.text_input(
-            "موضوع الدعوى (اختيارى)"
+        show_report = st.button(
+            "📄 عرض التقرير",
+            type="primary",
+            use_container_width=True
         )
 
-        report_type = st.selectbox(
-            "التقرير",
-            [
-                "بيان بجميع الدعاوى المتداولة",
-                "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
-            ]
-        )
+    with b2:
 
-    elif report_group == "تقارير الأحكام":
-
-        subject_search = st.text_input(
-            "موضوع الدعوى (اختيارى)"
-        )
-
-        report_type = st.selectbox(
-            "التقرير",
-            [
-                "بيان بجميع الأحكام الصادرة",
-                "بيان بالأحكام الصادرة للصالح",
-                "بيان بالأحكام الصادرة للضد",
-                "بيان الأحكام الصادرة حسب موضوع الدعوى"
-            ]
-        )
-
-    else:
-
-        subject_search = st.text_input(
-            "موضوع الدعوى (اختيارى)"
-        )
-
-        report_type = st.selectbox(
-            "التقرير",
-            [
-                "بيان عددى بجميع الدعاوى المتداولة",
-                "بيان عددى بالدعاوى حسب موضوع الدعوى",
-                "بيان عددى بجميع الأحكام الصادرة",
-                "بيان عددى بالأحكام الصادرة للصالح",
-                "بيان عددى بالأحكام الصادرة للضد",
-                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
-            ]
-        )
+        if st.button(
+            "⬅ العودة للرئيسية",
+            use_container_width=True
+        ):
+            st.session_state.page = "home"
+            st.rerun()
 
     st.divider()
+
+    if show_report:
+
         # ==================================================
+        # ======================
         # ==================================================
 # تقارير الدعاوى المتداولة
 # ==================================================
