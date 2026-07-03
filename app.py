@@ -2820,4 +2820,80 @@ elif st.session_state.page == "reports":
                 use_container_width=True,
                 hide_index=True
             )
+            # ==================================================
+# أزرار العمليات
+# ==================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+b1, b2, b3 = st.columns([1,1,2])
+
+with b1:
+
+    show_report = st.button(
+        "📄 عرض التقرير",
+        use_container_width=True
+    )
+
+with b2:
+
+    if st.button(
+        "⬅ العودة للقائمة السابقة",
+        use_container_width=True
+    ):
+        st.session_state.page = "home"
+        st.rerun()
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# لا يظهر التقرير إلا بعد الضغط على زر عرض التقرير
+if show_report:
+
+    rows_word = locals().get("rows_word", [])
+    headers = locals().get("headers", [])
+
+    st.markdown("---")
+
+    st.markdown(f"""
+    <div style="
+    background:#ffffff;
+    color:black;
+    border:2px solid #000;
+    padding:20px;
+    border-radius:8px;
+    ">
+
+    <div style="text-align:center;font-size:24px;font-weight:bold">
+    الهيئة القومية للتأمين الاجتماعى
+    </div>
+
+    <div style="text-align:center;font-size:20px;font-weight:bold">
+    الإدارة العامة للشئون القانونية
+    </div>
+
+    <div style="text-align:center;font-size:18px;font-weight:bold">
+    ديوان عام منطقة / {office}
+    </div>
+
+    <br>
+
+    <div style="text-align:center;font-size:22px;font-weight:bold">
+    {report_type}
+    </div>
+
+    <div style="text-align:center;font-size:17px">
+    خلال الفترة من
+    {from_date.strftime("%d/%m/%Y")}
+    حتى
+    {to_date.strftime("%d/%m/%Y")}
+    </div>
+
+    <div style="text-align:center;font-size:17px">
+    طرف الأستاذ / {lawyer}
+    </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
             
