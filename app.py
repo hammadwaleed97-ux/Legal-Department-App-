@@ -2597,27 +2597,31 @@ elif st.session_state.page == "reports":
     st.markdown("""
     <div style="
         background:#4E342E;
+        color:white;
         border:2px solid gold;
-        border-radius:18px;
+        border-radius:15px;
         padding:15px;
         text-align:center;
-        color:white;
         font-size:32px;
         font-weight:bold;
-        box-shadow:0 0 15px rgba(255,215,0,.35);
     ">
-        📊 التقارير
+        📊 إدارة التقارير
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # =====================================
-    # نوع التقرير أولاً
-    # =====================================
+    st.markdown("""
+    <div style="
+        background:#FFF8E1;
+        border:2px solid #C9A227;
+        border-radius:12px;
+        padding:15px;
+    ">
+    """, unsafe_allow_html=True)
 
     report_type = st.selectbox(
-        "نوع التقرير",
+        "📑 البيان",
         [
 
             "بيان بجميع الدعاوى المتداولة",
@@ -2636,14 +2640,13 @@ elif st.session_state.page == "reports":
             "بيان عددى بالأحكام الصادرة للضد",
             "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
 
-        ]
+        ],
+        use_container_width=True
     )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    col1, col2 = st.columns(2)
 
-    c1, c2 = st.columns(2)
-
-    with c1:
+    with col1:
 
         office = st.text_input(
             "ديوان عام منطقة",
@@ -2658,7 +2661,7 @@ elif st.session_state.page == "reports":
             "من تاريخ"
         )
 
-    with c2:
+    with col2:
 
         to_date = st.date_input(
             "إلى تاريخ"
@@ -2668,560 +2671,32 @@ elif st.session_state.page == "reports":
             "موضوع الدعوى (اختيارى)"
         )
 
+    st.markdown("</div>", unsafe_allow_html=True)
+
     st.markdown("<br>", unsafe_allow_html=True)
 
-    show_report = st.button(
-        "📑 عرض التقرير",
-        use_container_width=True
-    )
+    b1, b2 = st.columns(2)
+
+    with b1:
+
+        show_report = st.button(
+            "📄 عرض التقرير",
+            type="primary",
+            use_container_width=True
+        )
+
+    with b2:
+
+        if st.button(
+            "⬅ العودة للرئيسية",
+            use_container_width=True
+        ):
+            st.session_state.page = "home"
+            st.rerun()
 
     st.divider()
 
     if show_report:
-                # ==================================================
+
+        # ==================================================
         # تقارير الدعاوى المتداولة
-        # ==================================================
-
-        if report_type in (
-            "بيان بجميع الدعاوى المتداولة",
-            "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
-        ):
-
-            sql = """
-            SELECT
-                c.case_number,
-                c.judicial_year,
-                c.circuit,
-                c.case_category,
-                c.court_type || ' ' || c.court_name,
-                c.mission,
-                c.plaintiff,
-                c.defendant,
-                c.subject,
-                c.notes,
-
-                (
-                    SELECT session_date
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) last_session,
-
-                (
-                    SELECT procedure
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) procedure,
-
-                (
-                    SELECT roll_number
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) roll_number
-
-            FROM cases c
-            WHERE 1=1
-            """
-
-            params = []
-
-            if subject_search:
-
-                sql += " AND c.subject LIKE ? "
-                params.append(f"%{subject_search}%")
-
-            sql += """
-            AND EXISTS(
-
-                SELECT 1
-                FROM sessions s
-                WHERE s.case_id=c.id
-                AND DATE(s.session_date)
-                BETWEEN DATE(?) AND DATE(?)
-
-            )
-            """
-
-            params.append(from_date.strftime("%Y-%m-%d"))
-            params.append(to_date.strftime("%Y-%m-%d"))
-
-            sql += " ORDER BY c.case_number "
-
-            cur.execute(sql, params)
-
-            rows = cur.fetchall()
-
-            headers = [
-                "م",
-                "رقم القضية",
-                "السنة",
-                "الدائرة",
-                "نوع القضية",
-                "المحكمة",
-                "المأمورية",
-                "الخصوم",
-                "موضوع الدعوى",
-                "آخر جلسة",
-                "الإجراء",
-                "ملاحظات"
-            ]
-
-            data = []
-            rows_word = []
-
-            serial = 1
-
-            for r in rows:
-
-                if r[12] == "حكم":
-                    continue
-
-                item = {
-                    "م": serial,
-                    "رقم القضية": r[0],
-                    "السنة": r[1],
-                    "الدائرة": r[2],
-                    "نوع القضية": r[3] or "-",
-                    "المحكمة": r[4],
-                    "المأمورية": r[5] or "-",
-                    "الخصوم": f"{r[6] or '-'}\nضــــد\n{r[7] or '-'}",
-                    "موضوع الدعوى": r[8] or "-",
-                    "آخر جلسة": r[10] or "-",
-                    "الإجراء": r[11] or "-",
-                    "ملاحظات": r[9] or "-"
-                }
-
-                data.append(item)
-
-                rows_word.append([
-                    item["م"],
-                    item["رقم القضية"],
-                    item["السنة"],
-                    item["الدائرة"],
-                    item["نوع القضية"],
-                    item["المحكمة"],
-                    item["المأمورية"],
-                    item["الخصوم"],
-                    item["موضوع الدعوى"],
-                    item["آخر جلسة"],
-                    item["الإجراء"],
-                    item["ملاحظات"]
-                ])
-
-                serial += 1
-
-            st.dataframe(
-                data,
-                use_container_width=True,
-                hide_index=True
-            )
-            # ==================================================
-# أزرار العمليات
-# ==================================================
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-b1, b2, b3 = st.columns([1,1,2])
-
-with b1:
-
-    show_report = st.button(
-        "📄 عرض التقرير",
-        use_container_width=True
-    )
-
-with b2:
-
-    if st.button(
-        "⬅ العودة للقائمة السابقة",
-        use_container_width=True
-    ):
-        st.session_state.page = "home"
-        st.rerun()
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# لا يظهر التقرير إلا بعد الضغط على زر عرض التقرير
-if show_report:
-
-    rows_word = locals().get("rows_word", [])
-    headers = locals().get("headers", [])
-
-    st.markdown("---")
-
-    st.markdown(f"""
-    <div style="
-    background:#ffffff;
-    color:black;
-    border:2px solid #000;
-    padding:20px;
-    border-radius:8px;
-    ">
-
-    <div style="text-align:center;font-size:24px;font-weight:bold">
-    الهيئة القومية للتأمين الاجتماعى
-    </div>
-
-    <div style="text-align:center;font-size:20px;font-weight:bold">
-    الإدارة العامة للشئون القانونية
-    </div>
-
-    <div style="text-align:center;font-size:18px;font-weight:bold">
-    ديوان عام منطقة / {office}
-    </div>
-
-    <br>
-
-    <div style="text-align:center;font-size:22px;font-weight:bold">
-    {report_type}
-    </div>
-
-    <div style="text-align:center;font-size:17px">
-    خلال الفترة من
-    {from_date.strftime("%d/%m/%Y")}
-    حتى
-    {to_date.strftime("%d/%m/%Y")}
-    </div>
-
-    <div style="text-align:center;font-size:17px">
-    طرف الأستاذ / {lawyer}
-    </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-        # ==================================================
-    # عرض التقرير
-    # ==================================================
-
-    if rows_word:
-
-        st.dataframe(
-            data,
-            use_container_width=True,
-            hide_index=True
-        )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    # ==========================================
-    # Word
-    # ==========================================
-
-    with c1:
-
-        if rows_word:
-
-            word_file = create_word_report(
-                report_title=report_type,
-                office=office,
-                lawyer=lawyer,
-                from_date=from_date,
-                to_date=to_date,
-                headers=headers,
-                rows=rows_word
-            )
-
-            st.download_button(
-                "📝 تحميل Word",
-                data=word_file,
-                file_name=f"{report_type}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
-
-    # ==========================================
-    # Excel
-    # ==========================================
-
-    with c2:
-
-        import pandas as pd
-        from io import BytesIO
-
-        if rows_word:
-
-            df = pd.DataFrame(rows_word, columns=headers)
-
-            excel = BytesIO()
-
-            with pd.ExcelWriter(
-                excel,
-                engine="openpyxl"
-            ) as writer:
-
-                df.to_excel(
-                    writer,
-                    index=False,
-                    sheet_name="التقرير"
-                )
-
-            excel.seek(0)
-
-            st.download_button(
-                "📊 تحميل Excel",
-                data=excel,
-                file_name=f"{report_type}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-            # ==========================================
-# PDF
-# ==========================================
-
-with c3:
-
-    if rows_word:
-
-        pdf_file = create_pdf_report(
-            report_title=report_type,
-            office=office,
-            lawyer=lawyer,
-            from_date=from_date,
-            to_date=to_date,
-            headers=headers,
-            rows=rows_word
-        )
-
-        st.download_button(
-            "📄 تحميل PDF",
-            data=pdf_file,
-            file_name=f"{report_type}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-
-    else:
-
-        st.button(
-            "📄 تحميل PDF",
-            disabled=True,
-            use_container_width=True
-        )
-        # ==================================================
-# خاتمة التقرير
-# ==================================================
-
-if show_report:
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div style="
-    background:white;
-    color:black;
-    border:2px solid #000;
-    border-top:none;
-    padding:25px;
-    border-radius:0 0 8px 8px;
-    ">
-
-    <div style="text-align:right;font-size:18px;font-weight:bold">
-    وتفضلوا بقبول وافر الاحترام ،،،
-    </div>
-
-    <br><br>
-
-    <table style="width:100%;border:none">
-    <tr>
-
-    <td style="width:50%;text-align:center;font-size:18px;font-weight:bold">
-    عضو الإدارة
-    </td>
-
-    <td style="width:50%;text-align:center;font-size:18px;font-weight:bold">
-    مدير الإدارة
-    </td>
-
-    </tr>
-
-    <tr>
-
-    <td style="height:80px"></td>
-
-    <td></td>
-
-    </tr>
-
-    <tr>
-
-    <td colspan="2"
-    style="
-    text-align:center;
-    font-size:20px;
-    font-weight:bold;
-    ">
-    مدير عام الإدارات القانونية
-    </td>
-
-    </tr>
-
-    </table>
-
-    <br>
-
-    <div style="
-    text-align:right;
-    font-size:16px;
-    font-weight:bold;
-    ">
-    تحريراً فى :
-    """ + datetime.now().strftime("%d/%m/%Y") + """
-    </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
-
-if st.button(
-    "⬅ العودة للرئيسية",
-    use_container_width=True,
-    key="reports_home"
-):
-    st.session_state.page = "home"
-    st.rerun()
-    # ==========================================
-# طباعة
-# ==========================================
-
-with c4:
-
-    if rows_word:
-
-        html_table = "<table border='1' style='border-collapse:collapse;width:100%;font-size:12px'>"
-
-        html_table += "<tr>"
-
-        for h in headers:
-            html_table += f"<th>{h}</th>"
-
-        html_table += "</tr>"
-
-        for row in rows_word:
-
-            html_table += "<tr>"
-
-            for item in row:
-                html_table += f"<td>{item}</td>"
-
-            html_table += "</tr>"
-
-        html_table += "</table>"
-
-        st.components.v1.html(
-            f"""
-            <script>
-
-            function PrintReport(){{
-
-                var w=window.open("","","width=1200,height=900");
-
-                w.document.write(`
-                <html dir='rtl'>
-                <head>
-
-                <title>{report_type}</title>
-
-                <style>
-
-                body{{
-                    font-family:Arial;
-                    direction:rtl;
-                    margin:20px;
-                }}
-
-                h2{{
-                    text-align:center;
-                }}
-
-                table{{
-                    width:100%;
-                    border-collapse:collapse;
-                }}
-
-                th,td{{
-                    border:1px solid black;
-                    padding:6px;
-                    text-align:center;
-                }}
-
-                th{{
-                    background:#FFF2CC;
-                }}
-
-                </style>
-
-                </head>
-
-                <body>
-
-                <h2>الهيئة القومية للتأمين الاجتماعى</h2>
-
-                <h3 style="text-align:center">
-                الإدارة العامة للشئون القانونية
-                </h3>
-
-                <h3 style="text-align:center">
-                ديوان عام منطقة {office}
-                </h3>
-
-                <h3 style="text-align:center">
-                {report_type}
-                </h3>
-
-                <p style="text-align:center">
-                خلال الفترة من
-                {from_date.strftime("%d/%m/%Y")}
-                إلى
-                {to_date.strftime("%d/%m/%Y")}
-                </p>
-
-                <p style="text-align:center">
-                طرف الأستاذ /
-                {lawyer}
-                </p>
-
-                {html_table}
-
-                </body>
-
-                </html>
-                `);
-
-                w.document.close();
-
-                w.print();
-
-            }
-
-            PrintReport();
-
-            </script>
-            """,
-            height=0
-        )
-
-        st.button(
-            "🖨 طباعة التقرير",
-            use_container_width=True,
-            disabled=True,
-            key="printed"
-        )
-
-    else:
-
-        st.button(
-            "🖨 طباعة",
-            disabled=True,
-            use_container_width=True
-        )
