@@ -3071,3 +3071,12 @@ if show_report:
         </div>
         """, unsafe_allow_html=True)
             st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True,
+        key="reports_home"
+    ):
+        st.session_state.page = "home"
+        st.rerun()
