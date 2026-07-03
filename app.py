@@ -2588,3 +2588,77 @@ elif st.session_state.page == "case_details":
             st.success("تم حفظ بيانات الحكم")
 
             st.rerun()
+            # ==================================================
+# قسم التقارير
+# ==================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#4E342E;
+    padding:15px;
+    border-radius:15px;
+    border:2px solid gold;
+    text-align:center;
+    color:white;
+    font-size:30px;
+    font-weight:bold;
+    ">
+    📊 التقارير
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        office = st.text_input(
+            "ديوان عام منطقة",
+            value="البحيرة"
+        )
+
+        lawyer = st.text_input(
+            "اسم المحامى"
+        )
+
+        from_date = st.date_input(
+            "من تاريخ"
+        )
+
+    with c2:
+
+        to_date = st.date_input(
+            "إلى تاريخ"
+        )
+
+        subject_search = st.text_input(
+            "موضوع الدعوى (اختيارى)"
+        )
+
+        report_type = st.selectbox(
+            "نوع التقرير",
+            [
+
+                "بيان بجميع الدعاوى المتداولة",
+                "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+
+                "بيان بجميع الأحكام الصادرة",
+                "بيان بالأحكام الصادرة للصالح",
+                "بيان بالأحكام الصادرة للضد",
+                "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+                "بيان عددى بجميع الدعاوى المتداولة",
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+                "بيان عددى بجميع الأحكام الصادرة",
+                "بيان عددى بالأحكام الصادرة للصالح",
+                "بيان عددى بالأحكام الصادرة للضد",
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+            ]
+        )
+
+    st.divider()
