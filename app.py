@@ -2594,611 +2594,303 @@ elif st.session_state.page == "case_details":
 
 elif st.session_state.page == "reports":
 
-    st.markdown("""
-    <div style="
-        background:#4E342E;
-        color:white;
-        border:2px solid gold;
-        border-radius:15px;
-        padding:15px;
-        text-align:center;
-        font-size:32px;
-        font-weight:bold;
-    ">
-        📊 إدارة التقارير
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("📊 التقارير")
+    st.markdown("", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
 
-    st.markdown("""
-    <div style="
-        background:#FFF8E1;
-        border:2px solid #C9A227;
-        border-radius:12px;
-        padding:15px;
-    ">
-    """, unsafe_allow_html=True)
+    with c1:
+        office = st.text_input("ديوان عام منطقة", value="البحيرة")
+        lawyer = st.text_input("اسم المحامى")
+        from_date = st.date_input("من تاريخ")
 
-    report_type = st.selectbox(
-        "📑 البيان",
-        [
+    with c2:
+        to_date = st.date_input("إلى تاريخ")
+        subject_search = st.text_input("موضوع الدعوى (اختيارى)")
 
-            "بيان بجميع الدعاوى المتداولة",
-            "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
-
-            "بيان بجميع الأحكام الصادرة",
-            "بيان بالأحكام الصادرة للصالح",
-            "بيان بالأحكام الصادرة للضد",
-            "بيان الأحكام الصادرة حسب موضوع الدعوى",
-
-            "بيان عددى بجميع الدعاوى المتداولة",
-            "بيان عددى بالدعاوى حسب موضوع الدعوى",
-
-            "بيان عددى بجميع الأحكام الصادرة",
-            "بيان عددى بالأحكام الصادرة للصالح",
-            "بيان عددى بالأحكام الصادرة للضد",
-            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
-
-        ],
-        use_container_width=True
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        office = st.text_input(
-            "ديوان عام منطقة",
-            value="البحيرة"
+        report_type = st.selectbox(
+            "نوع التقرير",
+            [
+                "بيان بجميع الدعاوى المتداولة",
+                "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+                "بيان بجميع الأحكام الصادرة",
+                "بيان بالأحكام الصادرة للصالح",
+                "بيان بالأحكام الصادرة للضد",
+                "بيان الأحكام الصادرة حسب موضوع الدعوى",
+                "بيان عددى بجميع الدعاوى المتداولة",
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+                "بيان عددى بجميع الأحكام الصادرة",
+                "بيان عددى بالأحكام الصادرة للصالح",
+                "بيان عددى بالأحكام الصادرة للضد",
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+            ]
         )
-
-        lawyer = st.text_input(
-            "اسم المحامى"
-        )
-
-        from_date = st.date_input(
-            "من تاريخ"
-        )
-
-    with col2:
-
-        to_date = st.date_input(
-            "إلى تاريخ"
-        )
-
-        subject_search = st.text_input(
-            "موضوع الدعوى (اختيارى)"
-        )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    b1, b2 = st.columns(2)
-
-    with b1:
-
-        show_report = st.button(
-            "📄 عرض التقرير",
-            type="primary",
-            use_container_width=True
-        )
-
-    with b2:
-
-        if st.button(
-            "⬅ العودة للرئيسية",
-            use_container_width=True
-        ):
-            st.session_state.page = "home"
-            st.rerun()
 
     st.divider()
 
-    if show_report:
+    rows_word = []
+    headers = []
 
-        # ==================================================
-        # ======================
-        # ==================================================
-# تقارير الدعاوى المتداولة
-# ==================================================
+    # ==================================================
+    # تقارير الدعاوى المتداولة
+    # ==================================================
 
-   if report_type in (
-            "بيان بجميع الدعاوى المتداولة",
-            "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
-        ):
+    if report_type in (
+        "بيان بجميع الدعاوى المتداولة",
+        "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
+    ):
 
-            sql = """
-            SELECT
-                c.case_number,
-                c.judicial_year,
-                c.circuit,
-                c.case_category,
-                c.court_type || ' ' || c.court_name,
-                c.mission,
-                c.plaintiff,
-                c.defendant,
-                c.subject,
-                c.notes,
-                (
-                    SELECT session_date
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) AS last_session,
+        sql = """
+        SELECT
+            c.case_number,
+            c.judicial_year,
+            c.circuit,
+            c.case_category,
+            c.court_type || ' ' || c.court_name,
+            c.mission,
+            c.plaintiff,
+            c.defendant,
+            c.subject,
+            c.notes,
+            s.session_date,
+            s.procedure,
+            s.roll_number
+        FROM cases c
+        INNER JOIN sessions s
+        ON s.id=(
+            SELECT id
+            FROM sessions
+            WHERE case_id=c.id
+            ORDER BY session_date DESC,id DESC
+            LIMIT 1
+        )
+        WHERE DATE(s.session_date)
+        BETWEEN DATE(?) AND DATE(?)
+        """
 
-                (
-                    SELECT procedure
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) AS procedure,
+        params = [
+            from_date.strftime("%Y-%m-%d"),
+            to_date.strftime("%Y-%m-%d")
+        ]
 
-                (
-                    SELECT roll_number
-                    FROM sessions
-                    WHERE case_id=c.id
-                    ORDER BY session_date DESC,id DESC
-                    LIMIT 1
-                ) AS roll_number
+        if report_type == "بيان بالدعاوى المتداولة حسب موضوع الدعوى":
+            if subject_search:
+                sql += " AND c.subject LIKE ? "
+                params.append(f"%{subject_search}%")
 
-            FROM cases c
-            WHERE 1=1
-            """
+        sql += " ORDER BY s.session_date DESC"
 
-            params=[]
+        cur.execute(sql, params)
+        rows = cur.fetchall()
 
-            if report_type=="بيان بالدعاوى المتداولة حسب موضوع الدعوى":
-                if subject_search:
-                    sql+=" AND c.subject LIKE ? "
-                    params.append(f"%{subject_search}%")
+        headers = [
+            "م",
+            "رقم القضية",
+            "السنة",
+            "الدائرة",
+            "نوع القضية",
+            "المحكمة",
+            "المأمورية",
+            "الخصوم",
+            "موضوع الدعوى",
+            "آخر جلسة",
+            "الإجراء",
+            "ملاحظات"
+        ]
 
-            sql += """
-            AND EXISTS(
-                SELECT 1
-                FROM sessions s
-                WHERE s.case_id=c.id
-                AND DATE(s.session_date)
-                BETWEEN DATE(?) AND DATE(?)
-            )
-            """
+        data = []
+        serial = 1
 
-            params.append(from_date.strftime("%Y-%m-%d"))
-            params.append(to_date.strftime("%Y-%m-%d"))
+        for r in rows:
 
-            sql+=" ORDER BY c.case_number "
+            # ❗ الحكم يتم التعرف عليه من roll_number فقط
+            if r[12] == "حكم":
+                continue
 
-            cur.execute(sql,params)
+            row = {
+                "م": serial,
+                "رقم القضية": r[0],
+                "السنة": r[1],
+                "الدائرة": r[2],
+                "نوع القضية": r[3] or "-",
+                "المحكمة": r[4],
+                "المأمورية": r[5] or "-",
+                "الخصوم": f"{r[6] or '-'}\nضد\n{r[7] or '-'}",
+                "موضوع الدعوى": r[8] or "-",
+                "آخر جلسة": r[10] or "-",
+                "الإجراء": r[11] or "-",
+                "ملاحظات": r[9] or "-"
+            }
 
-            rows=cur.fetchall()
+            data.append(row)
 
-            if rows:
+            rows_word.append(list(row.values()))
+            serial += 1
 
-                headers=[
-                    "م",
-                    "رقم القضية",
-                    "السنة",
-                    "الدائرة",
-                    "نوع القضية",
-                    "المحكمة",
-                    "المأمورية",
-                    "الخصوم",
-                    "موضوع الدعوى",
-                    "آخر جلسة",
-                    "الإجراء",
-                    "ملاحظات"
-                ]
+        st.dataframe(data, use_container_width=True, hide_index=True)
 
-                data=[]
-                rows_word=[]
-                serial=1
+    # ==================================================
+    # تقارير الأحكام
+    # ==================================================
 
-                for r in rows:
+    elif report_type in (
+        "بيان بجميع الأحكام الصادرة",
+        "بيان بالأحكام الصادرة للصالح",
+        "بيان بالأحكام الصادرة للضد",
+        "بيان الأحكام الصادرة حسب موضوع الدعوى"
+    ):
 
-                    if r[12]=="حكم":
-                        continue
+        sql = """
+        SELECT
+            c.case_number,
+            c.judicial_year,
+            c.circuit,
+            c.case_category,
+            c.court_type || ' ' || c.court_name,
+            c.mission,
+            c.plaintiff,
+            c.defendant,
+            c.subject,
+            c.notes,
+            s.session_date,
+            s.procedure,
+            COALESCE(s.judgment_result,'')
+        FROM cases c
+        INNER JOIN sessions s
+        ON s.id=(
+            SELECT id
+            FROM sessions
+            WHERE case_id=c.id
+            AND roll_number='حكم'
+            ORDER BY session_date DESC,id DESC
+            LIMIT 1
+        )
+        WHERE DATE(s.session_date)
+        BETWEEN DATE(?) AND DATE(?)
+        """
 
-                    row={
+        params = [
+            from_date.strftime("%Y-%m-%d"),
+            to_date.strftime("%Y-%m-%d")
+        ]
 
-                        "م":serial,
-                        "رقم القضية":r[0],
-                        "السنة":r[1],
-                        "الدائرة":r[2],
-                        "نوع القضية":r[3] or "-",
-                        "المحكمة":r[4],
-                        "المأمورية":r[5] or "-",
-                        "الخصوم":f"{r[6] or '-'}\nضــــــد\n{r[7] or '-'}",
-                        "موضوع الدعوى":r[8] or "-",
-                        "آخر جلسة":r[10] or "-",
-                        "الإجراء":r[11] or "-",
-                        "ملاحظات":r[9] or "-"
+        if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
+            if subject_search:
+                sql += " AND c.subject LIKE ? "
+                params.append(f"%{subject_search}%")
 
-                    }
+        sql += " ORDER BY s.session_date DESC"
 
-                    data.append(row)
+        cur.execute(sql, params)
+        rows = cur.fetchall()
 
-                    rows_word.append([
+        headers = [
+            "م",
+            "رقم القضية",
+            "السنة",
+            "الدائرة",
+            "نوع القضية",
+            "المحكمة",
+            "المأمورية",
+            "الخصوم",
+            "موضوع الدعوى",
+            "تاريخ الحكم",
+            "منطوق الحكم",
+            "النتيجة",
+            "ملاحظات"
+        ]
 
-                        row["م"],
-                        row["رقم القضية"],
-                        row["السنة"],
-                        row["الدائرة"],
-                        row["نوع القضية"],
-                        row["المحكمة"],
-                        row["المأمورية"],
-                        row["الخصوم"],
-                        row["موضوع الدعوى"],
-                        row["آخر جلسة"],
-                        row["الإجراء"],
-                        row["ملاحظات"]
+        data = []
+        serial = 1
 
-                    ])
+        for r in rows:
 
-                    serial+=1
+            result = r[12] or ""
 
-                st.dataframe(
-                    data,
-                    use_container_width=True,
-                    hide_index=True
-                )
+            if report_type == "بيان بالأحكام الصادرة للصالح" and result != "لصالح الهيئة":
+                continue
 
-            else:
+            if report_type == "بيان بالأحكام الصادرة للضد" and result != "ضد الهيئة":
+                continue
 
-                st.warning("لا توجد دعاوى خلال الفترة المحددة.")
-                # ==================================================
-# بيان الأحكام الصادرة
-# ==================================================
+            row = {
+                "م": serial,
+                "رقم القضية": r[0],
+                "السنة": r[1],
+                "الدائرة": r[2],
+                "نوع القضية": r[3] or "-",
+                "المحكمة": r[4],
+                "المأمورية": r[5] or "-",
+                "الخصوم": f"{r[6] or '-'}\nضد\n{r[7] or '-'}",
+                "موضوع الدعوى": r[8] or "-",
+                "تاريخ الحكم": r[10] or "-",
+                "منطوق الحكم": r[11] or "-",
+                "النتيجة": result or "-",
+                "ملاحظات": r[9] or "-"
+            }
 
-        elif report_type in (
-            "بيان بجميع الأحكام الصادرة",
-            "بيان بالأحكام الصادرة للصالح",
-            "بيان بالأحكام الصادرة للضد",
-            "بيان الأحكام الصادرة حسب موضوع الدعوى"
-        ):
+            data.append(row)
+            rows_word.append(list(row.values()))
+            serial += 1
 
-            sql = """
-            SELECT
-                c.case_number,
-                c.judicial_year,
-                c.circuit,
-                c.case_category,
-                c.court_type || ' ' || c.court_name,
-                c.mission,
-                c.plaintiff,
-                c.defendant,
-                c.subject,
-                c.notes,
-                s.session_date,
-                s.procedure,
-                COALESCE(s.judgment_result,'')
-            FROM cases c
-            INNER JOIN sessions s
-            ON s.id=(
-                SELECT id
-                FROM sessions
-                WHERE case_id=c.id
-                AND roll_number='حكم'
-                ORDER BY session_date DESC,id DESC
-                LIMIT 1
-            )
-            WHERE DATE(s.session_date)
-            BETWEEN DATE(?) AND DATE(?)
-            """
+        st.dataframe(data, use_container_width=True, hide_index=True)
 
-            params=[
-                from_date.strftime("%Y-%m-%d"),
-                to_date.strftime("%Y-%m-%d")
-            ]
+    # ==================================================
+    # التقارير العددية
+    # ==================================================
 
-            if report_type=="بيان الأحكام الصادرة حسب موضوع الدعوى":
-                if subject_search:
-                    sql+=" AND c.subject LIKE ? "
-                    params.append(f"%{subject_search}%")
+    elif report_type.startswith("بيان عددى"):
 
-            sql+=" ORDER BY s.session_date DESC"
+        sql = """
+        SELECT c.subject, s.roll_number, COALESCE(s.judgment_result,'')
+        FROM cases c
+        LEFT JOIN sessions s
+        ON s.id=(
+            SELECT id
+            FROM sessions
+            WHERE case_id=c.id
+            ORDER BY session_date DESC,id DESC
+            LIMIT 1
+        )
+        WHERE 1=1
+        """
 
-            cur.execute(sql,params)
+        params = []
 
-            rows=cur.fetchall()
+        cur.execute(sql, params)
+        rows = cur.fetchall()
 
-            if rows:
+        total = 0
 
-                headers=[
-                    "م",
-                    "رقم القضية",
-                    "السنة",
-                    "الدائرة",
-                    "نوع القضية",
-                    "المحكمة",
-                    "المأمورية",
-                    "الخصوم",
-                    "موضوع الدعوى",
-                    "تاريخ الحكم",
-                    "منطوق الحكم",
-                    "النتيجة",
-                    "ملاحظات"
-                ]
+        for subject, roll_number, judgment_result in rows:
 
-                data=[]
-                rows_word=[]
-                serial=1
-
-                for r in rows:
-
-                    result=r[12].strip() if r[12] else ""
-
-                    if report_type=="بيان بالأحكام الصادرة للصالح":
-                        if result!="لصالح الهيئة":
-                            continue
-
-                    if report_type=="بيان بالأحكام الصادرة للضد":
-                        if result!="ضد الهيئة":
-                            continue
-
-                    row={
-
-                        "م":serial,
-                        "رقم القضية":r[0],
-                        "السنة":r[1],
-                        "الدائرة":r[2],
-                        "نوع القضية":r[3] or "-",
-                        "المحكمة":r[4],
-                        "المأمورية":r[5] or "-",
-                        "الخصوم":f"{r[6] or '-'}\nضــــــد\n{r[7] or '-'}",
-                        "موضوع الدعوى":r[8] or "-",
-                        "تاريخ الحكم":r[10] or "-",
-                        "منطوق الحكم":r[11] or "-",
-                        "النتيجة":result or "-",
-                        "ملاحظات":r[9] or "-"
-
-                    }
-
-                    data.append(row)
-
-                    rows_word.append([
-
-                        row["م"],
-                        row["رقم القضية"],
-                        row["السنة"],
-                        row["الدائرة"],
-                        row["نوع القضية"],
-                        row["المحكمة"],
-                        row["المأمورية"],
-                        row["الخصوم"],
-                        row["موضوع الدعوى"],
-                        row["تاريخ الحكم"],
-                        row["منطوق الحكم"],
-                        row["النتيجة"],
-                        row["ملاحظات"]
-
-                    ])
-
-                    serial+=1
-
-                st.dataframe(
-                    data,
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-            else:
-
-                st.warning("لا توجد أحكام خلال الفترة المحددة.")
-                # ==================================================
-# التقارير العددية
-# ==================================================
-
-        elif report_type.startswith("بيان عددى"):
-
-            sql = """
-            SELECT
-                c.subject,
-                s.roll_number,
-                COALESCE(s.judgment_result,'')
-            FROM cases c
-            LEFT JOIN sessions s
-            ON s.id=(
-                SELECT id
-                FROM sessions
-                WHERE case_id=c.id
-                ORDER BY session_date DESC,id DESC
-                LIMIT 1
-            )
-            WHERE 1=1
-            """
-
-            params=[]
+            roll_number = roll_number or ""
+            judgment_result = judgment_result or ""
 
             if report_type in (
-                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+                "بيان عددى بجميع الدعاوى المتداولة",
+                "بيان عددى بالدعاوى حسب موضوع الدعوى"
+            ):
+                if roll_number != "حكم":
+                    total += 1
+
+            elif report_type in (
+                "بيان عددى بجميع الأحكام الصادرة",
                 "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
             ):
-                if subject_search:
-                    sql+=" AND c.subject LIKE ? "
-                    params.append(f"%{subject_search}%")
+                if roll_number == "حكم":
+                    total += 1
 
-            cur.execute(sql,params)
+            elif report_type == "بيان عددى بالأحكام الصادرة للصالح":
+                if judgment_result == "لصالح الهيئة":
+                    total += 1
 
-            rows=cur.fetchall()
+            elif report_type == "بيان عددى بالأحكام الصادرة للضد":
+                if judgment_result == "ضد الهيئة":
+                    total += 1
 
-            total=0
+        data = [{"البيان": report_type, "العدد": total}]
+        headers = ["البيان", "العدد"]
+        rows_word = [[report_type, total]]
 
-            for subject,roll_number,judgment_result in rows:
-
-                roll_number=str(roll_number or "")
-                judgment_result=str(judgment_result or "")
-
-                if report_type=="بيان عددى بجميع الدعاوى المتداولة":
-
-                    if roll_number!="حكم":
-                        total+=1
-
-                elif report_type=="بيان عددى بالدعاوى حسب موضوع الدعوى":
-
-                    if roll_number!="حكم":
-                        total+=1
-
-                elif report_type=="بيان عددى بجميع الأحكام الصادرة":
-
-                    if roll_number=="حكم":
-                        total+=1
-
-                elif report_type=="بيان عددى بالأحكام الصادرة للصالح":
-
-                    if judgment_result=="لصالح الهيئة":
-                        total+=1
-
-                elif report_type=="بيان عددى بالأحكام الصادرة للضد":
-
-                    if judgment_result=="ضد الهيئة":
-                        total+=1
-
-                elif report_type=="بيان عددى بالأحكام الصادرة حسب موضوع الدعوى":
-
-                    if roll_number=="حكم":
-                        total+=1
-
-            data=[
-                {
-                    "البيان":report_type,
-                    "العدد":total
-                }
-            ]
-
-            headers=[
-                "البيان",
-                "العدد"
-            ]
-
-            rows_word=[
-                [
-                    report_type,
-                    total
-                ]
-            ]
-
-            st.dataframe(
-                data,
-                use_container_width=True,
-                hide_index=True
-            )
-            # ==================================================
-# أزرار التصدير
-# ==================================================
-
-        rows_word = locals().get("rows_word", [])
-        headers = locals().get("headers", [])
-
-        st.divider()
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        with c1:
-
-            st.button(
-                "🖨 طباعة",
-                use_container_width=True,
-                disabled=False
-            )
-
-        with c2:
-
-            st.button(
-                "📊 Excel",
-                use_container_width=True,
-                disabled=False
-            )
-
-        with c3:
-
-            if rows_word:
-
-                word_file = create_word_report(
-                    report_title=report_type,
-                    office=office,
-                    lawyer=lawyer,
-                    from_date=from_date,
-                    to_date=to_date,
-                    headers=headers,
-                    rows=rows_word
-                )
-
-                st.download_button(
-                    "📄 تحميل Word",
-                    data=word_file,
-                    file_name=f"{report_type}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    use_container_width=True
-                )
-
-            else:
-
-                st.button(
-                    "📄 تحميل Word",
-                    disabled=True,
-                    use_container_width=True
-                )
-
-        with c4:
-
-            st.button(
-                "📕 تحميل PDF",
-                use_container_width=True,
-                disabled=False
-            )
-
-        st.divider()
-
-        st.markdown(f"""
-<div style="text-align:center">
-
-<h4>وتفضلوا بقبول وافر الاحترام</h4>
-
-<br>
-
-<table style="width:100%;font-weight:bold">
-
-<tr>
-
-<td style="text-align:center">
-عضو الإدارة
-</td>
-
-<td style="text-align:center">
-مدير عام الإدارات القانونية
-</td>
-
-</tr>
-
-<tr>
-
-<td style="height:60px;"></td>
-
-<td></td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:center">
-{lawyer}
-</td>
-
-<td style="text-align:center">
-............................
-</td>
-
-</tr>
-
-</table>
-
-<br>
-
-تحريراً فى : {datetime.now().strftime("%d/%m/%Y")}
-
-</div>
-
-""", unsafe_allow_html=True)
+        st.dataframe(data, use_container_width=True, hide_index=True)
