@@ -2694,3 +2694,151 @@ elif st.session_state.page == "reports":
     if show_report:
 
         # ==================================================
+        # ==================================================
+# تقارير الدعاوى المتداولة
+# ==================================================
+
+        if report_type in (
+            "بيان بجميع الدعاوى المتداولة",
+            "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
+        ):
+
+            sql = """
+            SELECT
+                c.case_number,
+                c.judicial_year,
+                c.circuit,
+                c.case_category,
+                c.court_type || ' ' || c.court_name,
+                c.mission,
+                c.plaintiff,
+                c.defendant,
+                c.subject,
+                c.notes,
+                (
+                    SELECT session_date
+                    FROM sessions
+                    WHERE case_id=c.id
+                    ORDER BY session_date DESC,id DESC
+                    LIMIT 1
+                ) AS last_session,
+
+                (
+                    SELECT procedure
+                    FROM sessions
+                    WHERE case_id=c.id
+                    ORDER BY session_date DESC,id DESC
+                    LIMIT 1
+                ) AS procedure,
+
+                (
+                    SELECT roll_number
+                    FROM sessions
+                    WHERE case_id=c.id
+                    ORDER BY session_date DESC,id DESC
+                    LIMIT 1
+                ) AS roll_number
+
+            FROM cases c
+            WHERE 1=1
+            """
+
+            params=[]
+
+            if report_type=="بيان بالدعاوى المتداولة حسب موضوع الدعوى":
+                if subject_search:
+                    sql+=" AND c.subject LIKE ? "
+                    params.append(f"%{subject_search}%")
+
+            sql += """
+            AND EXISTS(
+                SELECT 1
+                FROM sessions s
+                WHERE s.case_id=c.id
+                AND DATE(s.session_date)
+                BETWEEN DATE(?) AND DATE(?)
+            )
+            """
+
+            params.append(from_date.strftime("%Y-%m-%d"))
+            params.append(to_date.strftime("%Y-%m-%d"))
+
+            sql+=" ORDER BY c.case_number "
+
+            cur.execute(sql,params)
+
+            rows=cur.fetchall()
+
+            if rows:
+
+                headers=[
+                    "م",
+                    "رقم القضية",
+                    "السنة",
+                    "الدائرة",
+                    "نوع القضية",
+                    "المحكمة",
+                    "المأمورية",
+                    "الخصوم",
+                    "موضوع الدعوى",
+                    "آخر جلسة",
+                    "الإجراء",
+                    "ملاحظات"
+                ]
+
+                data=[]
+                rows_word=[]
+                serial=1
+
+                for r in rows:
+
+                    if r[12]=="حكم":
+                        continue
+
+                    row={
+
+                        "م":serial,
+                        "رقم القضية":r[0],
+                        "السنة":r[1],
+                        "الدائرة":r[2],
+                        "نوع القضية":r[3] or "-",
+                        "المحكمة":r[4],
+                        "المأمورية":r[5] or "-",
+                        "الخصوم":f"{r[6] or '-'}\nضــــــد\n{r[7] or '-'}",
+                        "موضوع الدعوى":r[8] or "-",
+                        "آخر جلسة":r[10] or "-",
+                        "الإجراء":r[11] or "-",
+                        "ملاحظات":r[9] or "-"
+
+                    }
+
+                    data.append(row)
+
+                    rows_word.append([
+
+                        row["م"],
+                        row["رقم القضية"],
+                        row["السنة"],
+                        row["الدائرة"],
+                        row["نوع القضية"],
+                        row["المحكمة"],
+                        row["المأمورية"],
+                        row["الخصوم"],
+                        row["موضوع الدعوى"],
+                        row["آخر جلسة"],
+                        row["الإجراء"],
+                        row["ملاحظات"]
+
+                    ])
+
+                    serial+=1
+
+                st.dataframe(
+                    data,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+            else:
+
+                st.warning("لا توجد دعاوى خلال الفترة المحددة.")
