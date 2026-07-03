@@ -2896,4 +2896,105 @@ if show_report:
     """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
+        # ==================================================
+    # عرض التقرير
+    # ==================================================
+
+    if rows_word:
+
+        st.dataframe(
+            data,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    # ==========================================
+    # Word
+    # ==========================================
+
+    with c1:
+
+        if rows_word:
+
+            word_file = create_word_report(
+                report_title=report_type,
+                office=office,
+                lawyer=lawyer,
+                from_date=from_date,
+                to_date=to_date,
+                headers=headers,
+                rows=rows_word
+            )
+
+            st.download_button(
+                "📝 تحميل Word",
+                data=word_file,
+                file_name=f"{report_type}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+
+    # ==========================================
+    # Excel
+    # ==========================================
+
+    with c2:
+
+        import pandas as pd
+        from io import BytesIO
+
+        if rows_word:
+
+            df = pd.DataFrame(rows_word, columns=headers)
+
+            excel = BytesIO()
+
+            with pd.ExcelWriter(
+                excel,
+                engine="openpyxl"
+            ) as writer:
+
+                df.to_excel(
+                    writer,
+                    index=False,
+                    sheet_name="التقرير"
+                )
+
+            excel.seek(0)
+
+            st.download_button(
+                "📊 تحميل Excel",
+                data=excel,
+                file_name=f"{report_type}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+
+    # ==========================================
+    # PDF
+    # ==========================================
+
+    with c3:
+
+        st.button(
+            "📄 تحميل PDF",
+            disabled=True,
+            use_container_width=True
+        )
+
+    # ==========================================
+    # طباعة
+    # ==========================================
+
+    with c4:
+
+        st.button(
+            "🖨 طباعة",
+            disabled=True,
+            use_container_width=True
+        )
             
