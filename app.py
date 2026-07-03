@@ -2697,6 +2697,3 @@ elif st.session_state.page == "reports":
     st.divider()
 
     if show_report:
-
-        # ==================================================
-        # تقارير الدعاوى المتداولة
