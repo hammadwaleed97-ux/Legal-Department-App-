@@ -3090,3 +3090,138 @@ if st.button(
 ):
     st.session_state.page = "home"
     st.rerun()
+    # ==========================================
+# طباعة
+# ==========================================
+
+with c4:
+
+    if rows_word:
+
+        html_table = "<table border='1' style='border-collapse:collapse;width:100%;font-size:12px'>"
+
+        html_table += "<tr>"
+
+        for h in headers:
+            html_table += f"<th>{h}</th>"
+
+        html_table += "</tr>"
+
+        for row in rows_word:
+
+            html_table += "<tr>"
+
+            for item in row:
+                html_table += f"<td>{item}</td>"
+
+            html_table += "</tr>"
+
+        html_table += "</table>"
+
+        st.components.v1.html(
+            f"""
+            <script>
+
+            function PrintReport(){{
+
+                var w=window.open("","","width=1200,height=900");
+
+                w.document.write(`
+                <html dir='rtl'>
+                <head>
+
+                <title>{report_type}</title>
+
+                <style>
+
+                body{{
+                    font-family:Arial;
+                    direction:rtl;
+                    margin:20px;
+                }}
+
+                h2{{
+                    text-align:center;
+                }}
+
+                table{{
+                    width:100%;
+                    border-collapse:collapse;
+                }}
+
+                th,td{{
+                    border:1px solid black;
+                    padding:6px;
+                    text-align:center;
+                }}
+
+                th{{
+                    background:#FFF2CC;
+                }}
+
+                </style>
+
+                </head>
+
+                <body>
+
+                <h2>الهيئة القومية للتأمين الاجتماعى</h2>
+
+                <h3 style="text-align:center">
+                الإدارة العامة للشئون القانونية
+                </h3>
+
+                <h3 style="text-align:center">
+                ديوان عام منطقة {office}
+                </h3>
+
+                <h3 style="text-align:center">
+                {report_type}
+                </h3>
+
+                <p style="text-align:center">
+                خلال الفترة من
+                {from_date.strftime("%d/%m/%Y")}
+                إلى
+                {to_date.strftime("%d/%m/%Y")}
+                </p>
+
+                <p style="text-align:center">
+                طرف الأستاذ /
+                {lawyer}
+                </p>
+
+                {html_table}
+
+                </body>
+
+                </html>
+                `);
+
+                w.document.close();
+
+                w.print();
+
+            }
+
+            PrintReport();
+
+            </script>
+            """,
+            height=0
+        )
+
+        st.button(
+            "🖨 طباعة التقرير",
+            use_container_width=True,
+            disabled=True,
+            key="printed"
+        )
+
+    else:
+
+        st.button(
+            "🖨 طباعة",
+            disabled=True,
+            use_container_width=True
+        )
