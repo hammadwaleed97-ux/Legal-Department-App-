@@ -2597,11 +2597,11 @@ elif st.session_state.page == "reports":
     st.markdown("""
     <div style="
         background:#4E342E;
-        color:white;
-        border:2px solid gold;
-        border-radius:15px;
         padding:15px;
+        border-radius:15px;
+        border:2px solid gold;
         text-align:center;
+        color:white;
         font-size:32px;
         font-weight:bold;
     ">
@@ -2611,17 +2611,10 @@ elif st.session_state.page == "reports":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("""
-    <div style="
-        background:#FFF8E1;
-        border:2px solid #C9A227;
-        border-radius:12px;
-        padding:15px;
-    ">
-    """, unsafe_allow_html=True)
-
     report_type = st.selectbox(
-        "📑 البيان",
+
+        "📑 اختر البيان",
+
         [
 
             "بيان بجميع الدعاوى المتداولة",
@@ -2641,8 +2634,12 @@ elif st.session_state.page == "reports":
             "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
 
         ],
+
         use_container_width=True
+
     )
+
+    st.markdown("---")
 
     col1, col2 = st.columns(2)
 
@@ -2670,8 +2667,6 @@ elif st.session_state.page == "reports":
         subject_search = st.text_input(
             "موضوع الدعوى (اختيارى)"
         )
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
