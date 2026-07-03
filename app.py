@@ -2589,13 +2589,14 @@ elif st.session_state.page == "case_details":
 
             st.rerun()
             # ==================================================
-# قسم التقارير
+# قسم التقارير (معدل ومظبوط)
 # ==================================================
 
 elif st.session_state.page == "reports":
 
-    st.markdown("📊 التقارير")
-    st.markdown("", unsafe_allow_html=True)
+    st.markdown("""
+    📊 التقارير
+    """, unsafe_allow_html=True)
 
     c1, c2 = st.columns(2)
 
@@ -2613,12 +2614,15 @@ elif st.session_state.page == "reports":
             [
                 "بيان بجميع الدعاوى المتداولة",
                 "بيان بالدعاوى المتداولة حسب موضوع الدعوى",
+
                 "بيان بجميع الأحكام الصادرة",
                 "بيان بالأحكام الصادرة للصالح",
                 "بيان بالأحكام الصادرة للضد",
                 "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
                 "بيان عددى بجميع الدعاوى المتداولة",
                 "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
                 "بيان عددى بجميع الأحكام الصادرة",
                 "بيان عددى بالأحكام الصادرة للصالح",
                 "بيان عددى بالأحكام الصادرة للضد",
@@ -2630,11 +2634,11 @@ elif st.session_state.page == "reports":
 
     rows_word = []
     headers = []
+    data = []
 
     # ==================================================
-    # تقارير الدعاوى المتداولة
+    # الدعاوى المتداولة
     # ==================================================
-
     if report_type in (
         "بيان بجميع الدعاوى المتداولة",
         "بيان بالدعاوى المتداولة حسب موضوع الدعوى"
@@ -2652,18 +2656,20 @@ elif st.session_state.page == "reports":
             c.defendant,
             c.subject,
             c.notes,
+
             s.session_date,
             s.procedure,
             s.roll_number
+
         FROM cases c
         INNER JOIN sessions s
-        ON s.id=(
-            SELECT id
-            FROM sessions
-            WHERE case_id=c.id
-            ORDER BY session_date DESC,id DESC
-            LIMIT 1
-        )
+            ON s.id=(
+                SELECT id
+                FROM sessions
+                WHERE case_id=c.id
+                ORDER BY session_date DESC, id DESC
+                LIMIT 1
+            )
         WHERE DATE(s.session_date)
         BETWEEN DATE(?) AND DATE(?)
         """
@@ -2695,19 +2701,18 @@ elif st.session_state.page == "reports":
             "موضوع الدعوى",
             "آخر جلسة",
             "الإجراء",
-            "ملاحظات"
+            "رقم الرول"
         ]
 
-        data = []
         serial = 1
 
         for r in rows:
 
-            # ❗ الحكم يتم التعرف عليه من roll_number فقط
-            if r[12] == "حكم":
+            # الحكم = رول "حكم"
+            if str(r[12] or "").strip() == "حكم":
                 continue
 
-            row = {
+            item = {
                 "م": serial,
                 "رقم القضية": r[0],
                 "السنة": r[1],
@@ -2715,24 +2720,37 @@ elif st.session_state.page == "reports":
                 "نوع القضية": r[3] or "-",
                 "المحكمة": r[4],
                 "المأمورية": r[5] or "-",
-                "الخصوم": f"{r[6] or '-'}\nضد\n{r[7] or '-'}",
+                "الخصوم": f"{r[6] or '-'}\nضــــد\n{r[7] or '-'}",
                 "موضوع الدعوى": r[8] or "-",
                 "آخر جلسة": r[10] or "-",
                 "الإجراء": r[11] or "-",
-                "ملاحظات": r[9] or "-"
+                "رقم الرول": r[12] or "-"
             }
 
-            data.append(row)
+            data.append(item)
 
-            rows_word.append(list(row.values()))
+            rows_word.append([
+                item["م"],
+                item["رقم القضية"],
+                item["السنة"],
+                item["الدائرة"],
+                item["نوع القضية"],
+                item["المحكمة"],
+                item["المأمورية"],
+                item["الخصوم"],
+                item["موضوع الدعوى"],
+                item["آخر جلسة"],
+                item["الإجراء"],
+                item["رقم الرول"]
+            ])
+
             serial += 1
 
         st.dataframe(data, use_container_width=True, hide_index=True)
 
     # ==================================================
-    # تقارير الأحكام
+    # الأحكام
     # ==================================================
-
     elif report_type in (
         "بيان بجميع الأحكام الصادرة",
         "بيان بالأحكام الصادرة للصالح",
@@ -2752,19 +2770,21 @@ elif st.session_state.page == "reports":
             c.defendant,
             c.subject,
             c.notes,
+
             s.session_date,
             s.procedure,
             COALESCE(s.judgment_result,'')
+
         FROM cases c
         INNER JOIN sessions s
-        ON s.id=(
-            SELECT id
-            FROM sessions
-            WHERE case_id=c.id
-            AND roll_number='حكم'
-            ORDER BY session_date DESC,id DESC
-            LIMIT 1
-        )
+            ON s.id=(
+                SELECT id
+                FROM sessions
+                WHERE case_id=c.id
+                AND roll_number='حكم'
+                ORDER BY session_date DESC, id DESC
+                LIMIT 1
+            )
         WHERE DATE(s.session_date)
         BETWEEN DATE(?) AND DATE(?)
         """
@@ -2773,13 +2793,6 @@ elif st.session_state.page == "reports":
             from_date.strftime("%Y-%m-%d"),
             to_date.strftime("%Y-%m-%d")
         ]
-
-        if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى":
-            if subject_search:
-                sql += " AND c.subject LIKE ? "
-                params.append(f"%{subject_search}%")
-
-        sql += " ORDER BY s.session_date DESC"
 
         cur.execute(sql, params)
         rows = cur.fetchall()
@@ -2800,12 +2813,11 @@ elif st.session_state.page == "reports":
             "ملاحظات"
         ]
 
-        data = []
         serial = 1
 
         for r in rows:
 
-            result = r[12] or ""
+            result = (r[12] or "").strip()
 
             if report_type == "بيان بالأحكام الصادرة للصالح" and result != "لصالح الهيئة":
                 continue
@@ -2821,7 +2833,7 @@ elif st.session_state.page == "reports":
                 "نوع القضية": r[3] or "-",
                 "المحكمة": r[4],
                 "المأمورية": r[5] or "-",
-                "الخصوم": f"{r[6] or '-'}\nضد\n{r[7] or '-'}",
+                "الخصوم": f"{r[6] or '-'}\nضــــد\n{r[7] or '-'}",
                 "موضوع الدعوى": r[8] or "-",
                 "تاريخ الحكم": r[10] or "-",
                 "منطوق الحكم": r[11] or "-",
@@ -2830,24 +2842,26 @@ elif st.session_state.page == "reports":
             }
 
             data.append(row)
+
             rows_word.append(list(row.values()))
             serial += 1
 
         st.dataframe(data, use_container_width=True, hide_index=True)
 
     # ==================================================
-    # التقارير العددية
+    # التقارير العددية + تحليل
     # ==================================================
-
     elif report_type.startswith("بيان عددى"):
 
         sql = """
-        SELECT c.subject, s.roll_number, COALESCE(s.judgment_result,'')
+        SELECT
+            c.subject,
+            s.roll_number,
+            COALESCE(s.judgment_result,'')
         FROM cases c
         LEFT JOIN sessions s
         ON s.id=(
-            SELECT id
-            FROM sessions
+            SELECT id FROM sessions
             WHERE case_id=c.id
             ORDER BY session_date DESC,id DESC
             LIMIT 1
@@ -2855,42 +2869,100 @@ elif st.session_state.page == "reports":
         WHERE 1=1
         """
 
-        params = []
-
-        cur.execute(sql, params)
+        cur.execute(sql)
         rows = cur.fetchall()
 
         total = 0
+        by_subject = {}
 
-        for subject, roll_number, judgment_result in rows:
+        for subject, roll, result in rows:
 
-            roll_number = roll_number or ""
-            judgment_result = judgment_result or ""
+            subject = subject or "غير محدد"
+            roll = roll or ""
+            result = result or ""
 
-            if report_type in (
+            if report_type in [
                 "بيان عددى بجميع الدعاوى المتداولة",
                 "بيان عددى بالدعاوى حسب موضوع الدعوى"
-            ):
-                if roll_number != "حكم":
+            ]:
+                if roll != "حكم":
                     total += 1
 
-            elif report_type in (
-                "بيان عددى بجميع الأحكام الصادرة",
-                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
-            ):
-                if roll_number == "حكم":
+            elif report_type == "بيان عددى بجميع الأحكام الصادرة":
+                if roll == "حكم":
                     total += 1
 
             elif report_type == "بيان عددى بالأحكام الصادرة للصالح":
-                if judgment_result == "لصالح الهيئة":
+                if result == "لصالح الهيئة":
                     total += 1
 
             elif report_type == "بيان عددى بالأحكام الصادرة للضد":
-                if judgment_result == "ضد الهيئة":
+                if result == "ضد الهيئة":
                     total += 1
 
+            # تحليل حسب الموضوع
+            if subject not in by_subject:
+                by_subject[subject] = 0
+            by_subject[subject] += 1
+
         data = [{"البيان": report_type, "العدد": total}]
+
         headers = ["البيان", "العدد"]
         rows_word = [[report_type, total]]
 
         st.dataframe(data, use_container_width=True, hide_index=True)
+
+        st.markdown("### 📊 تحليل حسب الموضوع")
+        st.write(by_subject)
+
+    # ==================================================
+    # أزرار التصدير (مفعّلة)
+    # ==================================================
+    st.divider()
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.button("🖨 طباعة", use_container_width=True)
+
+    with c2:
+        st.button("📊 Excel", use_container_width=True)
+
+    with c3:
+        if rows_word:
+            word_file = create_word_report(
+                report_title=report_type,
+                office=office,
+                lawyer=lawyer,
+                from_date=from_date,
+                to_date=to_date,
+                headers=headers,
+                rows=rows_word
+            )
+
+            st.download_button(
+                "⬇ تحميل Word",
+                data=word_file,
+                file_name=f"{report_type}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                use_container_width=True
+            )
+        else:
+            st.button("⬇ تحميل Word", disabled=True, use_container_width=True)
+
+    with c4:
+        st.button("⬇ تحميل PDF", disabled=True, use_container_width=True)
+
+    st.divider()
+
+    st.write("### وتفضلوا بقبول وافر الاحترام")
+
+    col1, col2 = st.columns(2)
+    col1.write("عضو الإدارة")
+    col2.write("مدير الإدارة")
+
+    st.write(f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}")
+
+    if st.button("⬅ العودة للرئيسية", use_container_width=True):
+        st.session_state.page = "home"
+        st.rerun()
