@@ -2697,14 +2697,6 @@ elif st.session_state.page == "reports":
             ]
         )
 
-    with c2:
-
-        show_report = st.button(
-            "📄 عرض التقرير",
-            use_container_width=True,
-            type="primary"
-        )
-
     with c3:
 
         if st.button(
