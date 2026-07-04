@@ -2679,6 +2679,78 @@ elif st.session_state.page == "reports":
         )
 
     st.markdown("---")
+    # ==========================================
+# أدوات التقرير
+# ==========================================
+
+c1, c2, c3 = st.columns([2,2,1])
+
+with c1:
+
+    export_type = st.selectbox(
+        "📂 نوع الملف",
+        [
+            "Word",
+            "Excel",
+            "PDF"
+        ],
+        key="export_type"
+    )
+
+with c3:
+
+    if st.button(
+        "⬅ رجوع",
+        use_container_width=True,
+        key="back_reports"
+    ):
+        st.session_state.page = "home"
+        st.rerun()
+
+st.divider()
+
+# عرض التقرير بعد الضغط على الزر الموجود بالجزء الأول
+if show_report:
+
+    st.markdown(f"""
+    <div style="
+        background:#FFF8E1;
+        border:2px solid #D4AF37;
+        border-radius:15px;
+        padding:15px;
+        color:black;
+    ">
+    <h2 style="text-align:center;color:#113478;">
+    الهيئة القومية للتأمين الاجتماعى
+    </h2>
+
+    <h3 style="text-align:center;color:#113478;">
+    الإدارة المركزية للشئون القانونية
+    </h3>
+
+    <h3 style="text-align:center;color:#113478;">
+    الإدارة العامة للقضايا
+    </h3>
+
+    <hr>
+
+    <b>ديوان عام منطقة :</b> {office}<br>
+
+    <b>طرف الأستاذ / المحامى :</b> {lawyer}<br>
+
+    <b>الفترة :</b>
+    {from_date.strftime('%d/%m/%Y')}
+    &nbsp;&nbsp;إلى&nbsp;&nbsp;
+    {to_date.strftime('%d/%m/%Y')}
+
+    <hr>
+
+    <h3 style="text-align:center;color:#113478;">
+    {report_type}
+    </h3>
+
+    </div>
+    """, unsafe_allow_html=True)
         # ==========================================================
 # الجزء الثانى : فلاتر التقرير + التواريخ + زر عرض التقرير
 # يوضع بعد عنوان "التقارير" مباشرة
