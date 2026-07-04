@@ -2708,7 +2708,7 @@ elif st.session_state.page == "reports":
 
     st.divider()
 
-    if show_report:
+    if show_report_btn:
 
         st.markdown(f"""
         <div style="
