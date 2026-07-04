@@ -3170,3 +3170,229 @@ elif report_type.startswith("بيان عددى"):
         use_container_width=True,
         hide_index=True
     )
+    # ==================================================
+# أزرار التصدير (Word - Excel - PDF)
+# ==================================================
+
+rows_word = locals().get("rows_word", [])
+headers = locals().get("headers", [])
+
+st.divider()
+
+e1, e2, e3, e4 = st.columns(4)
+
+# ===========================
+# طباعة
+# ===========================
+
+with e1:
+
+    st.button(
+        "🖨 طباعة",
+        use_container_width=True,
+        disabled=True
+    )
+
+# ===========================
+# Excel
+# ===========================
+
+with e2:
+
+    if rows_word:
+
+        df_excel = pd.DataFrame(rows_word, columns=headers)
+
+        excel_buffer = io.BytesIO()
+
+        with pd.ExcelWriter(
+            excel_buffer,
+            engine="openpyxl"
+        ) as writer:
+
+            df_excel.to_excel(
+                writer,
+                index=False,
+                sheet_name="التقرير"
+            )
+
+        excel_buffer.seek(0)
+
+        st.download_button(
+
+            "📊 Excel",
+
+            data=excel_buffer,
+
+            file_name=f"{report_type}.xlsx",
+
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+
+            use_container_width=True
+
+        )
+
+    else:
+
+        st.button(
+            "📊 Excel",
+            disabled=True,
+            use_container_width=True
+        )
+
+# ===========================
+# Word
+# ===========================
+
+with e3:
+
+    if rows_word:
+
+        word_file = create_word_report(
+
+            report_title=report_type,
+
+            office=office,
+
+            lawyer=lawyer,
+
+            from_date=from_date,
+
+            to_date=to_date,
+
+            headers=headers,
+
+            rows=rows_word
+
+        )
+
+        st.download_button(
+
+            label="📝 Word",
+
+            data=word_file,
+
+            file_name=f"{report_type}.docx",
+
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+
+            use_container_width=True
+
+        )
+
+    else:
+
+        st.button(
+            "📝 Word",
+            disabled=True,
+            use_container_width=True
+        )
+
+# ===========================
+# PDF
+# ===========================
+
+with e4:
+
+    if rows_word:
+
+        pdf_file = create_pdf_report(
+
+            report_title=report_type,
+
+            office=office,
+
+            lawyer=lawyer,
+
+            from_date=from_date,
+
+            to_date=to_date,
+
+            headers=headers,
+
+            rows=rows_word
+
+        )
+
+        st.download_button(
+
+            label="📕 PDF",
+
+            data=pdf_file,
+
+            file_name=f"{report_type}.pdf",
+
+            mime="application/pdf",
+
+            use_container_width=True
+
+        )
+
+    else:
+
+        st.button(
+            "📕 PDF",
+            disabled=True,
+            use_container_width=True
+        )
+
+st.divider()
+
+# ==================================================
+# خاتمة التقرير
+# ==================================================
+
+st.markdown(
+"""
+<div style="
+border:2px solid #D4AF37;
+border-radius:12px;
+padding:20px;
+background:#FFFDF5;
+">
+
+<p style="text-align:center;font-size:18px;">
+وتفضلوا بقبول فائق الاحترام ،،،
+</p>
+
+</div>
+""",
+unsafe_allow_html=True
+)
+
+s1, s2 = st.columns(2)
+
+with s1:
+
+    st.markdown(
+    """
+    **عضو الإدارة**
+
+    المحامى
+    """
+    )
+
+with s2:
+
+    st.markdown(
+    """
+    **مدير الإدارة**
+
+    مدير عام الإدارات القانونية
+    """
+    )
+
+st.caption(
+    f"تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}"
+)
+
+st.divider()
+
+if st.button(
+    "⬅ العودة للقائمة السابقة",
+    use_container_width=True
+):
+
+    st.session_state.page = "home"
+
+    st.rerun()
