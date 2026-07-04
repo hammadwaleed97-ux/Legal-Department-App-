@@ -2834,15 +2834,6 @@ if report_type in (
         key="report_subject"
     )
 
-st.divider()
-
-show_report = st.button(
-    "📄 عرض التقرير",
-    type="primary",
-    use_container_width=True,
-    key="show_report"
-)
-
 if show_report:
 
     st.markdown(
