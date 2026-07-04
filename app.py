@@ -3396,3 +3396,134 @@ if st.button(
     st.session_state.page = "home"
 
     st.rerun()
+    # ==================== الجزء السادس ====================
+# أزرار التصدير + عرض التقرير + العودة
+
+st.markdown("---")
+
+c1, c2, c3, c4, c5 = st.columns(5)
+
+with c1:
+    show_report_btn = st.button(
+        "📄 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    )
+
+with c2:
+    if rows_word:
+        excel_data = pd.DataFrame(rows_word, columns=headers)
+
+        excel_buffer = io.BytesIO()
+        with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+            excel_data.to_excel(writer, index=False, sheet_name="التقرير")
+
+        st.download_button(
+            "📊 Excel",
+            excel_buffer.getvalue(),
+            file_name=f"{report_type}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+    else:
+        st.button("📊 Excel", disabled=True, use_container_width=True)
+
+with c3:
+    if rows_word:
+        word_file = create_word_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📝 Word",
+            data=word_file,
+            file_name=f"{report_type}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+    else:
+        st.button("📝 Word", disabled=True, use_container_width=True)
+
+with c4:
+    if rows_word:
+        pdf_bytes = create_pdf_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📕 PDF",
+            pdf_bytes,
+            file_name=f"{report_type}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+    else:
+        st.button("📕 PDF", disabled=True, use_container_width=True)
+
+with c5:
+    if st.button(
+        "⬅ العودة للقائمة السابقة",
+        use_container_width=True
+    ):
+        st.session_state.page = "home"
+        st.rerun()
+
+st.markdown("---")
+
+st.markdown(
+f"""
+<div style='text-align:center;font-size:18px'>
+
+<b>وتفضلوا بقبول فائق الاحترام ،،،</b>
+
+</div>
+""",
+unsafe_allow_html=True
+)
+
+cc1, cc2 = st.columns(2)
+
+with cc1:
+    st.markdown(
+    """
+    <div style='text-align:center'>
+    <b>المحامى</b><br><br><br>
+    ....................................
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
+
+with cc2:
+    st.markdown(
+    """
+    <div style='text-align:center'>
+    <b>مدير عام الإدارات القانونية</b><br><br><br>
+    ....................................
+    </div>
+    """,
+    unsafe_allow_html=True
+    )
+
+st.markdown(
+f"""
+<div style='text-align:left'>
+تحريراً فى : {datetime.now().strftime("%d/%m/%Y")}
+</div>
+""",
+unsafe_allow_html=True
+)
+
+# ==================== نهاية قسم التقارير ====================
