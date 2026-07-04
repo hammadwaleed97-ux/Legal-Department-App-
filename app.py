@@ -2680,15 +2680,6 @@ elif st.session_state.page == "reports":
 
     st.markdown("---")
     c_show1, c_show2 = st.columns([1,1])
-
-with c_show2:
-
-    show_report = st.button(
-        "📄 عرض التقرير",
-        use_container_width=True,
-        type="primary",
-        key="show_report"
-    )
     # ==========================================
 # أدوات التقرير
 # ==========================================
