@@ -3375,3 +3375,55 @@ with e4:
         )
 
 st.divider()
+# ==================================================
+# خاتمة التقرير
+# ==================================================
+
+st.markdown("""
+<div style="
+border:2px solid #D4AF37;
+border-radius:12px;
+padding:20px;
+background:#FFFDF5;
+margin-top:20px;
+">
+
+<p style="text-align:center;font-size:18px;font-weight:bold;">
+وتفضلوا بقبول فائق الاحترام
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+s1, s2 = st.columns(2)
+
+with s1:
+    st.markdown("""
+<div style="text-align:center;">
+<b>عضو الإدارة</b><br><br>
+المحامى
+</div>
+""", unsafe_allow_html=True)
+
+with s2:
+    st.markdown("""
+<div style="text-align:center;">
+<b>مدير الإدارة</b><br><br>
+مدير عام الإدارات القانونية
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown(
+    f"<div style='text-align:left;font-weight:bold;'>تحريراً فى : {datetime.now().strftime('%d/%m/%Y')}</div>",
+    unsafe_allow_html=True
+)
+
+st.divider()
+
+if st.button(
+    "⬅ العودة للقائمة الرئيسية",
+    use_container_width=True,
+    key="back_home_reports"
+):
+    st.session_state.page = "home"
+    st.rerun()
