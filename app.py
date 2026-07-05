@@ -2886,6 +2886,154 @@ if report_type in (
     else:
         st.warning("لا توجد دعاوى متداولة خلال الفترة المحددة.")
         # ==================================================
+# بيان الأحكام الصادرة
+# ==================================================
+
+elif report_type in (
+    "بيان بجميع الأحكام الصادرة",
+    "بيان بالأحكام الصادرة للصالح",
+    "بيان بالأحكام الصادرة للضد",
+    "بيان الأحكام الصادرة حسب موضوع الدعوى"
+):
+
+    sql = """
+    SELECT
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_type || ' ' || c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+        s.session_date,
+        s.procedure,
+        COALESCE(s.judgment_result,'') AS judgment_result
+    FROM cases c
+
+    INNER JOIN sessions s
+    ON s.id=(
+        SELECT id
+        FROM sessions
+        WHERE case_id=c.id
+        AND roll_number='حكم'
+        ORDER BY DATE(session_date) DESC,id DESC
+        LIMIT 1
+    )
+
+    WHERE DATE(s.session_date)
+    BETWEEN DATE(?) AND DATE(?)
+    """
+
+    params = [
+        from_date.strftime("%Y-%m-%d"),
+        to_date.strftime("%Y-%m-%d")
+    ]
+
+    if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى" and subject_search:
+        sql += " AND c.subject LIKE ? "
+        params.append(f"%{subject_search}%")
+
+    sql += """
+    ORDER BY
+    DATE(s.session_date) DESC,
+    c.case_number ASC
+    """
+
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+
+    if rows:
+
+        headers = [
+            "م",
+            "رقم القضية",
+            "السنة",
+            "الدائرة",
+            "نوع القضية",
+            "المحكمة",
+            "المأمورية",
+            "الخصوم",
+            "موضوع الدعوى",
+            "تاريخ الحكم",
+            "منطوق الحكم",
+            "النتيجة",
+            "ملاحظات"
+        ]
+
+        data = []
+        rows_word = []
+
+        serial = 1
+
+        for r in rows:
+
+            result = (r[12] or "").strip()
+
+            if report_type == "بيان بالأحكام الصادرة للصالح" and result != "لصالح الهيئة":
+                continue
+
+            if report_type == "بيان بالأحكام الصادرة للضد" and result != "ضد الهيئة":
+                continue
+
+            judgment_date = "-"
+
+            if r[10]:
+                try:
+                    judgment_date = datetime.strptime(
+                        str(r[10]),
+                        "%Y-%m-%d"
+                    ).strftime("%d/%m/%Y")
+                except:
+                    judgment_date = str(r[10])
+
+            row = {
+                "م": serial,
+                "رقم القضية": r[0],
+                "السنة": r[1],
+                "الدائرة": r[2],
+                "نوع القضية": r[3] or "-",
+                "المحكمة": r[4],
+                "المأمورية": r[5] or "-",
+                "الخصوم": f"{r[6] or '-'}\nضــــــد\n{r[7] or '-'}",
+                "موضوع الدعوى": r[8] or "-",
+                "تاريخ الحكم": judgment_date,
+                "منطوق الحكم": r[11] or "-",
+                "النتيجة": result or "-",
+                "ملاحظات": r[9] or "-"
+            }
+
+            data.append(row)
+
+            rows_word.append([
+                row["م"],
+                row["رقم القضية"],
+                row["السنة"],
+                row["الدائرة"],
+                row["نوع القضية"],
+                row["المحكمة"],
+                row["المأمورية"],
+                row["الخصوم"],
+                row["موضوع الدعوى"],
+                row["تاريخ الحكم"],
+                row["منطوق الحكم"],
+                row["النتيجة"],
+                row["ملاحظات"]
+            ])
+
+            serial += 1
+
+        st.dataframe(
+            data,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    else:
+        st.warning("لا توجد أحكام خلال الفترة المحددة.")
+        # ==================================================
 # التقارير العددية
 # ==================================================
 
