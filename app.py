@@ -2588,3 +2588,139 @@ elif st.session_state.page == "case_details":
             st.success("تم حفظ بيانات الحكم")
 
             st.rerun()
+            # ==================================================
+# قسم التقارير
+# ==================================================
+
+elif st.session_state.page == "reports":
+
+    st.markdown("""
+    <div style="
+    background:#071D49;
+    padding:25px;
+    border-radius:18px;
+    border:2px solid #1E88E5;
+    box-shadow:0 0 12px rgba(0,0,0,.25);
+    ">
+
+    <h1 style="
+    text-align:center;
+    color:white;
+    margin-bottom:25px;">
+    📊 التقارير
+    </h1>
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        office = st.text_input(
+            "اسم المنطقة",
+            value="البحيرة"
+        )
+
+        report_type = st.selectbox(
+            "نوع التقرير",
+            [
+                "بيان بجميع الدعاوى المتداولة",
+                "بيان الدعاوى حسب موضوع الدعوى",
+                "بيان بجميع الأحكام الصادرة",
+                "بيان بالأحكام الصادرة للصالح",
+                "بيان بالأحكام الصادرة للضد",
+                "بيان الأحكام الصادرة حسب موضوع الدعوى",
+                "بيان عددى بجميع الدعاوى المتداولة",
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+                "بيان عددى بجميع الأحكام الصادرة",
+                "بيان عددى بالأحكام الصادرة للصالح",
+                "بيان عددى بالأحكام الصادرة للضد",
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+            ]
+        )
+
+        to_date = st.date_input(
+            "إلى تاريخ",
+            min_value=date.today().replace(year=2026)
+        )
+
+    with c2:
+
+        lawyer = st.text_input(
+            "اسم الأستاذ",
+            value="وليد شعبان حماد"
+        )
+
+        from_date = st.date_input(
+            "من تاريخ"
+        )
+
+        if report_type in (
+            "بيان الدعاوى حسب موضوع الدعوى",
+            "بيان الأحكام الصادرة حسب موضوع الدعوى",
+            "بيان عددى بالدعاوى حسب موضوع الدعوى",
+            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+        ):
+            subject_search = st.text_input(
+                "موضوع الدعوى"
+            )
+        else:
+            subject_search = ""
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    show_report = st.button(
+        "📄 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    if show_report:
+
+        st.markdown(f"""
+        <div style="
+        background:white;
+        border-radius:15px;
+        border:1px solid #CCCCCC;
+        padding:20px;
+        color:#000;
+        ">
+
+        <h2 style="text-align:center;">
+        الهيئة القومية للتأمين الاجتماعى
+        </h2>
+
+        <h3 style="text-align:center;">
+        الإدارة العامة للشئون القانونية
+        </h3>
+
+        <h3 style="text-align:center;">
+        ديوان عام منطقة {office}
+        </h3>
+
+        <hr>
+
+        <h2 style="text-align:center;">
+        {report_type}
+        </h2>
+
+        <h4 style="text-align:center;">
+        خلال الفترة من
+        {from_date.strftime('%d/%m/%Y')}
+        حتى
+        {to_date.strftime('%d/%m/%Y')}
+        </h4>
+
+        <h4 style="text-align:center;">
+        طرف الأستاذ / {lawyer}
+        </h4>
+
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
