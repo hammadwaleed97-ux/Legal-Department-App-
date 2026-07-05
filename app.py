@@ -2724,3 +2724,144 @@ elif st.session_state.page == "reports":
         """, unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
+        # ==================================================
+# بيان الدعاوى المتداولة
+# ==================================================
+
+if report_type in (
+    "بيان بجميع الدعاوى المتداولة",
+    "بيان الدعاوى حسب موضوع الدعوى"
+):
+
+    sql = """
+    SELECT
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_type || ' ' || c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+        s.session_date,
+        s.procedure
+    FROM cases c
+
+    LEFT JOIN sessions s
+    ON s.id=(
+        SELECT id
+        FROM sessions
+        WHERE case_id=c.id
+        ORDER BY DATE(session_date) DESC,id DESC
+        LIMIT 1
+    )
+
+    WHERE
+    (s.roll_number IS NULL OR s.roll_number<>'حكم')
+    """
+
+    params = []
+
+    if from_date and to_date:
+
+        sql += """
+        AND DATE(s.session_date)
+        BETWEEN DATE(?) AND DATE(?)
+        """
+
+        params.extend([
+            from_date.strftime("%Y-%m-%d"),
+            to_date.strftime("%Y-%m-%d")
+        ])
+
+    if report_type == "بيان الدعاوى حسب موضوع الدعوى" and subject_search:
+
+        sql += " AND c.subject LIKE ? "
+        params.append(f"%{subject_search}%")
+
+    sql += """
+    ORDER BY DATE(s.session_date) DESC,
+    c.case_number
+    """
+
+    cur.execute(sql, params)
+
+    rows = cur.fetchall()
+
+    if rows:
+
+        headers = [
+            "م",
+            "رقم القضية",
+            "السنة",
+            "المحكمة",
+            "الموضوع",
+            "آخر جلسة",
+            "الإجراء"
+        ]
+
+        rows_word = []
+
+        data = []
+
+        serial = 1
+
+        for r in rows:
+
+            if r[10]:
+                try:
+                    last_date = datetime.strptime(
+                        str(r[10]),
+                        "%Y-%m-%d"
+                    ).strftime("%d/%m/%Y")
+                except:
+                    last_date = str(r[10])
+            else:
+                last_date = "-"
+
+            data.append({
+
+                "م": serial,
+
+                "رقم القضية":
+                f"{r[0]}/{r[1]}",
+
+                "السنة": r[1],
+
+                "المحكمة": r[4],
+
+                "الموضوع": r[8] or "-",
+
+                "آخر جلسة": last_date,
+
+                "الإجراء": r[11] or "-"
+
+            })
+
+            rows_word.append([
+                serial,
+                f"{r[0]}/{r[1]}",
+                r[1],
+                r[4],
+                r[8] or "-",
+                last_date,
+                r[11] or "-"
+            ])
+
+            serial += 1
+
+        df = pd.DataFrame(data)
+
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.success(f"إجمالى الدعاوى المتداولة : {len(df)}")
+
+    else:
+
+        st.warning("لا توجد بيانات خلال الفترة المحددة.")
