@@ -2865,3 +2865,149 @@ if report_type in (
     else:
 
         st.warning("لا توجد بيانات خلال الفترة المحددة.")
+        # ==================================================
+# بيان الأحكام الصادرة
+# ==================================================
+
+elif report_type in (
+    "بيان بجميع الأحكام الصادرة",
+    "بيان بالأحكام الصادرة للصالح",
+    "بيان بالأحكام الصادرة للضد",
+    "بيان الأحكام الصادرة حسب موضوع الدعوى"
+):
+
+    sql = """
+    SELECT
+        c.case_number,
+        c.judicial_year,
+        c.circuit,
+        c.case_category,
+        c.court_type || ' ' || c.court_name,
+        c.mission,
+        c.plaintiff,
+        c.defendant,
+        c.subject,
+        c.notes,
+        s.session_date,
+        s.procedure,
+        COALESCE(s.judgment_result,'')
+    FROM cases c
+
+    INNER JOIN sessions s
+    ON s.id=(
+        SELECT id
+        FROM sessions
+        WHERE case_id=c.id
+        AND roll_number='حكم'
+        ORDER BY DATE(session_date) DESC,id DESC
+        LIMIT 1
+    )
+
+    WHERE DATE(s.session_date)
+    BETWEEN DATE(?) AND DATE(?)
+    """
+
+    params = [
+        from_date.strftime("%Y-%m-%d"),
+        to_date.strftime("%Y-%m-%d")
+    ]
+
+    if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى" and subject_search:
+        sql += " AND c.subject LIKE ? "
+        params.append(f"%{subject_search}%")
+
+    sql += " ORDER BY DATE(s.session_date) DESC,c.case_number"
+
+    cur.execute(sql, params)
+
+    rows = cur.fetchall()
+
+    headers = [
+        "م",
+        "رقم القضية",
+        "السنة",
+        "المحكمة",
+        "موضوع الدعوى",
+        "تاريخ الحكم",
+        "منطوق الحكم",
+        "النتيجة"
+    ]
+
+    rows_word = []
+
+    data = []
+
+    serial = 1
+
+    for r in rows:
+
+        result = (r[12] or "").strip()
+
+        if report_type == "بيان بالأحكام الصادرة للصالح":
+            if result != "لصالح الهيئة":
+                continue
+
+        if report_type == "بيان بالأحكام الصادرة للضد":
+            if result != "ضد الهيئة":
+                continue
+
+        if r[10]:
+            try:
+                judgment_date = datetime.strptime(
+                    str(r[10]),
+                    "%Y-%m-%d"
+                ).strftime("%d/%m/%Y")
+            except:
+                judgment_date = str(r[10])
+        else:
+            judgment_date = "-"
+
+        data.append({
+
+            "م": serial,
+
+            "رقم القضية":
+            f"{r[0]}/{r[1]}",
+
+            "السنة": r[1],
+
+            "المحكمة": r[4],
+
+            "موضوع الدعوى": r[8] or "-",
+
+            "تاريخ الحكم": judgment_date,
+
+            "منطوق الحكم": r[11] or "-",
+
+            "النتيجة": result or "-"
+
+        })
+
+        rows_word.append([
+            serial,
+            f"{r[0]}/{r[1]}",
+            r[1],
+            r[4],
+            r[8] or "-",
+            judgment_date,
+            r[11] or "-",
+            result or "-"
+        ])
+
+        serial += 1
+
+    if data:
+
+        df = pd.DataFrame(data)
+
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True
+        )
+
+        st.success(f"إجمالى الأحكام : {len(df)}")
+
+    else:
+
+        st.warning("لا توجد أحكام خلال الفترة المحددة.")
