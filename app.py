@@ -3011,3 +3011,103 @@ elif report_type in (
     else:
 
         st.warning("لا توجد أحكام خلال الفترة المحددة.")
+        # ==================================================
+# التصدير
+# ==================================================
+
+rows_word = locals().get("rows_word", [])
+headers = locals().get("headers", [])
+
+st.divider()
+
+e1, e2, e3, e4 = st.columns(4)
+
+# ===========================
+# طباعة
+# ===========================
+
+with e1:
+    st.button(
+        "🖨 طباعة",
+        disabled=True,
+        use_container_width=True
+    )
+
+# ===========================
+# Word
+# ===========================
+
+with e2:
+
+    if rows_word:
+
+        word_file = create_word_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📝 Word",
+            data=word_file,
+            file_name=f"{report_type}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+
+# ===========================
+# Excel
+# ===========================
+
+with e3:
+
+    if rows_word:
+
+        df = pd.DataFrame(rows_word, columns=headers)
+
+        excel = io.BytesIO()
+
+        with pd.ExcelWriter(excel, engine="openpyxl") as writer:
+            df.to_excel(writer, index=False)
+
+        excel.seek(0)
+
+        st.download_button(
+            "📊 Excel",
+            data=excel,
+            file_name=f"{report_type}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+
+# ===========================
+# PDF
+# ===========================
+
+with e4:
+
+    if rows_word:
+
+        pdf = create_pdf_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📕 PDF",
+            data=pdf,
+            file_name=f"{report_type}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+
+st.divider()
