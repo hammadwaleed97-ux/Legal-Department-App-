@@ -2644,7 +2644,7 @@ elif st.session_state.page == "reports":
 
         to_date = st.date_input(
             "إلى تاريخ",
-            min_value=date.today().replace(year=2026)
+            min_value=date.today()   # ✅ FIX
         )
 
     with c2:
@@ -2680,117 +2680,74 @@ elif st.session_state.page == "reports":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if show_report:
+    rows_word = []
+    headers = []
 
-        st.markdown(f"""
-        <div style="
-        background:white;
-        border-radius:15px;
-        border:1px solid #CCCCCC;
-        padding:20px;
-        color:#000;
-        ">
+    # ==================================================
+    # بيان الدعاوى المتداولة
+    # ==================================================
 
-        <h2 style="text-align:center;">
-        الهيئة القومية للتأمين الاجتماعى
-        </h2>
+    if show_report and report_type in (
+        "بيان بجميع الدعاوى المتداولة",
+        "بيان الدعاوى حسب موضوع الدعوى"
+    ):
 
-        <h3 style="text-align:center;">
-        الإدارة العامة للشئون القانونية
-        </h3>
+        sql = """
+        SELECT
+            c.case_number,
+            c.judicial_year,
+            c.circuit,
+            c.case_category,
+            c.court_type || ' ' || c.court_name,
+            c.mission,
+            c.plaintiff,
+            c.defendant,
+            c.subject,
+            c.notes,
+            s.session_date,
+            s.procedure
+        FROM cases c
 
-        <h3 style="text-align:center;">
-        ديوان عام منطقة {office}
-        </h3>
+        LEFT JOIN sessions s
+        ON s.id=(
+            SELECT id
+            FROM sessions
+            WHERE case_id=c.id
+            ORDER BY DATE(session_date) DESC,id DESC
+            LIMIT 1
+        )
 
-        <hr>
-
-        <h2 style="text-align:center;">
-        {report_type}
-        </h2>
-
-        <h4 style="text-align:center;">
-        خلال الفترة من
-        {from_date.strftime('%d/%m/%Y')}
-        حتى
-        {to_date.strftime('%d/%m/%Y')}
-        </h4>
-
-        <h4 style="text-align:center;">
-        طرف الأستاذ / {lawyer}
-        </h4>
-
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        # ==================================================
-# بيان الدعاوى المتداولة
-# ==================================================
-
-if report_type in (
-    "بيان بجميع الدعاوى المتداولة",
-    "بيان الدعاوى حسب موضوع الدعوى"
-):
-
-    sql = """
-    SELECT
-        c.case_number,
-        c.judicial_year,
-        c.circuit,
-        c.case_category,
-        c.court_type || ' ' || c.court_name,
-        c.mission,
-        c.plaintiff,
-        c.defendant,
-        c.subject,
-        c.notes,
-        s.session_date,
-        s.procedure
-    FROM cases c
-
-    LEFT JOIN sessions s
-    ON s.id=(
-        SELECT id
-        FROM sessions
-        WHERE case_id=c.id
-        ORDER BY DATE(session_date) DESC,id DESC
-        LIMIT 1
-    )
-
-    WHERE
-    (s.roll_number IS NULL OR s.roll_number<>'حكم')
-    """
-
-    params = []
-
-    if from_date and to_date:
-
-        sql += """
-        AND DATE(s.session_date)
-        BETWEEN DATE(?) AND DATE(?)
+        WHERE
+        (s.roll_number IS NULL OR s.roll_number<>'حكم')
         """
 
-        params.extend([
-            from_date.strftime("%Y-%m-%d"),
-            to_date.strftime("%Y-%m-%d")
-        ])
+        params = []
 
-    if report_type == "بيان الدعاوى حسب موضوع الدعوى" and subject_search:
+        if from_date and to_date:
 
-        sql += " AND c.subject LIKE ? "
-        params.append(f"%{subject_search}%")
+            sql += """
+            AND DATE(s.session_date)
+            BETWEEN DATE(?) AND DATE(?)
+            """
 
-    sql += """
-    ORDER BY DATE(s.session_date) DESC,
-    c.case_number
-    """
+            params.extend([
+                from_date.strftime("%Y-%m-%d"),
+                to_date.strftime("%Y-%m-%d")
+            ])
 
-    cur.execute(sql, params)
+        if report_type == "بيان الدعاوى حسب موضوع الدعوى" and subject_search:
 
-    rows = cur.fetchall()
+            sql += " AND c.subject LIKE ? "
+            params.append(f"%{subject_search}%")
 
-    if rows:
+        sql += """
+        ORDER BY DATE(s.session_date) DESC,
+        c.case_number
+        """
+
+        cur.execute(sql, params)
+
+        rows = cur.fetchall()
 
         headers = [
             "م",
@@ -2802,43 +2759,17 @@ if report_type in (
             "الإجراء"
         ]
 
-        rows_word = []
-
-        data = []
-
         serial = 1
 
         for r in rows:
 
             if r[10]:
                 try:
-                    last_date = datetime.strptime(
-                        str(r[10]),
-                        "%Y-%m-%d"
-                    ).strftime("%d/%m/%Y")
+                    last_date = datetime.strptime(str(r[10]), "%Y-%m-%d").strftime("%d/%m/%Y")
                 except:
                     last_date = str(r[10])
             else:
                 last_date = "-"
-
-            data.append({
-
-                "م": serial,
-
-                "رقم القضية":
-                f"{r[0]}/{r[1]}",
-
-                "السنة": r[1],
-
-                "المحكمة": r[4],
-
-                "الموضوع": r[8] or "-",
-
-                "آخر جلسة": last_date,
-
-                "الإجراء": r[11] or "-"
-
-            })
 
             rows_word.append([
                 serial,
@@ -2852,477 +2783,179 @@ if report_type in (
 
             serial += 1
 
-        df = pd.DataFrame(data)
+        df = pd.DataFrame(rows_word, columns=headers)
 
-        st.dataframe(
-            df,
-            use_container_width=True,
-            hide_index=True
-        )
-
+        st.dataframe(df, use_container_width=True, hide_index=True)
         st.success(f"إجمالى الدعاوى المتداولة : {len(df)}")
 
-    else:
+    # ==================================================
+    # بيان الأحكام الصادرة
+    # ==================================================
 
-        st.warning("لا توجد بيانات خلال الفترة المحددة.")
-        # ==================================================
-# بيان الأحكام الصادرة
-# ==================================================
+    elif show_report and report_type in (
+        "بيان بجميع الأحكام الصادرة",
+        "بيان بالأحكام الصادرة للصالح",
+        "بيان بالأحكام الصادرة للضد",
+        "بيان الأحكام الصادرة حسب موضوع الدعوى"
+    ):
 
-elif report_type in (
-    "بيان بجميع الأحكام الصادرة",
-    "بيان بالأحكام الصادرة للصالح",
-    "بيان بالأحكام الصادرة للضد",
-    "بيان الأحكام الصادرة حسب موضوع الدعوى"
-):
+        sql = """
+        SELECT
+            c.case_number,
+            c.judicial_year,
+            c.circuit,
+            c.case_category,
+            c.court_type || ' ' || c.court_name,
+            c.mission,
+            c.plaintiff,
+            c.defendant,
+            c.subject,
+            c.notes,
+            s.session_date,
+            s.procedure,
+            COALESCE(s.judgment_result,'')
+        FROM cases c
+        INNER JOIN sessions s
+        ON s.id=(
+            SELECT id
+            FROM sessions
+            WHERE case_id=c.id
+            AND roll_number='حكم'
+            ORDER BY DATE(session_date) DESC,id DESC
+            LIMIT 1
+        )
+        WHERE DATE(s.session_date)
+        BETWEEN DATE(?) AND DATE(?)
+        """
 
-    sql = """
-    SELECT
-        c.case_number,
-        c.judicial_year,
-        c.circuit,
-        c.case_category,
-        c.court_type || ' ' || c.court_name,
-        c.mission,
-        c.plaintiff,
-        c.defendant,
-        c.subject,
-        c.notes,
-        s.session_date,
-        s.procedure,
-        COALESCE(s.judgment_result,'')
-    FROM cases c
+        params = [
+            from_date.strftime("%Y-%m-%d"),
+            to_date.strftime("%Y-%m-%d")
+        ]
 
-    INNER JOIN sessions s
-    ON s.id=(
-        SELECT id
-        FROM sessions
-        WHERE case_id=c.id
-        AND roll_number='حكم'
-        ORDER BY DATE(session_date) DESC,id DESC
-        LIMIT 1
-    )
+        if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى" and subject_search:
+            sql += " AND c.subject LIKE ? "
+            params.append(f"%{subject_search}%")
 
-    WHERE DATE(s.session_date)
-    BETWEEN DATE(?) AND DATE(?)
-    """
+        sql += " ORDER BY DATE(s.session_date) DESC,c.case_number"
 
-    params = [
-        from_date.strftime("%Y-%m-%d"),
-        to_date.strftime("%Y-%m-%d")
-    ]
+        cur.execute(sql, params)
 
-    if report_type == "بيان الأحكام الصادرة حسب موضوع الدعوى" and subject_search:
-        sql += " AND c.subject LIKE ? "
-        params.append(f"%{subject_search}%")
+        rows = cur.fetchall()
 
-    sql += " ORDER BY DATE(s.session_date) DESC,c.case_number"
+        headers = [
+            "م",
+            "رقم القضية",
+            "السنة",
+            "المحكمة",
+            "موضوع الدعوى",
+            "تاريخ الحكم",
+            "منطوق الحكم",
+            "النتيجة"
+        ]
 
-    cur.execute(sql, params)
+        serial = 1
 
-    rows = cur.fetchall()
+        for r in rows:
 
-    headers = [
-        "م",
-        "رقم القضية",
-        "السنة",
-        "المحكمة",
-        "موضوع الدعوى",
-        "تاريخ الحكم",
-        "منطوق الحكم",
-        "النتيجة"
-    ]
+            result = (r[12] or "").strip()
 
-    rows_word = []
+            if report_type == "بيان بالأحكام الصادرة للصالح":
+                if result != "لصالح الهيئة":
+                    continue
 
-    data = []
+            if report_type == "بيان بالأحكام الصادرة للضد":
+                if result != "ضد الهيئة":
+                    continue
 
-    serial = 1
+            if r[10]:
+                try:
+                    judgment_date = datetime.strptime(str(r[10]), "%Y-%m-%d").strftime("%d/%m/%Y")
+                except:
+                    judgment_date = str(r[10])
+            else:
+                judgment_date = "-"
 
-    for r in rows:
+            rows_word.append([
+                serial,
+                f"{r[0]}/{r[1]}",
+                r[1],
+                r[4],
+                r[8] or "-",
+                judgment_date,
+                r[11] or "-",
+                result or "-"
+            ])
 
-        result = (r[12] or "").strip()
+            serial += 1
 
-        if report_type == "بيان بالأحكام الصادرة للصالح":
-            if result != "لصالح الهيئة":
-                continue
+        df = pd.DataFrame(rows_word, columns=headers)
 
-        if report_type == "بيان بالأحكام الصادرة للضد":
-            if result != "ضد الهيئة":
-                continue
-
-        if r[10]:
-            try:
-                judgment_date = datetime.strptime(
-                    str(r[10]),
-                    "%Y-%m-%d"
-                ).strftime("%d/%m/%Y")
-            except:
-                judgment_date = str(r[10])
+        if not df.empty:
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.success(f"إجمالى الأحكام : {len(df)}")
         else:
-            judgment_date = "-"
+            st.warning("لا توجد بيانات خلال الفترة المحددة.")
 
-        data.append({
+    # ==================================================
+    # التصدير
+    # ==================================================
 
-            "م": serial,
+    st.divider()
 
-            "رقم القضية":
-            f"{r[0]}/{r[1]}",
+    e1, e2, e3, e4 = st.columns(4)
 
-            "السنة": r[1],
+    with e2:
+        if rows_word:
+            excel = io.BytesIO()
+            df = pd.DataFrame(rows_word, columns=headers)
+            with pd.ExcelWriter(excel, engine="openpyxl") as writer:
+                df.to_excel(writer, index=False)
+            excel.seek(0)
 
-            "المحكمة": r[4],
-
-            "موضوع الدعوى": r[8] or "-",
-
-            "تاريخ الحكم": judgment_date,
-
-            "منطوق الحكم": r[11] or "-",
-
-            "النتيجة": result or "-"
-
-        })
-
-        rows_word.append([
-            serial,
-            f"{r[0]}/{r[1]}",
-            r[1],
-            r[4],
-            r[8] or "-",
-            judgment_date,
-            r[11] or "-",
-            result or "-"
-        ])
-
-        serial += 1
-
-    if data:
-
-        df = pd.DataFrame(data)
-
-        st.dataframe(
-            df,
-            use_container_width=True,
-            hide_index=True
-        )
-
-        st.success(f"إجمالى الأحكام : {len(df)}")
-
-    else:
-
-        st.warning("لا توجد أحكام خلال الفترة المحددة.")
-        # ==================================================
-# التصدير
-# ==================================================
-
-rows_word = locals().get("rows_word", [])
-headers = locals().get("headers", [])
-
-st.divider()
-
-e1, e2, e3, e4 = st.columns(4)
-
-# ===========================
-# طباعة
-# ===========================
-
-with e1:
-    st.button(
-        "🖨 طباعة",
-        disabled=True,
-        use_container_width=True
-    )
-
-# ===========================
-# Word
-# ===========================
-
-with e2:
-
-    if rows_word:
-
-        word_file = create_word_report(
-            report_title=report_type,
-            office=office,
-            lawyer=lawyer,
-            from_date=from_date,
-            to_date=to_date,
-            headers=headers,
-            rows=rows_word
-        )
-
-        st.download_button(
-            "📝 Word",
-            data=word_file,
-            file_name=f"{report_type}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
-        )
-
-# ===========================
-# Excel
-# ===========================
-
-with e3:
-
-    if rows_word:
-
-        df = pd.DataFrame(rows_word, columns=headers)
-
-        excel = io.BytesIO()
-
-        with pd.ExcelWriter(excel, engine="openpyxl") as writer:
-            df.to_excel(writer, index=False)
-
-        excel.seek(0)
-
-        st.download_button(
-            "📊 Excel",
-            data=excel,
-            file_name=f"{report_type}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
-
-# ===========================
-# PDF
-# ===========================
-
-with e4:
-
-    if rows_word:
-
-        pdf = create_pdf_report(
-            report_title=report_type,
-            office=office,
-            lawyer=lawyer,
-            from_date=from_date,
-            to_date=to_date,
-            headers=headers,
-            rows=rows_word
-        )
-
-        st.download_button(
-            "📕 PDF",
-            data=pdf,
-            file_name=f"{report_type}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-
-st.divider()
-# ==================================================
-# التصدير
-# ==================================================
-
-rows_word = locals().get("rows_word", [])
-headers = locals().get("headers", [])
-
-st.divider()
-
-e1, e2, e3, e4 = st.columns(4)
-
-# ===========================
-# طباعة
-# ===========================
-
-with e1:
-
-    st.button(
-        "🖨 طباعة",
-        disabled=True,
-        use_container_width=True
-    )
-
-# ===========================
-# Excel
-# ===========================
-
-with e2:
-
-    if rows_word:
-
-        df = pd.DataFrame(rows_word, columns=headers)
-
-        excel = io.BytesIO()
-
-        with pd.ExcelWriter(excel, engine="openpyxl") as writer:
-            df.to_excel(
-                writer,
-                index=False,
-                sheet_name="التقرير"
+            st.download_button(
+                "📊 Excel",
+                data=excel,
+                file_name=f"{report_type}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
-        excel.seek(0)
+    with e3:
+        if rows_word:
+            word = create_word_report(
+                report_type,
+                office,
+                lawyer,
+                from_date,
+                to_date,
+                headers,
+                rows_word
+            )
 
-        st.download_button(
-            "📊 Excel",
-            data=excel,
-            file_name=f"{report_type}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
+            st.download_button(
+                "📝 Word",
+                data=word,
+                file_name=f"{report_type}.docx",
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
 
-    else:
+    with e4:
+        if rows_word:
+            pdf = create_pdf_report(
+                report_type,
+                office,
+                lawyer,
+                from_date,
+                to_date,
+                headers,
+                rows_word
+            )
 
-        st.button(
-            "📊 Excel",
-            disabled=True,
-            use_container_width=True
-        )
+            st.download_button(
+                "📕 PDF",
+                data=pdf,
+                file_name=f"{report_type}.pdf",
+                mime="application/pdf"
+            )
 
-# ===========================
-# Word
-# ===========================
-
-with e3:
-
-    if rows_word:
-
-        word = create_word_report(
-            report_title=report_type,
-            office=office,
-            lawyer=lawyer,
-            from_date=from_date,
-            to_date=to_date,
-            headers=headers,
-            rows=rows_word
-        )
-
-        st.download_button(
-            "📝 Word",
-            data=word,
-            file_name=f"{report_type}.docx",
-            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
-        )
-
-    else:
-
-        st.button(
-            "📝 Word",
-            disabled=True,
-            use_container_width=True
-        )
-
-# ===========================
-# PDF
-# ===========================
-
-with e4:
-
-    if rows_word:
-
-        pdf = create_pdf_report(
-            report_title=report_type,
-            office=office,
-            lawyer=lawyer,
-            from_date=from_date,
-            to_date=to_date,
-            headers=headers,
-            rows=rows_word
-        )
-
-        st.download_button(
-            "📕 PDF",
-            data=pdf,
-            file_name=f"{report_type}.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-
-    else:
-
-        st.button(
-            "📕 PDF",
-            disabled=True,
-            use_container_width=True
-        )
-
-st.divider()
-
-# ==================================================
-# خاتمة التقرير
-# ==================================================
-
-st.markdown("""
-<div style="
-border:2px solid #D4AF37;
-border-radius:12px;
-padding:18px;
-background:#FFFDF5;
-">
-
-<p style="
-text-align:center;
-font-size:22px;
-font-weight:bold;
-margin:0;
-">
-وتفضلوا بقبول فائق الاحترام ،،،
-</p>
-
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-c1, c2 = st.columns(2)
-
-with c1:
-    st.markdown("""
-<div style="
-text-align:center;
-font-size:18px;
-font-weight:bold;
-">
-عضو الإدارة
-</div>
-""", unsafe_allow_html=True)
-
-with c2:
-    st.markdown("""
-<div style="
-text-align:center;
-font-size:18px;
-font-weight:bold;
-">
-مدير الإدارة
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="
-text-align:center;
-font-size:18px;
-font-weight:bold;
-">
-مدير عام الإدارات القانونية
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("<br><br>", unsafe_allow_html=True)
-
-st.markdown(
-    f"""
-<div style="
-text-align:left;
-font-size:16px;
-font-weight:bold;
-">
-تحريراً في : {datetime.now().strftime('%d/%m/%Y')}
-</div>
-""",
-    unsafe_allow_html=True
-)
-
-st.divider()
-
-if st.button(
-    "⬅ العودة للقائمة الرئيسية",
-    use_container_width=True
-):
-    st.session_state.page = "home"
-    st.rerun()
+    st.divider()
