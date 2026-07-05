@@ -3111,3 +3111,218 @@ with e4:
         )
 
 st.divider()
+# ==================================================
+# التصدير
+# ==================================================
+
+rows_word = locals().get("rows_word", [])
+headers = locals().get("headers", [])
+
+st.divider()
+
+e1, e2, e3, e4 = st.columns(4)
+
+# ===========================
+# طباعة
+# ===========================
+
+with e1:
+
+    st.button(
+        "🖨 طباعة",
+        disabled=True,
+        use_container_width=True
+    )
+
+# ===========================
+# Excel
+# ===========================
+
+with e2:
+
+    if rows_word:
+
+        df = pd.DataFrame(rows_word, columns=headers)
+
+        excel = io.BytesIO()
+
+        with pd.ExcelWriter(excel, engine="openpyxl") as writer:
+            df.to_excel(
+                writer,
+                index=False,
+                sheet_name="التقرير"
+            )
+
+        excel.seek(0)
+
+        st.download_button(
+            "📊 Excel",
+            data=excel,
+            file_name=f"{report_type}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
+
+    else:
+
+        st.button(
+            "📊 Excel",
+            disabled=True,
+            use_container_width=True
+        )
+
+# ===========================
+# Word
+# ===========================
+
+with e3:
+
+    if rows_word:
+
+        word = create_word_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📝 Word",
+            data=word,
+            file_name=f"{report_type}.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            use_container_width=True
+        )
+
+    else:
+
+        st.button(
+            "📝 Word",
+            disabled=True,
+            use_container_width=True
+        )
+
+# ===========================
+# PDF
+# ===========================
+
+with e4:
+
+    if rows_word:
+
+        pdf = create_pdf_report(
+            report_title=report_type,
+            office=office,
+            lawyer=lawyer,
+            from_date=from_date,
+            to_date=to_date,
+            headers=headers,
+            rows=rows_word
+        )
+
+        st.download_button(
+            "📕 PDF",
+            data=pdf,
+            file_name=f"{report_type}.pdf",
+            mime="application/pdf",
+            use_container_width=True
+        )
+
+    else:
+
+        st.button(
+            "📕 PDF",
+            disabled=True,
+            use_container_width=True
+        )
+
+st.divider()
+
+# ==================================================
+# خاتمة التقرير
+# ==================================================
+
+st.markdown("""
+<div style="
+border:2px solid #D4AF37;
+border-radius:12px;
+padding:18px;
+background:#FFFDF5;
+">
+
+<p style="
+text-align:center;
+font-size:22px;
+font-weight:bold;
+margin:0;
+">
+وتفضلوا بقبول فائق الاحترام ،،،
+</p>
+
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+c1, c2 = st.columns(2)
+
+with c1:
+    st.markdown("""
+<div style="
+text-align:center;
+font-size:18px;
+font-weight:bold;
+">
+عضو الإدارة
+</div>
+""", unsafe_allow_html=True)
+
+with c2:
+    st.markdown("""
+<div style="
+text-align:center;
+font-size:18px;
+font-weight:bold;
+">
+مدير الإدارة
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.markdown("""
+<div style="
+text-align:center;
+font-size:18px;
+font-weight:bold;
+">
+مدير عام الإدارات القانونية
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+<div style="
+text-align:left;
+font-size:16px;
+font-weight:bold;
+">
+تحريراً في : {datetime.now().strftime('%d/%m/%Y')}
+</div>
+""",
+    unsafe_allow_html=True
+)
+
+st.divider()
+
+if st.button(
+    "⬅ العودة للقائمة الرئيسية",
+    use_container_width=True
+):
+    st.session_state.page = "home"
+    st.rerun()
