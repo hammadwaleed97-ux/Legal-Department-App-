@@ -2787,3 +2787,145 @@ align-items:center;">
 # ==========================================================
 # نهاية الجزء الأول
 # ==========================================================
+# ==========================================================
+# 🎨 التصميم الاحترافى - الجزء الثانى
+# كارت الفلاتر
+# ==========================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="report-card">
+<div style="color:#FFD56A;
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;">
+🔎 خيارات التقرير
+</div>
+""", unsafe_allow_html=True)
+
+r1, r2 = st.columns(2)
+
+with r1:
+
+    report_type = st.selectbox(
+        "نوع التقرير",
+        [
+
+            "بيان بجميع الدعاوى المتداولة",
+
+            "بيان الدعاوى حسب موضوع الدعوى",
+
+            "بيان بجميع الأحكام الصادرة",
+
+            "بيان بالأحكام الصادرة للصالح",
+
+            "بيان بالأحكام الصادرة للضد",
+
+            "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+            "بيان عددى بجميع الدعاوى المتداولة",
+
+            "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+            "بيان عددى بجميع الأحكام الصادرة",
+
+            "بيان عددى بالأحكام الصادرة للصالح",
+
+            "بيان عددى بالأحكام الصادرة للضد",
+
+            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+        ]
+
+    )
+
+with r2:
+
+    subject_search = ""
+
+    if report_type in (
+
+        "بيان الدعاوى حسب موضوع الدعوى",
+
+        "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+        "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+        "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+    ):
+
+        subject_search = st.text_input(
+            "موضوع الدعوى"
+        )
+
+    else:
+
+        st.empty()
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+c1, c2 = st.columns(2)
+
+with c1:
+
+    office = st.text_input(
+        "ديوان عام المنطقة",
+        value=""
+    )
+
+with c2:
+
+    lawyer = st.text_input(
+        "طرف الأستاذ / المحامى",
+        value=""
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+d1, d2 = st.columns(2)
+
+with d1:
+
+    from_date = st.date_input(
+        "من تاريخ"
+    )
+
+with d2:
+
+    to_date = st.date_input(
+        "إلى تاريخ"
+    )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+b1, b2, b3 = st.columns([2,2,1])
+
+with b1:
+
+    show_report = st.button(
+        "📊 عرض التقرير",
+        use_container_width=True,
+        type="primary"
+    )
+
+with b2:
+
+    clear_filter = st.button(
+        "🧹 مسح البيانات",
+        use_container_width=True
+    )
+
+with b3:
+
+    refresh = st.button(
+        "🔄",
+        use_container_width=True
+    )
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================================
+# نهاية الجزء الثانى
+# ==========================================================
