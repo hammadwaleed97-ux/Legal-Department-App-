@@ -2588,3 +2588,202 @@ elif st.session_state.page == "case_details":
             st.success("تم حفظ بيانات الحكم")
 
             st.rerun()
+            # ==========================================================
+# 🎨 التصميم الاحترافى - الجزء الأول
+# Header + CSS
+# ==========================================================
+
+st.markdown("""
+<style>
+
+/* ===============================
+   خلفية البرنامج
+================================ */
+
+.stApp{
+    background:linear-gradient(180deg,#08162F 0%,#071225 100%);
+}
+
+/* إزالة هوامش Streamlit */
+
+.block-container{
+    max-width:1450px;
+    padding-top:18px;
+    padding-bottom:25px;
+}
+
+/* اخفاء عناصر ستريملت */
+
+#MainMenu{
+    visibility:hidden;
+}
+
+footer{
+    visibility:hidden;
+}
+
+header{
+    visibility:hidden;
+}
+
+/* ===============================
+   الكروت
+================================ */
+
+.report-card{
+
+    background:#0C1E3E;
+
+    border:1px solid rgba(212,175,55,.35);
+
+    border-radius:18px;
+
+    padding:22px;
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,.35);
+
+}
+
+/* ===============================
+   عنوان الصفحة
+================================ */
+
+.report-title{
+
+    color:#FFD56A;
+
+    font-size:34px;
+
+    font-weight:700;
+
+    text-align:center;
+
+    margin-top:10px;
+
+    margin-bottom:5px;
+
+}
+
+/* ===============================
+   عنوان الهيئة
+================================ */
+
+.gov-title{
+
+    color:white;
+
+    text-align:center;
+
+    font-size:17px;
+
+    line-height:1.8;
+
+    font-weight:600;
+
+}
+
+/* ===============================
+   اللوجو
+================================ */
+
+.logo-box{
+
+    width:90px;
+
+    height:90px;
+
+    border-radius:50%;
+
+    border:2px solid #D4AF37;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:46px;
+
+    color:#D4AF37;
+
+    margin:auto;
+
+    background:#09162E;
+
+}
+
+/* ===============================
+   الفواصل
+================================ */
+
+.gold-line{
+
+    height:1px;
+
+    background:#D4AF37;
+
+    margin-top:18px;
+
+    margin-bottom:18px;
+
+    opacity:.45;
+
+}
+
+</style>
+""",unsafe_allow_html=True)
+
+# ==========================================================
+# Header
+# ==========================================================
+
+st.markdown("""
+
+<div class="report-card">
+
+<div style="display:flex;
+justify-content:space-between;
+align-items:center;">
+
+<div class="logo-box">
+
+⚖️
+
+</div>
+
+<div>
+
+<div class="report-title">
+
+📊 التقارير
+
+</div>
+
+<div class="gov-title">
+
+الهيئة القومية للتأمين الاجتماعى<br>
+
+الإدارة المركزية للشئون القانونية<br>
+
+الإدارة العامة للقضايا<br>
+
+ديوان عام منطقة ............
+
+</div>
+
+</div>
+
+<div style="width:90px;"></div>
+
+</div>
+
+<div class="gold-line"></div>
+
+</div>
+
+""",unsafe_allow_html=True)
+
+# ==========================================================
+# نهاية الجزء الأول
+# ==========================================================
