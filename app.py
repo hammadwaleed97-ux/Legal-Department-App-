@@ -2929,3 +2929,272 @@ st.markdown("</div>", unsafe_allow_html=True)
 # ==========================================================
 # نهاية الجزء الثانى
 # ==========================================================
+# ==========================================================
+# 🎨 التصميم الاحترافى - الجزء الثالث
+# لوحة الإحصائيات + عنوان التقرير
+# ==========================================================
+
+if show_report:
+
+    # ===========================================
+    # حساب الإحصائيات
+    # ===========================================
+
+    total_cases = 0
+    total_judgments = 0
+    total_for = 0
+    total_against = 0
+
+    try:
+
+        cur.execute("SELECT COUNT(*) FROM cases")
+        total_cases = cur.fetchone()[0]
+
+        cur.execute("""
+        SELECT COUNT(*)
+        FROM sessions
+        WHERE roll_number='حكم'
+        """)
+        total_judgments = cur.fetchone()[0]
+
+        cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='للصالح'
+        """)
+        total_for = cur.fetchone()[0]
+
+        cur.execute("""
+        SELECT COUNT(*)
+        FROM cases
+        WHERE judgment_result='للضد'
+        """)
+        total_against = cur.fetchone()[0]
+
+    except:
+        pass
+
+    # ===========================================
+    # CSS
+    # ===========================================
+
+    st.markdown("""
+
+    <style>
+
+    .stat-box{
+
+        background:#10274E;
+
+        border:1px solid rgba(212,175,55,.35);
+
+        border-radius:18px;
+
+        padding:18px;
+
+        text-align:center;
+
+        transition:.3s;
+
+        box-shadow:0 8px 20px rgba(0,0,0,.30);
+
+    }
+
+    .stat-box:hover{
+
+        transform:translateY(-4px);
+
+        border-color:#FFD700;
+
+    }
+
+    .stat-number{
+
+        color:#FFD700;
+
+        font-size:34px;
+
+        font-weight:bold;
+
+        margin-bottom:8px;
+
+    }
+
+    .stat-title{
+
+        color:white;
+
+        font-size:16px;
+
+        font-weight:600;
+
+    }
+
+    </style>
+
+    """, unsafe_allow_html=True)
+
+    # ===========================================
+    # الكروت
+    # ===========================================
+
+    a, b, c, d = st.columns(4)
+
+    with a:
+
+        st.markdown(f"""
+
+        <div class="stat-box">
+
+        <div class="stat-number">
+
+        {total_cases}
+
+        </div>
+
+        <div class="stat-title">
+
+        📂 إجمالى القضايا
+
+        </div>
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+    with b:
+
+        st.markdown(f"""
+
+        <div class="stat-box">
+
+        <div class="stat-number">
+
+        {total_judgments}
+
+        </div>
+
+        <div class="stat-title">
+
+        ⚖️ الأحكام
+
+        </div>
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+    with c:
+
+        st.markdown(f"""
+
+        <div class="stat-box">
+
+        <div class="stat-number">
+
+        {total_for}
+
+        </div>
+
+        <div class="stat-title">
+
+        ✅ للصالح
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+    with d:
+
+        st.markdown(f"""
+
+        <div class="stat-box">
+
+        <div class="stat-number">
+
+        {total_against}
+
+        </div>
+
+        <div class="stat-title">
+
+        ❌ للضد
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ===========================================
+    # عنوان التقرير
+    # ===========================================
+
+    st.markdown(f"""
+
+    <div class="report-card">
+
+    <div style="font-size:28px;
+    color:#FFD700;
+    font-weight:bold;
+    text-align:center;">
+
+    {report_type}
+
+    </div>
+
+    <br>
+
+    <div style="display:flex;
+    justify-content:space-between;
+    color:white;
+    font-size:16px;">
+
+    <span>
+
+    📅 من :
+    {from_date.strftime('%d/%m/%Y')}
+
+    </span>
+
+    <span>
+
+    📅 إلى :
+    {to_date.strftime('%d/%m/%Y')}
+
+    </span>
+
+    </div>
+
+    <br>
+
+    <div style="display:flex;
+    justify-content:space-between;
+    color:white;
+    font-size:16px;">
+
+    <span>
+
+    🏢 ديوان :
+    {office if office else '...............'}
+
+    </span>
+
+    <span>
+
+    👤 الأستاذ :
+    {lawyer if lawyer else '...............'}
+
+    </span>
+
+    </div>
+
+    </div>
+
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+# ==========================================================
+# نهاية الجزء الثالث
+# ==========================================================
