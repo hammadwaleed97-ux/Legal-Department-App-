@@ -175,7 +175,7 @@ def create_word_report(
 
     doc.add_paragraph()
 
-    # ================================
+    # =================================
     # إنشاء الجدول
     # =================================
 
@@ -451,6 +451,25 @@ st.set_page_config(
 )
 
 # =====================================
+# إعداد قاعدة البيانات والمستندات المحلية الدائمة
+# =====================================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "local_data")
+DOCUMENTS_DIR = os.path.join(DATA_DIR, "Documents")
+os.makedirs(DOCUMENTS_DIR, exist_ok=True)
+LOCAL_DB_PATH = os.path.join(DATA_DIR, "cases.db")
+
+@st.cache_resource
+def get_local_connection(db_path):
+    connection = sqlite3.connect(db_path, check_same_thread=False)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+conn = get_local_connection(LOCAL_DB_PATH)
+cur = conn.cursor()
+
+# =====================================
 # Session State
 # =====================================
 
@@ -473,113 +492,95 @@ if "show_report_flag" not in st.session_state:
     st.session_state.show_report_flag = False
 
 # =====================================
-# قاعدة البيانات
+# قاعدة البيانات المحلية
 # =====================================
 
-conn = sqlite3.connect(
-    "cases.db",
-    check_same_thread=False
-)
-
-cur = conn.cursor()
-
-# ===================================
-# جدول القضايا
-# =====================================
-
-cur.execute("""
-CREATE TABLE IF NOT EXISTS cases(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-case_type TEXT,
-court_type TEXT,
-court_name TEXT,
-mission TEXT,
-
-case_number TEXT,
-judicial_year TEXT,
-circuit TEXT,
-case_category TEXT,
-
-plaintiff TEXT,
-defendant TEXT,
-
-subject TEXT,
-
-notes TEXT,
-
-whatsapp_enabled INTEGER,
-whatsapp_number TEXT,
-
-created_at TEXT
-
-)
-""")
-
-# =====================================
-# جدول الجلسات
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS sessions(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-case_id INTEGER,
-
-session_date TEXT,
-
-roll_number TEXT,
-
-procedure TEXT,
-
-judgment_result TEXT,
-
-created_at TEXT
-
-)
-
-""")
-
-# إضافة العمود تلقائياً للقواعد القديمة
-try:
+def init_local_db():
     cur.execute("""
-        ALTER TABLE sessions
-        ADD COLUMN judgment_result TEXT
+    CREATE TABLE IF NOT EXISTS cases(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_type TEXT,
+    court_type TEXT,
+    court_name TEXT,
+    mission TEXT,
+
+    case_number TEXT,
+    judicial_year TEXT,
+    circuit TEXT,
+    case_category TEXT,
+
+    plaintiff TEXT,
+    defendant TEXT,
+
+    subject TEXT,
+
+    notes TEXT,
+
+    whatsapp_enabled INTEGER,
+    whatsapp_number TEXT,
+
+    created_at TEXT
+
+    )
     """)
+
+    cur.execute("""
+
+    CREATE TABLE IF NOT EXISTS sessions(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    session_date TEXT,
+
+    roll_number TEXT,
+
+    procedure TEXT,
+
+    judgment_result TEXT,
+
+    created_at TEXT
+
+    )
+
+    """)
+
+    try:
+        cur.execute("""
+            ALTER TABLE sessions
+            ADD COLUMN judgment_result TEXT
+        """)
+    except sqlite3.OperationalError:
+        pass
+
+    cur.execute("""
+
+    CREATE TABLE IF NOT EXISTS documents(
+
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    case_id INTEGER,
+
+    document_type TEXT,
+
+    document_description TEXT,
+
+    file_name TEXT,
+
+    file_path TEXT,
+
+    uploaded_at TEXT
+
+    )
+
+    """)
+
     conn.commit()
-except:
-    pass
 
-# =====================================
-# جدول المستندات
-# =====================================
-
-cur.execute("""
-
-CREATE TABLE IF NOT EXISTS documents(
-
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-case_id INTEGER,
-
-document_type TEXT,
-
-document_description TEXT,
-
-file_name TEXT,
-
-file_path TEXT,
-
-uploaded_at TEXT
-
-)
-
-""")
-
-conn.commit()
+init_local_db()
 
 # =====================================
 # التصميم العام (CSS)
@@ -899,7 +900,7 @@ st.markdown("""
 
 """,unsafe_allow_html=True)
 
-# ====================================
+# =====================================
 # الصفحة الرئيسية
 # =====================================
 
@@ -1011,7 +1012,7 @@ elif st.session_state.page == "search":
         st.session_state.page = "home"
         st.rerun()
 
-# ==========================================================
+# ============================================================
 # تسجيل القضايا
 # ==========================================================
 
@@ -1220,7 +1221,7 @@ elif st.session_state.page == "cases":
     col_save, col_delete = st.columns(2)
 
     # =====================================
-    # حفظ القضية
+    # حفظ القضية محلياً
     # =====================================
 
     with col_save:
@@ -1229,8 +1230,6 @@ elif st.session_state.page == "cases":
             "💾 حفظ القضية",
             use_container_width=True
         ):
-
-            # التحقق من البيانات الأساسية
 
             if case_number.strip() == "":
                 st.error("برجاء إدخال رقم القضية")
@@ -1244,203 +1243,173 @@ elif st.session_state.page == "cases":
                 st.error("برجاء إدخال اسم المدعى")
                 st.stop()
 
-            # التحقق من رقم الواتساب قبل الحفظ
+            if whatsapp_enabled and whatsapp_number.strip() != "":
+                valid_prefix = (
+                    whatsapp_number.startswith("010") or
+                    whatsapp_number.startswith("011") or
+                    whatsapp_number.startswith("012") or
+                    whatsapp_number.startswith("015")
+                )
+                if len(whatsapp_number.strip()) != 11 or not valid_prefix:
+                    st.error(
+                        "رقم واتساب غير صحيح (يجب أن يكون 11 رقم ويبدأ بـ 010 أو 011 أو 012 أو 015)"
+                    )
+                    st.stop()
 
-            if whatsapp_enabled:
+            try:
+                with conn:
+                    cur.execute("""
 
-                if whatsapp_number.strip() != "":
+                    INSERT INTO cases(
 
-                    valid_prefix = (
-                        whatsapp_number.startswith("010") or
-                        whatsapp_number.startswith("011") or
-                        whatsapp_number.startswith("012") or
-                        whatsapp_number.startswith("015")
+                    case_type,
+                    court_type,
+                    court_name,
+                    mission,
+                    case_number,
+                    judicial_year,
+                    circuit,
+                    case_category,
+                    plaintiff,
+                    defendant,
+                    subject,
+                    notes,
+                    whatsapp_enabled,
+                    whatsapp_number,
+                    created_at
+
                     )
 
-                    if len(whatsapp_number.strip()) != 11 or not valid_prefix:
+                    VALUES(
 
-                        st.error(
-                            "رقم واتساب غير صحيح (يجب أن يكون 11 رقم ويبدأ بـ 010 أو 011 أو 012 أو 015)"
+                    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+
+                    )
+
+                    """,
+
+                    (
+
+                    case_type.strip(),
+                    court_type.strip(),
+                    court_name.strip(),
+                    mission.strip(),
+                    case_number.strip(),
+                    judicial_year.strip(),
+                    circuit.strip(),
+                    case_category.strip(),
+                    plaintiff.strip(),
+                    defendant.strip(),
+                    subject.strip(),
+                    notes.strip(),
+                    int(whatsapp_enabled),
+                    whatsapp_number.strip(),
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                    )
+
+                    )
+
+                    case_id = cur.lastrowid
+
+                    cur.execute("""
+
+                    INSERT INTO sessions(
+
+                    case_id,
+                    session_date,
+                    roll_number,
+                    procedure,
+                    created_at
+
+                    )
+
+                    VALUES(
+
+                    ?,?,?,?,?
+
+                    )
+
+                    """,
+
+                    (
+
+                    case_id,
+                    str(first_session_date),
+                    roll_number.strip(),
+                    first_procedure.strip(),
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                    )
+
+                    )
+
+                    if uploaded_file is not None:
+
+                        safe_folder = f"{case_number.strip()}-{judicial_year.strip() or 'عام'}".replace("/", "_")
+                        case_folder = os.path.join(DOCUMENTS_DIR, safe_folder)
+                        os.makedirs(case_folder, exist_ok=True)
+
+                        file_path = os.path.join(
+                            case_folder,
+                            uploaded_file.name
                         )
-                        st.stop()
 
-            # حفظ القضية
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
 
-            cur.execute("""
+                        cur.execute("""
 
-            INSERT INTO cases(
+                        INSERT INTO documents(
 
-            case_type,
-            court_type,
-            court_name,
-            mission,
-            case_number,
-            judicial_year,
-            circuit,
-            case_category,
-            plaintiff,
-            defendant,
-            subject,
-            notes,
-            whatsapp_enabled,
-            whatsapp_number,
-            created_at
+                        case_id,
+                        document_type,
+                        document_description,
+                        file_name,
+                        file_path,
+                        uploaded_at
 
-            )
+                        )
 
-            VALUES(
+                        VALUES(
 
-            ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+                        ?,?,?,?,?,?
 
-            )
+                        )
 
-            """,
+                        """,
 
-            (
+                        (
 
-            case_type,
-            court_type,
-            court_name,
-            mission,
-            case_number,
-            judicial_year,
-            circuit,
-            case_category,
-            plaintiff,
-            defendant,
-            subject,
-            notes,
-            int(whatsapp_enabled),
-            whatsapp_number,
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
+                        case_id,
 
-            )
+                        document_type,
 
-            )
+                        f"{document_type} رقم {case_number.strip()}",
 
-            conn.commit()
+                        uploaded_file.name,
 
-            case_id = cur.lastrowid
+                        file_path,
 
-            # =====================================
-            # حفظ أول جلسة
-            # =====================================
+                        datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
 
-            cur.execute("""
+                        )
 
-            INSERT INTO sessions(
+                        )
 
-            case_id,
-            session_date,
-            roll_number,
-            procedure,
-            created_at
+                st.success("✅ تم حفظ القضية محلياً بنجاح")
+                st.balloons()
+                st.session_state.page = "inventory"
+                st.rerun()
 
-            )
-
-            VALUES(
-
-            ?,?,?,?,?
-
-            )
-
-            """,
-
-            (
-
-            case_id,
-            str(first_session_date),
-            roll_number,
-            first_procedure,
-            datetime.now().strftime(
-                "%Y-%m-%d %H:%M:%S"
-            )
-
-            )
-
-            )
-
-            conn.commit()
-
-            # ====================================
-            # إنشاء مجلد المستندات وحفظ الملف
-            # =====================================
-
-            if uploaded_file is not None:
-
-                documents_folder = "Documents"
-
-                if not os.path.exists(documents_folder):
-                    os.mkdir(documents_folder)
-
-                case_folder = os.path.join(
-                    documents_folder,
-                    f"{case_number}-{judicial_year}"
-                )
-
-                if not os.path.exists(case_folder):
-                    os.mkdir(case_folder)
-
-                file_path = os.path.join(
-                    case_folder,
-                    uploaded_file.name
-                )
-
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
-
-                cur.execute("""
-
-                INSERT INTO documents(
-
-                case_id,
-                document_type,
-                document_description,
-                file_name,
-                file_path,
-                uploaded_at
-
-                )
-
-                VALUES(
-
-                ?,?,?,?,?,?
-
-                )
-
-                """,
-
-                (
-
-                case_id,
-
-                document_type,
-
-                f"{document_type} رقم {case_number}",
-
-                uploaded_file.name,
-
-                file_path,
-
-                datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S"
-                )
-
-                )
-
-                )
-
-                conn.commit()
-
-            st.success("✅ تم حفظ القضية وجميع البيانات بنجاح")
-
-            st.balloons()
-
-            st.session_state.page = "inventory"
-
-            st.rerun()
+            except sqlite3.Error as e:
+                st.error(f"❌ حدث خطأ أثناء الحفظ المحلي: {e}")
 
     # =====================================
     # حذف البيانات المدخلة
@@ -1635,7 +1604,7 @@ elif st.session_state.page == "inventory":
 
     rows = cur.fetchall()
 
-    # =====================================
+    # ====================================
     # تطبيق البحث والفلاتر
     # =====================================
 
@@ -1644,7 +1613,7 @@ elif st.session_state.page == "inventory":
     for row in rows:
 
         text = " ".join(
-            [str(x) if x else "" for x in row]
+            [str(x) if x else "" for x in tuple(row)]
         ).lower()
 
         if search.strip():
@@ -1654,12 +1623,12 @@ elif st.session_state.page == "inventory":
 
         if case_filter != "الكل":
 
-            if row[1] != case_filter:
+            if row["case_type"] != case_filter:
                 continue
 
         if court_filter.strip():
 
-            if court_filter.lower() not in (row[6] or "").lower():
+            if court_filter.lower() not in (row["court_name"] or "").lower():
                 continue
 
         filtered.append(row)
@@ -1682,22 +1651,22 @@ elif st.session_state.page == "inventory":
 
     for row in filtered:
 
-        case_id = row[0]
+        case_id = row["id"]
 
         plaintiff = (
-            row[8].replace(
+            row["plaintiff"].replace(
                 "الهيئة القومية للتأمين الاجتماعى",
                 "الهيئة"
             )
-            if row[8] else ""
+            if row["plaintiff"] else ""
         )
 
         defendant = (
-            row[9].replace(
+            row["defendant"].replace(
                 "الهيئة القومية للتأمين الاجتماعى",
                 "الهيئة"
             )
-            if row[9] else ""
+            if row["defendant"] else ""
         )
 
         st.markdown(f"""
@@ -1716,7 +1685,7 @@ elif st.session_state.page == "inventory":
         font-weight:bold;
         ">
 
-        ⚖️ {row[1]} رقم {row[2]} لسنة {row[3]}
+        ⚖️ {row["case_type"]} رقم {row["case_number"]} لسنة {row["judicial_year"]}
 
         </div>
 
@@ -1724,19 +1693,19 @@ elif st.session_state.page == "inventory":
 
         <div style="color:white;font-size:18px;">
 
-        🏛 <b>المحكمة :</b> {row[6]}
+        🏛 <b>المحكمة :</b> {row["court_name"]}
 
         </div>
 
         <div style="color:white;font-size:18px;">
 
-        ⚖️ <b>الدائرة :</b> {row[4]}
+        ⚖️ <b>الدائرة :</b> {row["circuit"]}
 
         </div>
 
         <div style="color:white;font-size:18px;">
 
-        📂 <b>النوع :</b> {row[5]}
+        📂 <b>النوع :</b> {row["case_category"]}
 
         </div>
 
@@ -1756,7 +1725,7 @@ elif st.session_state.page == "inventory":
 
         📄 <b>الموضوع :</b><br>
 
-        {row[10]}
+        {row["subject"]}
 
         </div>
 
@@ -1764,7 +1733,7 @@ elif st.session_state.page == "inventory":
 
         📅 <b>آخر جلسة :</b>
 
-        {row[11] if row[11] else "لا يوجد"}
+        {row["last_session"] if row["last_session"] else "لا يوجد"}
 
         </div>
 
@@ -1772,7 +1741,7 @@ elif st.session_state.page == "inventory":
 
         ⚖️ <b>آخر إجراء :</b><br>
 
-        {row[12] if row[12] else "لا يوجد"}
+        {row["last_procedure"] if row["last_procedure"] else "لا يوجد"}
 
         </div>
 
@@ -1819,7 +1788,1159 @@ elif st.session_state.page == "inventory":
 
         st.markdown("<br>", unsafe_allow_html=True)
 
-    # 
+    # =====================================
+    # تأكيد حذف القضية محلياً
+    # =====================================
+
+    if st.session_state.delete_case_id:
+
+        st.markdown("---")
+
+        st.error("⚠️ هل تريد حذف القضية نهائياً؟")
+
+        d1, d2 = st.columns(2)
+
+        with d1:
+
+            if st.button(
+                "✅ نعم - حذف القضية",
+                use_container_width=True,
+                key="confirm_delete_case"
+            ):
+
+                delete_id = st.session_state.delete_case_id
+
+                cur.execute("SELECT file_path FROM documents WHERE case_id=?", (delete_id,))
+                for d_row in cur.fetchall():
+                    if d_row["file_path"] and os.path.exists(d_row["file_path"]):
+                        try:
+                            os.remove(d_row["file_path"])
+                        except OSError:
+                            pass
+
+                with conn:
+                    cur.execute(
+                        "DELETE FROM sessions WHERE case_id=?",
+                        (delete_id,)
+                    )
+
+                    cur.execute(
+                        "DELETE FROM documents WHERE case_id=?",
+                        (delete_id,)
+                    )
+
+                    cur.execute(
+                        "DELETE FROM cases WHERE id=?",
+                        (delete_id,)
+                    )
+
+                st.success("تم حذف القضية محلياً بنجاح")
+
+                st.session_state.delete_case_id = None
+
+                st.rerun()
+
+        with d2:
+
+            if st.button(
+                "❌ إلغاء",
+                use_container_width=True,
+                key="cancel_delete_case"
+            ):
+
+                st.session_state.delete_case_id = None
+
+                st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # =====================================
+    # العودة للرئيسية
+    # =====================================
+
+    if st.button(
+        "⬅ العودة للرئيسية",
+        use_container_width=True,
+        key="inventory_home"
+    ):
+
+        st.session_state.page = "home"
+
+        st.rerun()
+
+# ==========================================================
+# ملف القضية
+# ==========================================================
+
+elif st.session_state.page == "case_details":
+
+    case_id = st.session_state.selected_case
+
+    cur.execute("""
+
+    SELECT *
+
+    FROM cases
+
+    WHERE id=?
+
+    """,(case_id,))
+
+    case = cur.fetchone()
+
+    if not case:
+
+        st.error("❌ القضية غير موجودة")
+
+        if st.button("⬅ العودة للحصر العام"):
+
+            st.session_state.page="inventory"
+
+            st.rerun()
+
+    else:
+
+        st.markdown("""
+
+        <div style="
+        background:#4E342E;
+        border:2px solid gold;
+        border-radius:18px;
+        padding:18px;
+        text-align:center;
+        color:white;
+        font-size:32px;
+        font-weight:bold;
+        ">
+
+        ⚖️ ملف القضية
+
+        </div>
+
+        """,unsafe_allow_html=True)
+
+        st.markdown("<br>",unsafe_allow_html=True)
+
+        # =====================================
+        # بيانات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📋 بيانات القضية
+        </h3>
+        """,unsafe_allow_html=True)
+
+        t1,t2=st.columns(2)
+
+        with t1:
+
+            st.info(f"""
+⚖️ نوع الدعوى
+
+{case["case_type"]}
+""")
+
+            st.info(f"""
+🏛 المحكمة
+
+{case["court_name"]}
+""")
+
+            st.info(f"""
+📄 رقم الدعوى
+
+{case["case_number"]}
+""")
+
+            st.info(f"""
+📅 السنة القضائية
+
+{case["judicial_year"]}
+""")
+
+            st.info(f"""
+⚖️ الدائرة
+
+{case["circuit"]}
+""")
+
+            if case["mission"]:
+
+                st.info(f"""
+📍 المأمورية
+
+{case["mission"]}
+""")
+
+        with t2:
+
+            st.success(f"""
+👤 المدعى
+
+{case["plaintiff"]}
+""")
+
+            st.error(f"""
+👤 المدعى عليه
+
+{case["defendant"]}
+""")
+
+            st.warning(f"""
+📑 موضوع الدعوى
+
+{case["subject"]}
+""")
+
+            if case["notes"]:
+
+                st.info(f"""
+📝 الملاحظات
+
+{case["notes"]}
+""")
+
+        st.markdown("<hr>",unsafe_allow_html=True)
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📅 جدول الجلسات
+        </h3>
+        """,unsafe_allow_html=True)
+
+        # =====================================
+        # قراءة الجلسات
+        # =====================================
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        roll_number,
+        session_date,
+        procedure
+
+        FROM sessions
+
+        WHERE case_id=?
+
+        ORDER BY session_date ASC, id ASC
+
+        """,(case_id,))
+
+        sessions=cur.fetchall()
+
+        if sessions:
+
+            st.markdown("""
+            <style>
+
+            table{
+                width:100%;
+                border-collapse:collapse;
+            }
+
+            th{
+                background:#5D4037;
+                color:#FFD700;
+                text-align:center;
+                padding:10px;
+                border:1px solid gold;
+            }
+
+            td{
+                background:#3E2723;
+                color:white;
+                text-align:center;
+                padding:8px;
+                border:1px solid #8D6E63;
+            }
+
+            </style>
+            """,unsafe_allow_html=True)
+
+            table="""
+
+            <table>
+
+            <tr>
+
+            <th>م</th>
+
+            <th>الرول</th>
+
+            <th>تاريخ الجلسة</th>
+
+            <th>الإجراءات</th>
+
+            </tr>
+
+            """
+
+            for i,s in enumerate(sessions,start=1):
+
+                table+=f"""
+
+                <tr>
+
+                <td>{i}</td>
+
+                <td>{s["roll_number"]}</td>
+
+                <td>{s["session_date"]}</td>
+
+                <td>{s["procedure"]}</td>
+
+                </tr>
+
+                """
+
+            table+="</table>"
+
+            st.markdown(
+                table,
+                unsafe_allow_html=True
+            )
+
+        else:
+
+            st.warning("لا توجد جلسات مسجلة")
+
+        st.markdown("<br>",unsafe_allow_html=True)
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ⚖️ متابعة الجلسات
+        </h3>
+        """,unsafe_allow_html=True)
+
+        c1,c2=st.columns(2)
+
+        with c1:
+
+            next_session_date=st.date_input(
+                "تاريخ الجلسة القادمة"
+            )
+
+            next_roll=st.text_input(
+                "الرول الجديد"
+            )
+
+        with c2:
+
+            next_procedure=st.text_area(
+                "سبب التأجيل / الإجراء",
+                height=120
+            )
+
+        if st.button(
+            "💾 حفظ الجلسة الجديدة",
+            use_container_width=True
+        ):
+
+            with conn:
+                cur.execute("""
+
+                INSERT INTO sessions(
+
+                case_id,
+                session_date,
+                roll_number,
+                procedure,
+                created_at
+
+                )
+
+                VALUES(
+
+                ?,?,?,?,?
+
+                )
+
+                """,
+
+                (
+
+                case_id,
+
+                str(next_session_date),
+
+                next_roll.strip(),
+
+                next_procedure.strip(),
+
+                datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+
+                )
+
+                )
+
+            st.success("تم حفظ الجلسة محلياً بنجاح")
+
+            st.rerun()
+
+        # =====================================
+        # تعديل جلسة سابقة
+        # =====================================
+
+        st.markdown("---")
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ✏️ تعديل جلسة
+        </h3>
+        """, unsafe_allow_html=True)
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        session_date,
+        roll_number
+
+        FROM sessions
+
+        WHERE case_id=?
+
+        ORDER BY session_date ASC, id ASC
+
+        """, (case_id,))
+
+        session_list = cur.fetchall()
+
+        if session_list:
+
+            session_labels = {
+                s["id"]: f"{s['session_date']} - {s['roll_number'] or 'بدون رول'}"
+                for s in session_list
+            }
+
+            selected_session = st.selectbox(
+                "اختر الجلسة",
+                options=list(session_labels.keys()),
+                format_func=lambda sid: session_labels[sid]
+            )
+
+            cur.execute("""
+
+            SELECT
+
+            roll_number,
+            session_date,
+            procedure
+
+            FROM sessions
+
+            WHERE id=?
+
+            """, (selected_session,))
+
+            data = cur.fetchone()
+
+            edit_roll = st.text_input(
+                "الرول",
+                value=data["roll_number"] or "",
+                key=f"edit_roll_{selected_session}"
+            )
+
+            edit_date = st.date_input(
+                "تاريخ الجلسة",
+                value=datetime.strptime(
+                    data["session_date"],
+                    "%Y-%m-%d"
+                ),
+                key=f"edit_date_{selected_session}"
+            )
+
+            edit_procedure = st.text_area(
+                "الإجراءات",
+                value=data["procedure"] or "",
+                height=120,
+                key=f"edit_proc_{selected_session}"
+            )
+
+            if st.button(
+                "💾 حفظ التعديل",
+                use_container_width=True
+            ):
+
+                with conn:
+                    cur.execute("""
+
+                    UPDATE sessions
+
+                    SET
+
+                    roll_number=?,
+                    session_date=?,
+                    procedure=?
+
+                    WHERE id=?
+
+                    """,
+
+                    (
+
+                    edit_roll.strip(),
+
+                    str(edit_date),
+
+                    edit_procedure.strip(),
+
+                    selected_session
+
+                    )
+
+                    )
+
+                st.success("تم تعديل الجلسة محلياً بنجاح")
+
+                st.rerun()
+
+        else:
+
+            st.info("لا توجد جلسات للتعديل")
+
+        st.markdown("---")
+
+        # =====================================
+        # مستندات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📂 مستندات القضية
+        </h3>
+        """, unsafe_allow_html=True)
+
+        document_type = st.selectbox(
+
+            "نوع المستند",
+
+            [
+
+                "صحيفة دعوى",
+
+                "صحيفة استئناف",
+
+                "صحيفة طعن",
+
+                "مذكرة دفاع",
+
+                "حافظة مستندات",
+
+                "تقرير خبير",
+
+                "تقرير طب شرعى",
+
+                "تقرير لجنة طبية",
+
+                "صحيفة تجديد من الشطب",
+
+                "صحيفة تعجيل من الوقف",
+
+                "صورة حكم تمهيدى",
+
+                "أخرى"
+
+            ]
+
+        )
+
+        document_description = st.text_input(
+            "بيان المستند"
+        )
+
+        uploaded_document = st.file_uploader(
+            "رفع المستند",
+            key="case_details_doc"
+        )
+
+        # =====================================
+        # حفظ المستند محلياً
+        # =====================================
+
+        if st.button(
+            "💾 حفظ المستند",
+            use_container_width=True
+        ):
+
+            if uploaded_document is None:
+
+                st.error("يرجى اختيار مستند")
+
+            else:
+
+                safe_folder = f"{case['case_number']}-{case['judicial_year'] or 'عام'}".replace("/", "_")
+                case_folder = os.path.join(DOCUMENTS_DIR, safe_folder)
+                os.makedirs(case_folder, exist_ok=True)
+
+                file_path = os.path.join(
+                    case_folder,
+                    uploaded_document.name
+                )
+
+                with open(
+                    file_path,
+                    "wb"
+                ) as f:
+
+                    f.write(
+                        uploaded_document.getbuffer()
+                    )
+
+                with conn:
+                    cur.execute("""
+
+                    INSERT INTO documents(
+
+                    case_id,
+                    document_type,
+                    document_description,
+                    file_name,
+                    file_path,
+                    uploaded_at
+
+                    )
+
+                    VALUES(?,?,?,?,?,?)
+
+                    """,
+
+                    (
+
+                    case_id,
+
+                    document_type,
+
+                    document_description.strip(),
+
+                    uploaded_document.name,
+
+                    file_path,
+
+                    datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                    )
+
+                    )
+
+                st.success("تم حفظ المستند محلياً بنجاح")
+
+                st.rerun()
+
+        st.markdown("---")
+
+        # =====================================
+        # عرض مستندات القضية
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        📂 المستندات المحفوظة
+        </h3>
+        """, unsafe_allow_html=True)
+
+        cur.execute("""
+
+        SELECT
+
+        id,
+        document_type,
+        document_description,
+        file_name,
+        file_path
+
+        FROM documents
+
+        WHERE case_id=?
+
+        ORDER BY uploaded_at DESC
+
+        """,(case_id,))
+
+        docs = cur.fetchall()
+
+        if docs:
+
+            for doc in docs:
+
+                with st.expander(
+                    f"📄 {doc['document_type']}"
+                ):
+
+                    st.write(
+                        f"**البيان :** {doc['document_description']}"
+                    )
+
+                    st.write(
+                        f"**اسم الملف :** {doc['file_name']}"
+                    )
+
+                    try:
+
+                        with open(
+                            doc["file_path"],
+                            "rb"
+                        ) as f:
+
+                            st.download_button(
+
+                                "⬇ تحميل المستند",
+
+                                f,
+
+                                file_name=doc["file_name"],
+
+                                use_container_width=True,
+
+                                key=f"download_{doc['id']}"
+
+                            )
+
+                    except:
+
+                        st.error(
+                            "الملف غير موجود"
+                        )
+
+        else:
+
+            st.info(
+                "لا توجد مستندات"
+            )
+
+        st.markdown("---")
+
+        # =====================================
+        # جلسة الحكم
+        # =====================================
+
+        st.markdown("""
+        <h3 style='color:#FFD700'>
+        ⚖️ بيانات الحكم
+        </h3>
+        """, unsafe_allow_html=True)
+
+        judgment_date = st.date_input(
+            "تاريخ جلسة الحكم"
+        )
+
+        judgment_text = st.text_area(
+            "منطوق الحكم",
+            height=150
+        )
+
+        judgment_result = st.selectbox(
+            "نتيجة الحكم",
+            [
+                "لصالح الهيئة",
+                "ضد الهيئة"
+            ]
+        )
+
+        if st.button(
+            "💾 حفظ الحكم",
+            use_container_width=True
+        ):
+
+            with conn:
+                cur.execute("""
+                INSERT INTO sessions(
+                    case_id,
+                    session_date,
+                    roll_number,
+                    procedure,
+                    judgment_result,
+                    created_at
+                )
+                VALUES(
+                    ?,?,?,?,?,?
+                )
+                """,
+                (
+                    case_id,
+                    str(judgment_date),
+                    "حكم",
+                    judgment_text.strip(),
+                    judgment_result,
+                    datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+                )
+
+            st.success("تم حفظ بيانات الحكم محلياً")
+
+            st.rerun()
+
+# ==========================================================
+# قسم التقارير
+# ==========================================================
+
+elif st.session_state.page == "reports":
+
+    rrk = st.session_state.report_reset
+
+    st.markdown("""
+    <div class="report-card">
+
+    <div style="display:flex;
+    justify-content:space-between;
+    align-items:center;">
+
+    <div class="logo-box">
+
+    ⚖️
+
+    </div>
+
+    <div>
+
+    <div class="report-title">
+
+    📊 التقارير
+
+    </div>
+
+    <div class="gov-title">
+
+    الهيئة القومية للتأمين الاجتماعى<br>
+
+    الإدارة المركزية للشئون القانونية<br>
+
+    الإدارة العامة للقضايا<br>
+
+    ديوان عام منطقة ............
+
+    </div>
+
+    </div>
+
+    <div style="width:90px;"></div>
+
+    </div>
+
+    <div class="gold-line"></div>
+
+    </div>
+
+    """,unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="report-card">
+    <div style="color:#FFD56A;
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:20px;">
+    🔎 خيارات التقرير
+    </div>
+    """, unsafe_allow_html=True)
+
+    r1, r2 = st.columns(2)
+
+    with r1:
+
+        report_type = st.selectbox(
+            "نوع التقرير",
+            [
+
+                "بيان بجميع الدعاوى المتداولة",
+
+                "بيان الدعاوى حسب موضوع الدعوى",
+
+                "بيان بجميع الأحكام الصادرة",
+
+                "بيان بالأحكام الصادرة للصالح",
+
+                "بيان بالأحكام الصادرة للضد",
+
+                "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+                "بيان عددى بجميع الدعاوى المتداولة",
+
+                "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+                "بيان عددى بجميع الأحكام الصادرة",
+
+                "بيان عددى بالأحكام الصادرة للصالح",
+
+                "بيان عددى بالأحكام الصادرة للضد",
+
+                "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+            ],
+            key=f"rep_type_{rrk}"
+        )
+
+    with r2:
+
+        subject_search = ""
+
+        if report_type in (
+
+            "بيان الدعاوى حسب موضوع الدعوى",
+
+            "بيان الأحكام الصادرة حسب موضوع الدعوى",
+
+            "بيان عددى بالدعاوى حسب موضوع الدعوى",
+
+            "بيان عددى بالأحكام الصادرة حسب موضوع الدعوى"
+
+        ):
+
+            subject_search = st.text_input(
+                "موضوع الدعوى",
+                key=f"subj_search_{rrk}"
+            )
+
+        else:
+
+            st.empty()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    c1, c2 = st.columns(2)
+
+    with c1:
+
+        office = st.text_input(
+            "ديوان عام المنطقة",
+            value="",
+            key=f"rep_office_{rrk}"
+        )
+
+    with c2:
+
+        lawyer = st.text_input(
+            "طرف الأستاذ / المحامى",
+            value="",
+            key=f"rep_lawyer_{rrk}"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    d1, d2 = st.columns(2)
+
+    with d1:
+
+        from_date = st.date_input(
+            "من تاريخ",
+            key=f"rep_from_{rrk}"
+        )
+
+    with d2:
+
+        to_date = st.date_input(
+            "إلى تاريخ",
+            key=f"rep_to_{rrk}"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    b1, b2, b3 = st.columns([2,2,1])
+
+    with b1:
+
+        if st.button(
+            "📊 عرض التقرير",
+            use_container_width=True,
+            type="primary",
+            key=f"show_rep_{rrk}"
+        ):
+            st.session_state.show_report_flag = True
+
+    with b2:
+
+        if st.button(
+            "🧹 مسح البيانات",
+            use_container_width=True,
+            key=f"clear_rep_{rrk}"
+        ):
+            st.session_state.report_reset += 1
+            st.session_state.show_report_flag = False
+            st.rerun()
+
+    with b3:
+
+        if st.button(
+            "🔄",
+            use_container_width=True,
+            key=f"ref_rep_{rrk}"
+        ):
+            st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if st.session_state.show_report_flag:
+
+        # ===========================================
+        # حساب الإحصائيات من قاعدة البيانات المحلية
+        # ===========================================
+
+        total_cases = 0
+        total_judgments = 0
+        total_for = 0
+        total_against = 0
+
+        try:
+
+            cur.execute("SELECT COUNT(*) FROM cases")
+            total_cases = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE roll_number='حكم'
+            """)
+            total_judgments = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE roll_number='حكم' AND judgment_result='لصالح الهيئة'
+            """)
+            total_for = cur.fetchone()[0]
+
+            cur.execute("""
+            SELECT COUNT(*)
+            FROM sessions
+            WHERE roll_number='حكم' AND judgment_result='ضد الهيئة'
+            """)
+            total_against = cur.fetchone()[0]
+
+        except:
+            pass
+
+        # ===========================================
+        # الكروت
+        # ===========================================
+
+        a, b, c, d = st.columns(4)
+
+        with a:
+
+            st.markdown(f"""
+
+            <div class="stat-box">
+
+            <div class="stat-number">
+
+            {total_cases}
+
+            </div>
+
+            <div class="stat-title">
+
+            📂 إجمالى القضايا
+
+            </div>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+        with b:
+
+            st.markdown(f"""
+
+            <div class="stat-box">
+
+            <div class="stat-number">
+
+            {total_judgments}
+
+            </div>
+
+            <div class="stat-title">
+
+            ⚖️ الأحكام
+
+            </div>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+        with c:
+
+            st.markdown(f"""
+
+            <div class="stat-box">
+
+            <div class="stat-number">
+
+            {total_for}
+
+            </div>
+
+            <div class="stat-title">
+
+            ✅ للصالح
+
+            </div>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+        with d:
+
+            st.markdown(f"""
+
+            <div class="stat-box">
+
+            <div class="stat-number">
+
+            {total_against}
+
+            </div>
+
+            <div class="stat-title">
+
+            ❌ للضد
+
+            </div>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # ===========================================
+        # عنوان التقرير
+        # ===========================================
+
+        st.markdown(f"""
+
+        <div class="report-card">
+
+        <div style="font-size:28px;
+        color:#FFD700;
+        font-weight:bold;
+        text-align:center;">
+
+        {report_type}
+
+        </div>
+
+        <br>
+
+        <div style="display:flex;
+        justify-content:space-between;
+        color:white;
+        font-size:16px;">
+
+        <span>
+
         📅 من :
         {from_date.strftime('%d/%m/%Y')}
 
